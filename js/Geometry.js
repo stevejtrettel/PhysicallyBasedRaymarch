@@ -50,7 +50,7 @@ class Point extends Vector4 {
 
 }
 
-
+let ORIGIN_PT = new Point().set(0., 0., 0., 1.);
 
 /**
  * Tangent vector at the origin of X
@@ -90,6 +90,29 @@ class Isometry extends Matrix4 {
     }
 
 
+
+    makeLeftTranslation(v) {
+        this.set(
+            1, 0, 0, v.x,
+            0, 1, 0, v.y,
+            0, 0, 1, v.z,
+            0, 0, 0, 1
+        );
+        return this;
+
+    }
+
+    makeInvLeftTranslation(v) {
+        this.set(
+            1, 0, 0, -v.x,
+            0, 1, 0, -v.y,
+            0, 0, 1, -v.z,
+            0, 0, 0, 1
+        );
+        return this;
+
+    }
+
 }
 
 
@@ -103,9 +126,9 @@ class Isometry extends Matrix4 {
  */
 function serializePoints(pointArr) {
     return pointArr;
-//    return pointArr.map(function (point) {
-               //        return point.serialize();
-               //    });
+    //    return pointArr.map(function (point) {
+    //        return point.serialize();
+    //    });
 }
 
 
@@ -120,14 +143,15 @@ function serializePoints(pointArr) {
  */
 function serializeIsoms(isomArr) {
     return isomArr;
-//    return isomArr.map(function (isom) {
-//        return isom.serialize();
-//    });
+    //    return isomArr.map(function (isom) {
+    //        return isom.serialize();
+    //    });
 }
 
 
 
 export {
+    ORIGIN_PT,
     Point,
     Vector,
     Isometry,

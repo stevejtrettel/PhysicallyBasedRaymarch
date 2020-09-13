@@ -49,6 +49,7 @@ let globals = {
     screenResolution: undefined,
     gens: undefined,
     invGens: undefined,
+    projDomain: undefined,
     lightPositions: [],
     lightColors: [],
     globalObjectPosition: undefined,

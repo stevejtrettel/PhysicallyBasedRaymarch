@@ -8,7 +8,7 @@ Vector getRayPoint(vec2 resolution, vec2 fragCoord){ //creates a tangent vector 
     float z = 0.1 / tan(radians(fov * 0.5));
     // coordinates in the prefered frame at the origin
     vec3 dir = vec3(xy, -z);
-    Vector tv = createVector(ORIGIN, dir);
+    Vector tv = Vector(ORIGIN, dir);
     tv = tangNormalize(tv);
     return tv;
 }
@@ -61,6 +61,9 @@ void main(){
     
 //do the first raymarch and get the color
     vec3 pixelColor=getPixelColor(rayDir);
+   
+   //do the post processing: gamma correction
+   pixelColor= pow( pixelColor, vec3(1.0/2.2) );
    
     out_FragColor=vec4(pixelColor,1.);
     

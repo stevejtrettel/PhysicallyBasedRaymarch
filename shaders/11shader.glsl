@@ -15,8 +15,13 @@ vec3 getPixelColor(Vector rayDir){
     raymarch(rayDir,totalFixIsom);
     
     //------ Basic Surface Properties ----------
-    baseColor=materialColor(hitWhich);   
-
-    return baseColor; 
+    baseColor=materialColor(hitWhich);  
     
+    
+    
+    
+    //apply fog
+    return skyFog(baseColor,distToViewer,turnAround(sampletv),Vector(sampletv.pos,vec3(0.,0.,1.)));
+    //return basicFog(baseColor,distToViewer);
+    //return exp(-distToViewer/5.)*baseColor+(1.-exp(-distToViewer/5.))*vec3(0.5,0.6,0.7);
 }

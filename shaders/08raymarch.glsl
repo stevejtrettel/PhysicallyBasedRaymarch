@@ -11,266 +11,8 @@
 // done with general vectors
 
 
-//int BINARY_SEARCH_STEPS=10;
+int BINARY_SEARCH_STEPS=10;
 
-//void raymarchIterate(Vector rayDir, out Isometry totalFixIsom){
-//
-//    Isometry fixIsom;
-//    Isometry testfixIsom;
-//    float marchStep = MIN_DIST;
-//    float testMarchStep = MIN_DIST;
-//    float globalDepth = MIN_DIST;
-//    float localDepth = MIN_DIST;
-//    Vector tv = rayDir;
-//    Vector localtv = rayDir;
-//    Vector testlocaltv = rayDir;
-//    Vector bestlocaltv = rayDir;
-//    totalFixIsom = identity;
-//
-//    // Trace the local scene, then the global scene:
-//
-//    if (TILING_SCENE){
-//        for (int i = 0; i < MAX_MARCHING_STEPS; i++){
-//            localtv = flow(localtv, marchStep);
-//            if (isOutsideCell(localtv, fixIsom)){
-//                totalFixIsom = composeIsometry(fixIsom, totalFixIsom);
-//                localtv = translate(fixIsom, localtv);
-//                marchStep = MIN_DIST;
-//            }
-//            else {
-//                float localDist = min(1., localSceneSDF(localtv.pos));
-//                if (localDist < EPSILON){
-//                    sampletv = localtv;
-//                    break;
-//                }
-//                marchStep = localDist;
-//                globalDepth += localDist;
-//            }
-//        }
-//
-//        localDepth=min(globalDepth, MAX_DIST);
-//
-//        /*
-//        // TODO. VERSION TO BE CHECKED...
-//        for (int i = 0; i < MAX_MARCHING_STEPS; i++){
-//            float localDist = localSceneSDF(localtv.pos);
-//
-//
-//            if (localDist < EPSILON){
-//                sampletv = toTangVector(localtv);
-//                break;
-//            }
-//            marchStep = localDist;
-//
-//            //localtv = flow(localtv, marchStep);
-//
-//            //            if (isOutsideCell(localtv, fixIsom)){
-//            //                totalFixIsom = composeIsometry(fixIsom, totalFixIsom);
-//            //                localtv = translate(fixIsom, localtv);
-//            //                localtv=tangNormalize(localtv);
-//            //                marchStep = MIN_DIST;
-//            //            }
-//
-//            testlocaltv = flow(localtv, marchStep);
-//            if (isOutsideCell(testlocaltv, fixIsom)){
-//                bestlocaltv = testlocaltv;
-//
-//                for (int j = 0; j < BINARY_SEARCH_STEPS; j++){
-//                    ////// do binary search to get close to but outside this cell -
-//                    ////// dont jump too far forwards, since localSDF can't see stuff in the next cube
-//                    testMarchStep = marchStep - pow(0.5,float(j+1))*localDist;
-//                    testlocaltv = flow(localtv, testMarchStep);
-//                    if ( isOutsideCell(testlocaltv, testfixIsom) ){
-//                        marchStep = testMarchStep;
-//                        bestlocaltv = testlocaltv;
-//                        fixIsom = testfixIsom;
-//                    }
-//                }
-//
-//                localtv = bestlocaltv;
-//                totalFixIsom = composeIsometry(fixIsom, totalFixIsom);
-//                localtv = translate(fixIsom, localtv);
-//                localtv=tangNormalize(localtv);
-//                //globalDepth += marchStep;
-//                marchStep = MIN_DIST;
-//            }
-//
-//            else{
-//                localtv = testlocaltv;
-//                globalDepth += marchStep;
-//            }
-//        }
-//        localDepth=min(globalDepth, MAX_DIST);
-//        */
-//
-//    }
-//    else {
-//        localDepth=MAX_DIST;
-//    }
-//
-//    if (GLOBAL_SCENE){
-//        globalDepth = MIN_DIST;
-//        marchStep = MIN_DIST;
-//
-//        for (int i = 0; i < MAX_MARCHING_STEPS; i++){
-//            tv = flow(tv, marchStep);
-//
-//            /*
-//            if (i == 1) {
-//                float aux = globalSceneSDF(tv.pos);
-//                hitWhich = 5;
-//                //debugColor = 1000. * aux * vec3(1, 0, 0);
-//                debugColor = abs(tv.dir);
-//                break;
-//            }
-//            */
-//
-//            float globalDist = globalSceneSDF(tv.pos);
-//            if (globalDist < EPSILON){
-//                // hitWhich has now been set
-//                totalFixIsom = identity;
-//                sampletv = tv;
-//                return;
-//            }
-//            marchStep = globalDist;
-//            globalDepth += globalDist;
-//            if (globalDepth >= localDepth){
-//                break;
-//            }
-//        }
-//    }
-//}
-//
-
-//void raymarchDirect(Vector rayDir, out Isometry totalFixIsom){
-//    hitWhich=0;
-//    distToViewer=0.;
-//    Isometry fixIsom;
-//    Isometry testFixIsom;
-//    float marchStep = MIN_DIST;
-//    float testMarchStep = MIN_DIST;
-//    float globalDepth = MIN_DIST;
-//    float localDepth = MIN_DIST;
-//    Vector tv = rayDir;
-//    Vector localtv = rayDir;
-//    Vector testlocaltv = rayDir;
-//    Vector bestlocaltv = rayDir;
-//    totalFixIsom = identity;
-//
-//    // Trace the local scene, then the global scene:
-//
-//    if (TILING_SCENE){
-//
-//        // VERSION WITHOUT CREEPING
-//        for (int i = 0; i < MAX_MARCHING_STEPS; i++){
-//            localtv = flow(localtv, marchStep);
-//            if (isOutsideCell(localtv, fixIsom)){
-//                totalFixIsom = composeIsometry(fixIsom, totalFixIsom);
-//                localtv = translate(fixIsom, localtv);
-//                marchStep = MIN_DIST;
-//            }
-//            else {
-//                float localDist = min(1., localSceneSDF(localtv.pos));
-//                if (localDist < EPSILON){
-//                    sampletv = localtv;
-//                    break;
-//                }
-//                marchStep = localDist;
-//                globalDepth += localDist;
-//            }
-//        }
-//
-//        localDepth=min(globalDepth, MAX_DIST);
-//    
-//
-//        // VERSION WITH CREEPING
-////        for (int i = 0; i < MAX_MARCHING_STEPS; i++){
-////            float localDist = localSceneSDF(localtv.pos);
-////            if (localDist < EPSILON){
-////                sampletv = localtv;
-////                distToViewer=localDepth;
-////                break;
-////            }
-////            marchStep = 0.9*localDist;
-////
-////            localtv = flow(localtv, marchStep);
-////            localDepth += marchStep;
-////            if (isOutsideCell(testlocaltv, fixIsom)){
-////                bestlocaltv = testlocaltv;
-////
-////                //commenting out this for loop brings us back to what we were doing before...
-////                for (int j = 0; j < BINARY_SEARCH_STEPS; j++){
-////                    // do binary search to get close to but outside this cell -
-////                    // dont jump too far forwards, since localSDF can't see stuff in the next cube
-////                    testMarchStep = marchStep - pow(0.5, float(j+1))*localDist;
-////                    testlocaltv = flow(localtv, testMarchStep);
-////                    if (isOutsideCell(testlocaltv, testFixIsom)){
-////                        marchStep = testMarchStep;
-////                        bestlocaltv = testlocaltv;
-////                        fixIsom = testFixIsom;
-////                    }
-////                }
-////                localtv = bestlocaltv;
-////                totalFixIsom = composeIsometry(fixIsom, totalFixIsom);
-////                localtv = translate(fixIsom, localtv);
-////                localDepth += marchStep;
-////                marchStep = MIN_DIST;
-////            }
-////
-////            else {
-////               // localtv = testlocaltv;
-////               // localDepth += marchStep;
-////            }
-////        }
-//
-////localDepth=min(localDepth, MAX_DIST);
-//
-//
-//    }
-//    else {
-//        localDepth=MAX_DIST;
-//    }
-//
-////    if (GLOBAL_SCENE){
-////        globalDepth = MIN_DIST;
-////        marchStep = MIN_DIST;
-////
-////        for (int i = 0; i < MAX_MARCHING_STEPS; i++){
-////            tv = flow(rayDir, globalDepth);
-////
-////            /*
-////            if (i == 2) {
-////                //float aux = globalSceneSDF(tv.pos);
-////                hitWhich = 5;
-////                //debugColor = 1000. * aux * vec3(1, 0, 0);
-////                debugColor = vec3(tv.pos.fiber, -tv.pos.fiber,0);
-////                break;
-////            }
-////            */
-////
-////
-////            float globalDist = globalSceneSDF(tv.pos);
-////            if (globalDist < EPSILON){
-////                // hitWhich has now been set
-////                //hitWhich = 5;
-////                //debugColor = abs(tv.dir);
-////                totalFixIsom = identity;
-////                sampletv = tv;
-////                distToViewer=globalDepth;
-////                return;
-////            }
-////            //marchStep = globalDist;
-////            globalDepth += globalDist;
-////            if (globalDepth >= localDepth){
-////                //hitWhich = 5;
-////                //debugColor = vec3(1, 1, 0);
-////                break;
-////            }
-////        }
-//   // }
-//}
-//
-//
 
 
 void raymarchSimple(Vector rayDir, out Isometry totalFixIsom){
@@ -283,16 +25,20 @@ void raymarchSimple(Vector rayDir, out Isometry totalFixIsom){
     totalFixIsom = identity;
 
         for (int i = 0; i < MAX_MARCHING_STEPS; i++){
-            tv = flow(tv, marchStep);
-
-                float localDist = localSceneSDF(tv.pos);
+            
+                float localDist = sceneSDF(tv.pos);
                 if (localDist < EPSILON){
                     sampletv =tv;
                     distToViewer=depth;
+                    numSteps=float(i);
                     break;
                 }
                 marchStep = localDist;
-                depth += localDist;
+                depth += marchStep;
+            if(depth>MAX_DIST){
+                break;
+            }
+            tv = flow(tv, marchStep);
         }
 
 }
@@ -301,9 +47,92 @@ void raymarchSimple(Vector rayDir, out Isometry totalFixIsom){
 
 
 
+
+//
+//
+////given two parallel planes, given by pushing the plane with normal n off the origin by +- n/2 
+//float Slab(Vector tv, vec3 n, out int planeNum){
+//    vec3 p=projModel(tv.pos);
+//    vec3 v=tv.dir;
+//   
+//    float np=dot(n,p);
+//    float nv=dot(n,v);
+//    
+//    float d=(0.5-np)/nv;
+//    if(d>0.){
+//        planeNum=0;
+//        return d;
+//    }
+//    else{
+//        planeNum=1;
+//        return (-0.5-np)/nv;
+//    }
+//}
+//
+//void raymarchDomain(Vector rayDir, out Isometry totalFixIsom){
+//    hitWhich=0;
+//    distToViewer=0.;
+//    float marchStep = MIN_DIST;
+//    float depth=0.;
+//    Vector tv = rayDir;
+//    float d,d0,d1,d2;
+//    int planeNum0,planeNum1,planeNum2;
+//    
+//    Isometry fixIsom;
+//    totalFixIsom = identity;
+//
+//        for (int i = 0; i < MAX_MARCHING_STEPS; i++){
+//            
+//
+//                float localDist = localSceneSDF(tv.pos);
+//                if (localDist < EPSILON){
+//                    sampletv =tv;
+//                    distToViewer=depth;
+//                    break;
+//                }
+//            
+//            //if this is not the case, we need to flow by either localDist, OR the min dist to the walls of the domain.
+//            d0=Slab(tv,nV[0],planeNum0);
+//            d1=Slab(tv,nV[1],planeNum1);
+//            d2=Slab(tv,nV[2],planeNum2);
+//            
+//            //if we do not leave the cube;
+//            if(localDist<min(d0,min(d1,d2))){
+//                d=localDist;
+//                fixIsom=identity;
+//                tv=flow(tv,d);
+//            }
+//            else {
+//                if(d0<min(d1,d2)){//left through walls 0
+//                d=d0;
+//                fixIsom = Isometry(invGenerators[0+planeNum0]);
+//            }
+//            else if(d1<min(d0,d2)){//left through walls 1
+//                d=d1;
+//                fixIsom = Isometry(invGenerators[1+planeNum1]);
+//                
+//            }
+//            else{//left through walls 2
+//               d=d2;
+//              fixIsom = Isometry(invGenerators[2+planeNum2]);
+//            }
+//                
+//            
+//         totalFixIsom=composeIsometry(fixIsom,totalFixIsom);
+//         tv=flow(tv,d);
+//         tv = translate(fixIsom, tv);
+//        }
+//    }
+//}
+//
+//
+
+
+
+
+
 void raymarch(Vector rayDir, out Isometry totalFixIsom){
-    //raymarchIterate(rayDir, totalFixIsom);
-   // raymarchDirect(rayDir, totalFixIsom);
+   //raymarchDomain(rayDir, totalFixIsom);
     raymarchSimple(rayDir, totalFixIsom);
 }
 

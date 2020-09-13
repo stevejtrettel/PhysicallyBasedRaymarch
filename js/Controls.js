@@ -49,7 +49,8 @@ Quaternion.prototype.extractAxis = function () {
 
 let Controls = function () {
     // this.phoneVR = new PhoneVR();
-    let speed = 0.2;
+    let translationSpeed = 0.5;
+    let rotationSpeed = 0.2;
     //this.defaultPosition = new Vector3();
     this.manualRotateRate = new Float32Array([0.0, 0.0, 0.0]);
     this.manualMoveRate = new Float32Array([0.0, 0.0, 0.0]);
@@ -209,9 +210,9 @@ let Controls = function () {
 
 
         if (this.manualMoveRate[0] !== 0 || this.manualMoveRate[1] !== 0 || this.manualMoveRate[2] !== 0) {
-            deltaPosition = deltaPosition.add(globals.position.getFwdVector().multiplyScalar(speed * deltaTime * this.manualMoveRate[0]));
-            deltaPosition = deltaPosition.add(globals.position.getRightVector().multiplyScalar(speed * deltaTime * this.manualMoveRate[1]));
-            deltaPosition = deltaPosition.add(globals.position.getUpVector().multiplyScalar(speed * deltaTime * this.manualMoveRate[2]));
+            deltaPosition = deltaPosition.add(globals.position.getFwdVector().multiplyScalar(translationSpeed * deltaTime * this.manualMoveRate[0]));
+            deltaPosition = deltaPosition.add(globals.position.getRightVector().multiplyScalar(translationSpeed * deltaTime * this.manualMoveRate[1]));
+            deltaPosition = deltaPosition.add(globals.position.getUpVector().multiplyScalar(translationSpeed * deltaTime * this.manualMoveRate[2]));
             deltaPositionNonZero = true;
         }
 
@@ -236,9 +237,9 @@ let Controls = function () {
 
         if (this.manualRotateRate[0] !== 0 || this.manualRotateRate[1] !== 0 || this.manualRotateRate[2] !== 0) {
             deltaRotation.set(
-                this.manualRotateRate[0] * speed * deltaTime,
-                this.manualRotateRate[1] * speed * deltaTime,
-                this.manualRotateRate[2] * speed * deltaTime,
+                this.manualRotateRate[0] * rotationSpeed * deltaTime,
+                this.manualRotateRate[1] * rotationSpeed * deltaTime,
+                this.manualRotateRate[2] * rotationSpeed * deltaTime,
                 1.0
             );
             deltaRotationNonZero = true;

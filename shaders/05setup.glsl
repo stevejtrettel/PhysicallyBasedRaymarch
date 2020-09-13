@@ -24,7 +24,7 @@ vec3 debugColor = vec3(0.5, 0, 0.8);
 //----------------------------------------------------------------------------------------------------------------------
 int MAX_MARCHING_STEPS =  400;
 const float MIN_DIST = 0.0;
-float MAX_DIST = 200.0;
+float MAX_DIST = 50.0;
 
 
 void setResolution(int UIVar){
@@ -55,8 +55,14 @@ Isometry invCellBoost;
 Isometry globalObjectBoost;
 
 
-Isometry gens[11];
+Isometry gens[6];
 int numGens;
+
+//normal vector to faces in the affine model fundamental domain
+uniform vec3 nV[3];
+//face pairing in affine model fundamental domain
+uniform vec3 pV[3];
+
 
 Point surfacePosition;
 Vector toLight;
@@ -66,13 +72,14 @@ Vector surfNormal;
 float surfRefl;
 Isometry totalFixIsom;
 float distToViewer;
+float numSteps;
 float distToLight;
 
 //----------------------------------------------------------------------------------------------------------------------
 // Translation & Utility Variables
 //----------------------------------------------------------------------------------------------------------------------
 uniform vec2 screenResolution;
-uniform vec4 invGenerators[10];//
+uniform mat4 invGenerators[6];//
 
 uniform mat4 currentBoostMat;
 uniform mat4 facing;
@@ -117,8 +124,18 @@ vec3 colorOfLight=vec3(1., 1., 1.);
 
 
 
-
 void setVariables(){
+    
+//    //right now make the generators manually - later do this correctly
+//    Isometry g0=makeLeftTranslation(createPoint(-1.,0.,0.));
+//    Isometry g1=makeLeftTranslation(createPoint(1.,0.,0.));
+//    Isometry g2=makeLeftTranslation(createPoint(0.,-1.,0.));
+//    Isometry g3=makeLeftTranslation(createPoint(0.,1.,0.));
+//    Isometry g4=makeLeftTranslation(createPoint(0.,0.,-1.));
+//    Isometry g5=makeLeftTranslation(createPoint(0.,0.,1.));
+//    
+//    gens=Isometry[6](g0,g1,g2,g3,g4,g5);
+
      
    totalFixIsom=identity;
     currentBoost = Isometry(currentBoostMat);

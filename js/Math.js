@@ -1,4 +1,5 @@
 import {
+    Vector3,
     Vector4,
     Matrix4
 } from "./module/three.module.js";
@@ -8,6 +9,7 @@ import {
 } from "./Main.js";
 
 import {
+    ORIGIN_PT,
     Point,
     Vector,
     Isometry
@@ -16,6 +18,134 @@ import {
 import {
     Position
 } from "./Position.js";
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+//	Geometry Of the Model and Projective Model
+//----------------------------------------------------------------------------------------------------------------------
+
+
+
+function projPoint(pt) {
+    //euclidean space is affine; is its own model
+    return new Vector3(pt.x, pt.y, pt.z);
+}
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+//  Tiling Generators Constructors
+//----------------------------------------------------------------------------------------------------------------------
+
+/*
+
+Moves the generators in the 'Geometry.js' file (or another geometry dependent file)?
+Maybe create a class "lattice" to would store
+- the generators
+- the test function 'is inside fundamental domain ?'
+
+ */
+
+function setGenVec() {
+
+    let G1 = new Vector4(1, 0, 0., 0.);
+    let G2 = new Vector4(0, 1, 0., 0.);
+    let G3 = new Vector4(0., 0., 1, 0.);
+    return [G1, G2, G3]
+}
+
+
+/**
+ * Create the generators of a lattice and their inverses
+ * The (2i+1)-entry of the output is the inverse of the (2i)-entry.
+ * @returns {Array.<Isometry>} - the list of generators
+ */
+function createGenerators() {
+
+    let GenVec = setGenVec();
+
+    const gen0 = new Isometry().makeLeftTranslation(GenVec[0]);
+    const gen1 = new Isometry().makeInvLeftTranslation(GenVec[0]);
+    const gen2 = new Isometry().makeLeftTranslation(GenVec[1]);
+    const gen3 = new Isometry().makeInvLeftTranslation(GenVec[1]);
+    const gen4 = new Isometry().makeLeftTranslation(GenVec[2]);
+    const gen5 = new Isometry().makeInvLeftTranslation(GenVec[2]);
+
+    return [gen0, gen1, gen2, gen3, gen4, gen5];
+
+
+}
+
+/**
+ * Return the inverses of the generators
+ *
+ * @param {Array.<Isometry>} genArr - the isom
+ * @returns {Array.<Isometry>} - the inverses
+ */
+function invGenerators(genArr) {
+
+    return [
+            genArr[1],
+            genArr[0],
+            genArr[3],
+            genArr[2],
+            genArr[5],
+            genArr[4],
+            genArr[7],
+            genArr[6],
+            genArr[9],
+            genArr[8]
+        ];
+}
+
+
+
+
+
+
+
+function createProjDomain() {
+
+    let Generators = setGenVec();
+
+    //the vectors of half the length determine transformations taking the origin to the faces of the fundamental domain
+    let V1 = Generators[0].clone().multiplyScalar(0.5);
+    let V2 = Generators[1].clone().multiplyScalar(0.5);
+    let V3 = Generators[2].clone().multiplyScalar(0.5);
+
+    //what we actually need is the image of these in the projective models, as this tells us where the faces of the fundamental domains are
+
+
+    //The three vectors specifying the directions / lengths of the generators of the lattice  IN THE PROJECTIVE MODEL
+    //length of each vector is the HALF LENGTH of the generator: its the length needed to go from the center to the face
+    const pV1 = projPoint(ORIGIN_PT.clone().translateBy(new Isometry().makeLeftTranslation(V1)));
+    const pV2 = projPoint(ORIGIN_PT.clone().translateBy(new Isometry().makeLeftTranslation(V2)));
+    const pV3 = projPoint(ORIGIN_PT.clone().translateBy(new Isometry().makeLeftTranslation(V3)));
+
+    //create a list of these vectors
+    let pVs = [pV1, pV2, pV3];
+
+    //also need a list of the unit normal vectors to each face of the fundamental domain.
+    //Assume a positively oriented list of basis vectors, so that the normal done in order always points "inward"
+    const nV1 = pV2.clone().cross(pV3).normalize();
+    const nV2 = pV3.clone().cross(pV1).normalize();
+    const nV3 = pV1.clone().cross(pV2).normalize();
+
+    let nVs = [nV1, nV2, nV3];
+
+    //return the side pairings in the affine model, and the unit normals to the faces of the fundamental domain in that model
+    return [pVs, nVs];
+
+}
+
+
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -86,115 +216,12 @@ function fixOutsideCentralCell(position) {
 }
 
 
-//----------------------------------------------------------------------------------------------------------------------
-//  Tiling Generators Constructors
-//----------------------------------------------------------------------------------------------------------------------
-
-/*
-
-Moves the generators in the 'Geometry.js' file (or another geometry dependent file)?
-Maybe create a class "lattice" to would store
-- the generators
-- the test function 'is inside fundamental domain ?'
-
- */
-
-/**
- * Create the generators of a lattice and their inverses
- * The (2i+1)-entry of the output is the inverse of the (2i)-entry.
- * @returns {Array.<Isometry>} - the list of generators
- */
-function createGenerators() { /// generators for the tiling by cubes.
-    //
-    //    const sqrt2 = Math.sqrt(2);
-    //    const auxSurfaceP = Math.sqrt(sqrt2 + 1.);
-    //
-    //    const pointA1 = new Point();
-    //    pointA1.set(0.5 * sqrt2 + 1., 0.5 * sqrt2 + 1., auxSurfaceP, -auxSurfaceP);
-    //    pointA1.fiber = 0.5 * Math.PI;
-    //    let genA1 = new Isometry().set([pointA1]);
-    //
-    //    const pointA1inv = new Point();
-    //    pointA1inv.set(0.5 * sqrt2 + 1., -0.5 * sqrt2 - 1., -auxSurfaceP, auxSurfaceP);
-    //    pointA1inv.fiber = -0.5 * Math.PI;
-    //    let genA1inv = new Isometry().set([pointA1inv]);
-    //
-    //    const pointA2 = new Point();
-    //    pointA2.set(0.5 * sqrt2 + 1., 0.5 * sqrt2 + 1., -auxSurfaceP, auxSurfaceP);
-    //    pointA2.fiber = 0.5 * Math.PI;
-    //    let genA2 = new Isometry().set([pointA2]);
-    //
-    //    const pointA2inv = new Point();
-    //    pointA2inv.set(0.5 * sqrt2 + 1., -0.5 * sqrt2 - 1., auxSurfaceP, -auxSurfaceP);
-    //    pointA2inv.fiber = -0.5 * Math.PI;
-    //    let genA2inv = new Isometry().set([pointA2inv]);
-    //
-    //    const pointB1 = new Point();
-    //    pointB1.set(0.5 * sqrt2 + 1., 0.5 * sqrt2 + 1., sqrt2 * auxSurfaceP, 0);
-    //    pointB1.fiber = 0.5 * Math.PI;
-    //    let genB1 = new Isometry().set([pointB1]);
-    //
-    //    const pointB1inv = new Point();
-    //    pointB1inv.set(0.5 * sqrt2 + 1., -0.5 * sqrt2 - 1., -sqrt2 * auxSurfaceP, 0);
-    //    pointB1inv.fiber = -0.5 * Math.PI;
-    //    let genB1inv = new Isometry().set([pointB1inv]);
-    //
-    //    const pointB2 = new Point();
-    //    pointB2.set(0.5 * sqrt2 + 1., 0.5 * sqrt2 + 1., -sqrt2 * auxSurfaceP, 0);
-    //    pointB2.fiber = 0.5 * Math.PI;
-    //    let genB2 = new Isometry().set([pointB2]);
-    //
-    //    const pointB2inv = new Point();
-    //    pointB2inv.set(0.5 * sqrt2 + 1., -0.5 * sqrt2 - 1., sqrt2 * auxSurfaceP, 0);
-    //    pointB2inv.fiber = -0.5 * Math.PI;
-    //    let genB2inv = new Isometry().set([pointB2inv]);
-    //
-    //    const pointC = new Point();
-    //    pointC.set(-1, 0, 0, 0);
-    //    pointC.fiber = 2 * Math.PI;
-    //    let genC = new Isometry().set([pointC]);
-    //
-    //    const pointCinv = new Point();
-    //    pointCinv.set(-1, 0, 0, 0);
-    //    pointCinv.fiber = -2 * Math.PI;
-    //    let genCinv = new Isometry().set([pointCinv]);
-    //
-    //    return [genA1, genA1inv, genA2, genA2inv, genB1, genB1inv, genB2, genB2inv, genC, genCinv];
-
-    return [new Isometry()];
-}
-
-/**
- * Return the inverses of the generators
- *
- * @param {Array.<Isometry>} genArr - the isom
- * @returns {Array.<Isometry>} - the inverses
- */
-function invGenerators(genArr) {
-
-    //    return [
-    //        genArr[1],
-    //        genArr[0],
-    //        genArr[3],
-    //        genArr[2],
-    //        genArr[5],
-    //        genArr[4],
-    //        genArr[7],
-    //        genArr[6],
-    //        genArr[9],
-    //        genArr[8]
-    //    ];
-
-
-    return [new Isometry()];
-}
-
-
-
 
 
 
 export {
+    setGenVec,
+    createProjDomain,
     fixOutsideCentralCell,
     createGenerators,
     invGenerators

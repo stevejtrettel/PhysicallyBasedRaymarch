@@ -31,6 +31,53 @@ Point unserializePoint(vec4 data) {
     return Point(data);
 }
 
+Point createPoint(float x, float y, float z){
+    return Point(vec4(x,y,z,1.));
+}
+
+vec3 projModel(Point p){
+    return p.coords.xyz;
+}
+
+
+Point shiftPoint(Point p, vec3 v, float ep){
+    vec3 s=p.coords.xyz+ep*v;
+    return createPoint(s.x,s.y,s.z);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// STRUCT Vector
+//----------------------------------------------------------------------------------------------------------------------
+
+
+/*
+  Data type for manipulating points in the tangent bundle
+  A Vector is given by
+  - pos : a point in the space
+  - dir: a tangent vector at pos
+
+  Local direction are vec3 written in the orthonormal basis (e_x, e_y, e_phi) where
+  . e_x is the direction of the x coordinate of H^2
+  . e_y is the direction of the y coordinate in H^2
+  . e_phi is the direction of the fiber
+
+  Implement various basic methods to manipulate them
+
+*/
+
+
+struct Vector {
+    Point pos;// position on the manifold
+    vec3 dir;// pull back of the tangent vector at the origin written in the appropriate basis
+};
+
+Vector createVector(Point p, vec3 dp) {
+    return Vector(p, dp);
+}
+
+
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // STRUCT Isometry
@@ -91,41 +138,33 @@ Isometry makeInvLeftTranslation(Point pt) {
     return Isometry(matrix);
 }
 
+
+
+
+
+
+Isometry translateByVector(vec3 dir) {
+    mat4 matrix =  mat4(
+    1, 0., 0., 0.,
+    0., 1, 0., 0.,
+    0., 0., 1., 0,
+    dir.x, dir.y, dir.z, 1.
+    );
+    return Isometry(matrix);
+}
+
+
+Isometry translateByVector(Vector v) {
+   return translateByVector(v.dir);
+}
+
+
+
 Point translate(Isometry A, Point pt) {
     return Point(A.mat * pt.coords);
 }
 
 
-
-//----------------------------------------------------------------------------------------------------------------------
-// STRUCT Vector
-//----------------------------------------------------------------------------------------------------------------------
-
-
-/*
-  Data type for manipulating points in the tangent bundle
-  A Vector is given by
-  - pos : a point in the space
-  - dir: a tangent vector at pos
-
-  Local direction are vec3 written in the orthonormal basis (e_x, e_y, e_phi) where
-  . e_x is the direction of the x coordinate of H^2
-  . e_y is the direction of the y coordinate in H^2
-  . e_phi is the direction of the fiber
-
-  Implement various basic methods to manipulate them
-
-*/
-
-
-struct Vector {
-    Point pos;// position on the manifold
-    vec3 dir;// pull back of the tangent vector at the origin written in the appropriate basis
-};
-
-Vector createVector(Point p, vec3 dp) {
-    return Vector(p, dp);
-}
 
 
 //----------------------------------------------------------------------------------------------------------------------

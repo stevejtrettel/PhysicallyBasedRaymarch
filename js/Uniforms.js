@@ -24,7 +24,9 @@ import {
 import {
     //fixOutsideCentralCell,
     createGenerators,
-    invGenerators
+    invGenerators,
+    setGenVec,
+    createProjDomain
 } from "./Math.js";
 
 
@@ -45,6 +47,7 @@ function initGeometry() {
     globals.cellPosition = new Position();
     globals.invCellPosition = new Position();
     globals.gens = createGenerators();
+    globals.projDomain = createProjDomain();
     globals.invGens = invGenerators(globals.gens);
 
 }
@@ -130,6 +133,16 @@ function setupMaterial(fShader) {
             invGenerators: {
                 type: "m4",
                 value: serializeIsoms(globals.invGens)
+            },
+
+            //Sending the normals to faces of fundamental domain
+            pV: {
+                type: "v3",
+                value: globals.projDomain[0]
+            },
+            nV: {
+                type: "v3",
+                value: globals.projDomain[1]
             },
             //            //--- end of invGen stuff
             currentBoostMat: {
