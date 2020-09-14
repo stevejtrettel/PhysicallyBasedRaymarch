@@ -67,13 +67,15 @@ uniform vec3 pV[3];
 Point  surfPos;
 Vector surfNormal;
 vec3 surfColor;
+vec2 refl;//this vector contains the absorbtion and reflectivity, 
+//for example vec2(0.2,0.8) means 20 percent reflective;
 
 Vector toLight;
 float distToLight;
-
 Vector fromLight;
 Vector reflLight;
 Vector atLight;
+vec4 colorOfLight;
 
 Vector toViewer;
 float distToViewer;
@@ -112,7 +114,7 @@ uniform float globalSphereRad;
 uniform samplerCube earthCubeTex;
 uniform float time;
 uniform float lightRad;
-uniform float refl;
+//uniform float refl;
 uniform float foggy;
 uniform int planes;
 uniform int resol;
@@ -133,7 +135,7 @@ Point localLightPos;
 vec4 localLightColor=vec4(1., 1., 1., 0.2);
 
 //variable which sets the light colors for drawing in hitWhich 1
-vec3 colorOfLight=vec3(1., 1., 1.);
+//vec3 colorOfLight=vec3(1., 1., 1.);
 
 
 

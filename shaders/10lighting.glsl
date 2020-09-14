@@ -10,10 +10,9 @@ vec3 fresnel( vec3 F0, vec3 h, vec3 l ) {
 //material properties are already set in the background
 vec3 phong(Point lightPos, vec4 lightColor){
     float shiny=15.;
-    vec3 Ks = vec3( 0.5 );
-    vec3 Kd = vec3( 1.0 );
+//    vec3 Ks = vec3( 0.5 );
+//    vec3 Kd = vec3( 1.0 );
     
-    float absIntensity=lightColor.w;
     
     
     //set toLight and distToLight
@@ -29,14 +28,16 @@ vec3 phong(Point lightPos, vec4 lightColor){
     //Calculate Specular Component
     //should this be toViewer or reflectIncident?
     float rDotV = max(cosAng(reflLight, toViewer), 0.0);
-    vec3 specular = vec3(pow(rDotV,16.));
-    
+    vec3 specular = vec3(pow(rDotV,shiny));
+    specular=clamp(specular,0.,1.);
     //Intensity calculation
     float intensity=lightColor.w/(distToLight*distToLight);
     
     return intensity*lightColor.rgb*(diffuse+specular);
 
 }
+
+
 
 
 

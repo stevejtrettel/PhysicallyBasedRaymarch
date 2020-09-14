@@ -147,6 +147,53 @@ void raymarch(Vector rayDir, out Isometry totalFixIsom){
 
 
 
+void reflectmarch(Vector rayDir, out Isometry totalFixIsom){
+    
+        hitWhich=0;
+    distToViewer=0.;
+    float marchStep = MIN_DIST;
+    float depth=0.;
+    Vector tv = rayDir;
+    
+    totalFixIsom = identity;
+
+        for (int i = 0; i < MAX_MARCHING_STEPS; i++){
+            
+                float localDist = sceneSDF(tv.pos);
+                if (localDist < EPSILON){
+                    sampletv =tv;
+                    distToViewer=depth;
+                    numSteps=float(i);
+                    break;
+                }
+                marchStep = localDist;
+                depth += marchStep;
+            if(depth>5.){//shorter distance 
+                hitWhich=0;
+                break;
+            }
+            tv = flow(tv, marchStep);
+        }
+
+    
+    
+    
+    
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

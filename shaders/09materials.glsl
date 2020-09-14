@@ -42,19 +42,23 @@ void materialProperties(int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
            surfColor=vec3(0.5,0.6,0.7);
+            refl=vec2(0.,1.);
             break;//sky
         
         case 1://Lightsource
-            surfColor=vec3(0.8);
+            surfColor=vec3(1.);
+            refl=vec2(0.,1.);
             break;
             
         case 2://Plane
             surfColor=vec3(0.1,0.35,0.2);
+            refl=vec2(0.2,0.8);
             break;
                 //0.2*surfaceNormal(sampletv).dir;
             
         case 3: //Spheres
             surfColor=0.2*surfNormal.dir;
+            refl=vec2(0.5,0.5);
             break;
 
         case 5://debug

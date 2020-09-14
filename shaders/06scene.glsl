@@ -31,6 +31,13 @@ float sceneSDF(Point p){
     distance=min(distance,sphere(p,createPoint(1.,1.,0.),0.2));
     if(distance<EPSILON){
         hitWhich=1;
+        colorOfLight=vec4(1.,1.,1.,1.);
+        return distance;
+    }
+    distance=min(distance,sphere(p,createPoint(-1.,-1.,0.),0.2));
+    if(distance<EPSILON){
+        hitWhich=1;
+        colorOfLight=vec4(0.5,0.2,0.2,1.);
         return distance;
     }
     

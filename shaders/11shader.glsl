@@ -1,7 +1,20 @@
+//----------------------------------------------------------------------------------------------------------------------
+// The Lights in the Scene
+//----------------------------------------------------------------------------------------------------------------------
+
+vec3 lighting(){
+    vec3 color=vec3(0.);
+    color+=phong(createPoint(1.,1.,0.),vec4(1.));
+    color+=phong(createPoint(-1.,-1.,0.),vec4(1.));
+    return color;
+}
+
+
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Color at the end of a single raymarch
+// Color from a reflection
 //----------------------------------------------------------------------------------------------------------------------
 //getReflColor(Vector rayDir, int hitWhich){
 //    if(hitWhich==0){
@@ -10,9 +23,6 @@
 //    
 //    
 //}
-//
-//
-//
 
 
 
@@ -22,10 +32,23 @@
 
 vec3 getPixelColor(Vector rayDir){
     
-    vec3 baseColor;//color of the surface where it is struck
-    vec3 reflectColor;
-    vec3 reflectColor2;
-    vec3 reflectColor3;
+    
+    vec3 col0;
+    vec3 ph0;
+    vec2 r0;
+    
+    vec3 col1;
+    vec3 ph1;
+    vec2 r1;
+    
+    vec3 col2;
+    vec3 ph2;
+    vec2 r2;
+    
+    vec3 col3;
+    vec3 ph3;
+    
+    vec3 totalColor;
     float rayDistance=0.;//distance to viewer of the first march;
 
     //------ DOING THE RAYMARCH ----------
@@ -36,63 +59,61 @@ vec3 getPixelColor(Vector rayDir){
     
     //------ Basic Surface Properties ----------
 
-baseColor= skyFog(surfColor,rayDistance);
+    col0= skyFog(surfColor,rayDistance);
+    ph0=lighting();//add lights
+    r0=refl;
     
-baseColor+=phong(createPoint(1.,1.,0.),vec4(1.));
-     baseColor+=phong(createPoint(1.,-1.,0.),vec4(vec3(0.5,0.3,0.1),1.));
-    
-    if(hitWhich!=0){
+    if(refl.x>0.01){
     //-----DO A REFLECTION
     //Vector surfNormal=surfaceNormal(sampletv);
     Vector reflectedRay=flow(reflectIncident,0.1);
     
-    raymarch(reflectedRay,totalFixIsom);
+    reflectmarch(reflectedRay,totalFixIsom);
     surfaceData(sampletv,hitWhich);//set all the local data
     
     rayDistance+=distToViewer;//accumulate distance travelled
         
-    reflectColor=skyFog(surfColor,rayDistance);
-    reflectColor+=phong(createPoint(1.,1.,0.),vec4(1.));
-    reflectColor+=phong(createPoint(1.,-1.,0.),vec4(vec3(0.5,0.3,0.1),1.));
+    col1=skyFog(surfColor,rayDistance);
+    ph1=lighting();
+    r1=refl;
     
-    
-if(hitWhich!=0){
+if(refl.x>0.01){
         //-----DO A REFLECTION
     //Vector surfNormal=surfaceNormal(sampletv);
     reflectedRay=flow(reflectIncident,0.1);
     
-    raymarch(reflectedRay,totalFixIsom);
+    reflectmarch(reflectedRay,totalFixIsom);
     surfaceData(sampletv,hitWhich);//set all the local data
     
     rayDistance+=distToViewer;//accumulate distance travelled
 
-    reflectColor2=skyFog(surfColor,rayDistance);
-    reflectColor2+=phong(createPoint(1.,1.,0.),vec4(1.));
-    reflectColor2+=phong(createPoint(1.,-1.,0.),vec4(vec3(0.5,0.3,0.1),1.));
+    col2=skyFog(surfColor,rayDistance);
+    ph2=lighting(); 
+    r2=refl;
     
-    if(hitWhich!=0){
+    if(refl.x>0.01){
         //-----DO A REFLECTION
     //Vector surfNormal=surfaceNormal(sampletv);
     reflectedRay=flow(reflectIncident,0.1);
     
-    raymarch(reflectedRay,totalFixIsom);
+    reflectmarch(reflectedRay,totalFixIsom);
     surfaceData(sampletv,hitWhich);//set all the local data
     
     rayDistance+=distToViewer;//accumulate distance travelled
 
-    reflectColor3=skyFog(surfColor,rayDistance);
-    reflectColor3+=phong(createPoint(1.,1.,0.),vec4(1.));
-    reflectColor3+=phong(createPoint(1.,-1.,0.),vec4(vec3(0.5,0.3,0.1),1.));
+    col3=skyFog(surfColor,rayDistance);
+    ph3=lighting();
+  
         
-        return  0.5*baseColor+0.5*(0.5*reflectColor+0.5*(0.5*reflectColor2+0.5*reflectColor3));
+        return  ph0+r0.y*col0+r0.x*(ph1+r1.y*col1+r1.x*(ph2+r2.y*col2+r2.x*(ph3+col3)));
                                    }
     
     
     
-    else return 0.5*baseColor+0.5*(0.5*reflectColor+0.5*reflectColor2);
+    else return ph0+r0.y*col0+r0.x*(ph1+r1.y*col1+r1.x*(ph2+col2));
 }
-        else return  0.5*baseColor+0.5*reflectColor;
+        else return  ph0+(r0.y*col0+r0.x*(ph1+col1));
     }
     
-    else return baseColor;
+    else return ph0+col0;
 }
