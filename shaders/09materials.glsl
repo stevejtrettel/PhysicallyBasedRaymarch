@@ -41,24 +41,27 @@ Vector surfaceNormal(Vector tv){
 void materialProperties(int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
-           surfColor=vec3(0.5,0.6,0.7);
+           surfColor=skyColor.rgb;
             refl=vec2(0.,1.);
             break;//sky
         
         case 1://Lightsource
-            surfColor=vec3(1.);
+            surfColor=vec3(.5);
+            surfShine=5.;
             refl=vec2(0.,1.);
             break;
             
         case 2://Plane
             surfColor=vec3(0.1,0.35,0.2);
+            surfShine=5.;
             refl=vec2(0.2,0.8);
             break;
                 //0.2*surfaceNormal(sampletv).dir;
             
         case 3: //Spheres
-            surfColor=0.2*surfNormal.dir;
-            refl=vec2(0.5,0.5);
+            surfColor=0.8*vec3(0.1,0.2,0.35);
+            surfShine=15.;
+            refl=vec2(0.9,0.1);
             break;
 
         case 5://debug

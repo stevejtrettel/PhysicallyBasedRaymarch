@@ -69,7 +69,7 @@ Vector flow(Vector v, float t) {
 
 
 
-float AreaDensity(float r,Vector u){
+float areaDensity(float r,Vector u){
     
     float areaDensity=r*r;
     

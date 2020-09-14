@@ -8,24 +8,22 @@
 
 
 //material properties are already set in the background
-vec3 phong(Vector toLight, vec4 lightColor){
-    float shiny=15.;
-
+vec3 phong(Vector toLight, vec4 lightColor,float surfShine){
     
     fromLight=turnAround(toLight);
     reflLight=reflectOff(fromLight,surfNormal);
     
     //diffuse lighting
     float nDotL = max(cosAng(surfNormal, toLight), 0.0);
-    vec3 diffuse = vec3(nDotL);
+    vec3 diffuse = nDotL*lightColor.rgb*surfColor;
     
     //Calculate Specular Component
     //should this be toViewer or reflectIncident?
     float rDotV = max(cosAng(reflLight, toViewer), 0.0);
-    vec3 specular = vec3(pow(rDotV,shiny));
-    specular=clamp(specular,0.,1.);
+    vec3 specular = vec3(pow(rDotV,surfShine));
+    specular=clamp(specular,0.,1.)*lightColor.rgb;
     
-    return lightColor.rgb*(diffuse+specular);
+    return diffuse+specular;
 
 }
 
@@ -39,17 +37,19 @@ vec3 pointLight(Point lightPos, vec4 lightColor,bool marchShadow){
     
     //set toLight and distToLight
     tangDirection(surfPos,lightPos,toLight,distToLight);
+    fromLight=toLight;//doesnt matter here cuz isotropic
     
-    ph=phong(toLight,lightColor);
+    ph=phong(toLight,lightColor,surfShine);
     
     if(marchShadow&&hitWhich!=1){//not the light scene
-        sh=shadowmarch(toLight,distToLight);
+        sh=shadowmarch(toLight,distToLight,20.);
+    }
+    float intensity=1.;
+    if(hitWhich!=1){
+      intensity=3.*lightColor.w/areaDensity(distToLight,fromLight);
     }
     
-    //Intensity calculation
-    float intensity=lightColor.w/(distToLight*distToLight);
-    
-    return intensity*sh*(ph+surfColor); 
+    return intensity*sh*ph; 
 }
 
 
@@ -60,9 +60,25 @@ vec3 dirLight(vec3 lightDir,vec4 lightColor,bool marchShadow){
     float sh=1.;
     
     Vector toSky=Vector(surfPos,lightDir);
-    ph=phong(toSky,lightColor);
+    
+    Vector fromSky=turnAround(toSky);
+    reflLight=reflectOff(fromSky,surfNormal);
+    
+    //diffuse lighting
+    float nDotL = max(cosAng(surfNormal, toSky), 0.0);
+    vec3 diffuse = nDotL*lightColor.rgb*surfColor;
+    
+    //Calculate Specular Component
+    //should this be toViewer or reflectIncident?
+    float rDotV = max(cosAng(reflLight, toViewer), 0.0);
+    vec3 specular = vec3(pow(rDotV,surfShine));
+    specular=clamp(specular,0.,1.)*surfColor;
+    
+    ph=diffuse+specular;
+    
+    ph=phong(toSky,lightColor,2.);
     if(marchShadow&&hitWhich!=1){//not the light scene
-        sh=shadowmarch(toSky,100.);
+        sh=shadowmarch(toSky,100.,5.);
     }
     
      return lightColor.w*sh*ph; 
@@ -76,12 +92,13 @@ vec3 ambientLight(vec4 lightColor){
 }
 
 
-vec3 skyLight(vec3 lightDir, vec4 lightColor, bool marchShadows){
+vec3 skyLight(vec3 lightDir, bool marchShadows){
     
+   // vec4 skyColor=vec4(vec3(0.5,0.6,0.7),0.5);
     vec3 color=vec3(0.);
     
-    color+=ambientLight(lightColor);
-    color+=dirLight(lightDir,lightColor,false);
+    color+=ambientLight(skyColor);
+    color+=dirLight(lightDir,skyColor,false);
     return color;
 }
 
@@ -202,14 +219,16 @@ vec3 skyFog( in vec3  pixelColor,      // original color of the pixel
            )  // sun light direction
 {
     
-    float a=15.;
-    float b=15.;
-    vec3 skyColor=vec3(0.5,0.6,0.7);
+    float a=60.;
+    float b=60.;
+    //vec3 skyColor=vec3(0.);
+    
     
     float extinction = exp( -distance/a );
     float inscatter =  1.0 - exp( -distance/b );
-    
-    return pixelColor*extinction + skyColor*inscatter;
+
+    //return pixelColor;
+    return pixelColor*extinction+ skyColor.w*skyColor.rgb*inscatter;
 }
 
 

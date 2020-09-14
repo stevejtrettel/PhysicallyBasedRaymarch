@@ -11,7 +11,7 @@
 // done with general vectors
 
 
-int BINARY_SEARCH_STEPS=10;
+//int BINARY_SEARCH_STEPS=10;
 
 
 
@@ -19,7 +19,7 @@ void raymarchSimple(Vector rayDir, out Isometry totalFixIsom){
     hitWhich=0;
     distToViewer=0.;
     float marchStep = MIN_DIST;
-    float depth=0.;
+    distToViewer=0.;
     Vector tv = rayDir;
     
     totalFixIsom = identity;
@@ -29,19 +29,18 @@ void raymarchSimple(Vector rayDir, out Isometry totalFixIsom){
                 float localDist = sceneSDF(tv.pos);
                 if (localDist < EPSILON){
                     sampletv =tv;
-                    distToViewer=depth;
                     numSteps=float(i);
                     break;
                 }
                 marchStep = localDist;
-                depth += marchStep;
-            if(depth>MAX_DIST){
+               distToViewer += marchStep;
+            if(distToViewer>MAX_DIST){
                 hitWhich=0;
+                distToViewer=MAX_DIST;
                 break;
             }
             tv = flow(tv, marchStep);
         }
-
 }
 
 
@@ -189,10 +188,10 @@ void reflectmarch(Vector rayDir, out Isometry totalFixIsom){
 
 
 //improving the shadows using some ideas of iq on shadertoy
-float shadowmarch(in Vector toLight, float distToLight)
+float shadowmarch(in Vector toLight, float distToLight,float k)
     {
     
-    float k =40.; //parameter to determine softness of the shadows.
+   // float k =40.; //parameter to determine softness of the shadows.
     
     float shade=1.;
     float localDist;

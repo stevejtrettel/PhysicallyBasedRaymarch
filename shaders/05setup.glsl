@@ -67,6 +67,7 @@ uniform vec3 pV[3];
 Point  surfPos;
 Vector surfNormal;
 vec3 surfColor;
+float surfShine;
 vec2 refl;//this vector contains the absorbtion and reflectivity, 
 //for example vec2(0.2,0.8) means 20 percent reflective;
 
@@ -81,6 +82,10 @@ Vector toViewer;
 float distToViewer;
 Vector reflectIncident;//reflection of incident ray in surface normal
 
+
+//color of the sky
+//vec4 skyColor=vec4(0.,0.,0.,1.);
+vec4 skyColor=vec4(0.5,0.6,0.7,.4);
 
 float surfRefl;
 bool surfTransparency;

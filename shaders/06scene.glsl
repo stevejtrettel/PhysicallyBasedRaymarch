@@ -23,7 +23,7 @@
 float sceneLights(Point p){
     float distance=MAX_DIST;
         //light
-    distance=min(distance,sphere(p,createPoint(1.,1.,0.),0.2));
+    distance=min(distance,sphere(p,createPoint(1.,1.,1.),0.2));
     if(distance<EPSILON){
         hitWhich=1;
         colorOfLight=vec4(1.,1.,1.,1.);
@@ -32,7 +32,7 @@ float sceneLights(Point p){
         distance=min(distance,sphere(p,createPoint(-1.,-1.,0.),0.2));
     if(distance<EPSILON){
         hitWhich=1;
-        colorOfLight=vec4(0.5,0.2,0.2,1.);
+        colorOfLight=vec4(1.,1.,1.,1.);
         return distance;
     }
     
@@ -53,7 +53,7 @@ float sceneObjs(Point p){
     for(int i=-2;i<2;i++){
    for(int j=-2;j<2;j++){ 
        distance=min(distance,
-                sphere(p,createPoint(2.*float(i),2.*float(j),-1.),0.5));
+                sphere(p,createPoint(1.5*float(i),1.5*float(j),-1.),0.5));
    }
     }
     if(distance<EPSILON){
