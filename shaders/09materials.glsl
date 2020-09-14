@@ -27,25 +27,6 @@ Vector surfaceNormal(Vector tv){
 
 
 
-
-
-
-
-
-
-
-vec3 surfaceColor(Vector tv){
-    
-    float x=tv.pos.coords.x;
-    float y=tv.pos.coords.y;
-    float z=tv.pos.coords.x;
-    
-    return vec3(0.5)+abs(vec3(x,y,z));
-    
-    
-}
-
-
 //----------------------------------------------------------------------------------------------------------------------
 // DECIDING BASE COLOR OF HIT OBJECTS, AND MATERIAL PROPERTIES
 //----------------------------------------------------------------------------------------------------------------------
@@ -54,21 +35,59 @@ vec3 surfaceColor(Vector tv){
 //given the value of hitWhich, decide the initial color assigned to the surface you hit, before any lighting calculations
 //in the future, this function will also contain more data, like its rerflectivity etc
 
-vec3 materialColor(int hitWhich){
+
+//this sets a bunch of global parameters for materials;
+
+void materialProperties(int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
-           return vec3(0.5,0.6,0.7);//sky
+           surfColor=vec3(0.5,0.6,0.7);
+            break;//sky
         
         case 1://Lightsource
-            return vec3(0.8);
+            surfColor=vec3(0.8);
+            break;
             
         case 2://Plane
-            return 0.2*surfaceNormal(sampletv).dir;
+            surfColor=vec3(0.1,0.35,0.2);
+            break;
+                //0.2*surfaceNormal(sampletv).dir;
             
-        case 3: //Local Tiling
-                return 0.2*surfaceNormal(sampletv).dir;
-    
+        case 3: //Spheres
+            surfColor=0.2*surfNormal.dir;
+            break;
+
         case 5://debug
-            return vec3(1.,0.,1.);
+            surfColor=vec3(0.,0.,1.);
+            break;
     }
 }
+
+
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// SETTING ALL THE LOCAL DATA
+//----------------------------------------------------------------------------------------------------------------------
+
+
+
+void surfaceData(Vector tv,int hitWhich){
+    
+    //set the local data once you hit a point on the surface
+    toViewer=turnAround(tv);
+    surfPos=tv.pos;
+    surfNormal=surfaceNormal(tv);
+    reflectIncident=reflectOff(sampletv,surfNormal);
+    
+    //set the material colors, reflectivity etc
+    materialProperties(hitWhich);
+    
+}
+
+

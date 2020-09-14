@@ -64,16 +64,29 @@ uniform vec3 nV[3];
 uniform vec3 pV[3];
 
 
-Point surfacePosition;
-Vector toLight;
-Vector atLight;
-Vector toViewer;
+Point  surfPos;
 Vector surfNormal;
-float surfRefl;
-Isometry totalFixIsom;
-float distToViewer;
-float numSteps;
+vec3 surfColor;
+
+Vector toLight;
 float distToLight;
+
+Vector fromLight;
+Vector reflLight;
+Vector atLight;
+
+Vector toViewer;
+float distToViewer;
+Vector reflectIncident;//reflection of incident ray in surface normal
+
+
+float surfRefl;
+bool surfTransparency;
+
+
+Isometry totalFixIsom;
+
+float numSteps;
 
 //----------------------------------------------------------------------------------------------------------------------
 // Translation & Utility Variables
@@ -135,9 +148,12 @@ void setVariables(){
 //    Isometry g5=makeLeftTranslation(createPoint(0.,0.,1.));
 //    
 //    gens=Isometry[6](g0,g1,g2,g3,g4,g5);
+    
+    
+    
 
      
-   totalFixIsom=identity;
+    totalFixIsom=identity;
     currentBoost = Isometry(currentBoostMat);
     cellBoost = Isometry(cellBoostMat);
     invCellBoost = Isometry(invCellBoostMat);

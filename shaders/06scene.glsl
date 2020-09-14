@@ -36,12 +36,16 @@ float sceneSDF(Point p){
     
 
     for(int i=-2;i<2;i++){
-    distance=min(distance,sphere(p,createPoint(float(i),float(i),-1.5),0.5));
+   for(int j=-2;j<2;j++){ 
+       distance=min(distance,
+                sphere(p,createPoint(2.*float(i),2.*float(j),-1.5),0.5));
+   }
+    }
     if(distance<EPSILON){
         hitWhich=3;
         return distance;
     }
-    }
+    
       
       return distance;
    

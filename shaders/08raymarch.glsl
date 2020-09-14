@@ -36,6 +36,7 @@ void raymarchSimple(Vector rayDir, out Isometry totalFixIsom){
                 marchStep = localDist;
                 depth += marchStep;
             if(depth>MAX_DIST){
+                hitWhich=0;
                 break;
             }
             tv = flow(tv, marchStep);
