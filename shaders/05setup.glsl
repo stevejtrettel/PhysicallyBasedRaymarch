@@ -22,9 +22,9 @@ vec3 debugColor = vec3(0.5, 0, 0.8);
 //----------------------------------------------------------------------------------------------------------------------
 // Global Constants
 //----------------------------------------------------------------------------------------------------------------------
-int MAX_MARCHING_STEPS =  400;
+int MAX_MARCHING_STEPS =  300;
 const float MIN_DIST = 0.0;
-float MAX_DIST = 50.0;
+float MAX_DIST = 40.0;
 
 
 void setResolution(int UIVar){

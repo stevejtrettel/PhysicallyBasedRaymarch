@@ -2,10 +2,16 @@
 // The Lights in the Scene
 //----------------------------------------------------------------------------------------------------------------------
 
-vec3 lighting(){
+vec3 lighting(bool marchShadow){
+    
     vec3 color=vec3(0.);
-    color+=phong(createPoint(1.,1.,0.),vec4(1.));
-    color+=phong(createPoint(-1.,-1.,0.),vec4(1.));
+    
+    //color+=0.2*ambientLight();
+    
+   // color+=dirLight(vec3(0.,0.,1.),vec4(1.,1.,1.,0.1),false);
+    color+=pointLight(createPoint(1.,1.,0.),vec4(1,1.,1.,0.5),marchShadow);
+    color+=pointLight(createPoint(-1.,-1.,0.),vec4(1.,1.,1.,0.5),marchShadow);
+    
     return color;
 }
 
@@ -59,9 +65,12 @@ vec3 getPixelColor(Vector rayDir){
     
     //------ Basic Surface Properties ----------
 
-    col0= skyFog(surfColor,rayDistance);
-    ph0=lighting();//add lights
+    col0=skyLight(vec3(0.,0.,1.),vec4(1.,1.,1.,0.3),false);
+    col0= skyFog(col0,rayDistance);
+    ph0=lighting(true);//add lights
     r0=refl;
+    //distToLight and toLight are set already
+
     
     if(refl.x>0.01){
     //-----DO A REFLECTION
@@ -72,9 +81,10 @@ vec3 getPixelColor(Vector rayDir){
     surfaceData(sampletv,hitWhich);//set all the local data
     
     rayDistance+=distToViewer;//accumulate distance travelled
-        
-    col1=skyFog(surfColor,rayDistance);
-    ph1=lighting();
+    
+    col1=skyLight(vec3(0.,0.,1.),vec4(1.,1.,1.,0.3),false);
+    col1=skyFog(col1,rayDistance);
+    ph1=lighting(false);
     r1=refl;
     
 if(refl.x>0.01){
@@ -87,33 +97,22 @@ if(refl.x>0.01){
     
     rayDistance+=distToViewer;//accumulate distance travelled
 
-    col2=skyFog(surfColor,rayDistance);
-    ph2=lighting(); 
+    col1=skyLight(vec3(0.,0.,1.),vec4(1.,1.,1.,0.3),false);
+    col2=skyFog(col2,rayDistance);
+    ph2=lighting(false); 
     r2=refl;
     
-    if(refl.x>0.01){
-        //-----DO A REFLECTION
-    //Vector surfNormal=surfaceNormal(sampletv);
-    reflectedRay=flow(reflectIncident,0.1);
-    
-    reflectmarch(reflectedRay,totalFixIsom);
-    surfaceData(sampletv,hitWhich);//set all the local data
-    
-    rayDistance+=distToViewer;//accumulate distance travelled
-
-    col3=skyFog(surfColor,rayDistance);
-    ph3=lighting();
-  
-        
-        return  ph0+r0.y*col0+r0.x*(ph1+r1.y*col1+r1.x*(ph2+r2.y*col2+r2.x*(ph3+col3)));
-                                   }
-    
-    
-    
-    else return ph0+r0.y*col0+r0.x*(ph1+r1.y*col1+r1.x*(ph2+col2));
+    totalColor=ph0+r0.y*col0+r0.x*(ph1+r1.y*col1+r1.x*(ph2+col2));
 }
-        else return  ph0+(r0.y*col0+r0.x*(ph1+col1));
+        else totalColor=ph0+(r0.y*col0+r0.x*(ph1+col1));
     }
     
-    else return ph0+col0;
+    else  totalColor= ph0+col0;
+    
+    
+    return totalColor;
 }
+
+
+
+

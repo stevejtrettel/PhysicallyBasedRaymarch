@@ -149,7 +149,7 @@ void raymarch(Vector rayDir, out Isometry totalFixIsom){
 
 void reflectmarch(Vector rayDir, out Isometry totalFixIsom){
     
-        hitWhich=0;
+    hitWhich=0;
     distToViewer=0.;
     float marchStep = MIN_DIST;
     float depth=0.;
@@ -188,8 +188,44 @@ void reflectmarch(Vector rayDir, out Isometry totalFixIsom){
 
 
 
+//improving the shadows using some ideas of iq on shadertoy
+float shadowmarch(in Vector toLight, float distToLight)
+    {
+    
+    float k =40.; //parameter to determine softness of the shadows.
+    
+    float shade=1.;
+    float localDist;
+    float depth=0.;
+    float marchStep;
+    float newEp = EPSILON * 1.0;
+    
+    //start the march on the surface pointed at the light
+    Vector localtv=flow(toLight,0.05);
+    
+    for (int i = 0; i < 40; i++){
+        
+            float localDist =sceneObjs(localtv.pos);
+                  marchStep = 0.9*localDist;//make this distance your next march step
+            depth += marchStep;//add this to the total distance traced so far
+        
+        localtv = flow(localtv, marchStep); 
 
-
+  
+            
+             shade = min(shade, smoothstep(0.,1.,k*localDist/depth)); 
+            //if you've hit something 
+            if (localDist < newEp){//if you hit something
+                return 0.;
+            }
+        
+            if(depth>distToLight-0.1){
+                break;
+            }
+    }    
+    //at the end, return this value for the shadow deepness
+    return clamp(shade,0.,1.); 
+}
 
 
 

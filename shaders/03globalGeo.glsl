@@ -22,9 +22,9 @@ void tangDirection(Point p, Point q, out Vector tv, out float len){
     vec4 difference=q.coords-p.coords;
     len=length(difference);
     
-    vec4 dir=normalize(difference);
+    vec3 dir=normalize(difference.xyz);
         
-    tv=Vector(p,dir.xyz);
+    tv=Vector(p,dir);
 }
 
 void tangDirection(Vector u, Vector v, out Vector tv, out float len){

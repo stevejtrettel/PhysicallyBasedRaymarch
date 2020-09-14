@@ -1,22 +1,16 @@
 
 
-vec3 fresnel( vec3 F0, vec3 h, vec3 l ) {
-	return F0 + ( 1.0 - F0 ) * pow( clamp( 1.0 - dot( h, l ), 0.0, 1.0 ), 5.0 );
-}
-
-
+//vec3 fresnel( vec3 F0, vec3 h, vec3 l ) {
+//	return F0 + ( 1.0 - F0 ) * pow( clamp( 1.0 - dot( h, l ), 0.0, 1.0 ), 5.0 );
+//}
+//
+//
 
 
 //material properties are already set in the background
-vec3 phong(Point lightPos, vec4 lightColor){
+vec3 phong(Vector toLight, vec4 lightColor){
     float shiny=15.;
-//    vec3 Ks = vec3( 0.5 );
-//    vec3 Kd = vec3( 1.0 );
-    
-    
-    
-    //set toLight and distToLight
-    tangDirection(surfPos,lightPos,toLight,distToLight);
+
     
     fromLight=turnAround(toLight);
     reflLight=reflectOff(fromLight,surfNormal);
@@ -30,17 +24,66 @@ vec3 phong(Point lightPos, vec4 lightColor){
     float rDotV = max(cosAng(reflLight, toViewer), 0.0);
     vec3 specular = vec3(pow(rDotV,shiny));
     specular=clamp(specular,0.,1.);
-    //Intensity calculation
-    float intensity=lightColor.w/(distToLight*distToLight);
     
-    return intensity*lightColor.rgb*(diffuse+specular);
+    return lightColor.rgb*(diffuse+specular);
 
 }
 
 
 
+//do phong, do shadow, do everything for this light
+vec3 pointLight(Point lightPos, vec4 lightColor,bool marchShadow){
+    
+    vec3 ph;
+    float sh=1.;
+    
+    //set toLight and distToLight
+    tangDirection(surfPos,lightPos,toLight,distToLight);
+    
+    ph=phong(toLight,lightColor);
+    
+    if(marchShadow&&hitWhich!=1){//not the light scene
+        sh=shadowmarch(toLight,distToLight);
+    }
+    
+    //Intensity calculation
+    float intensity=lightColor.w/(distToLight*distToLight);
+    
+    return intensity*sh*(ph+surfColor); 
+}
 
 
+
+vec3 dirLight(vec3 lightDir,vec4 lightColor,bool marchShadow){
+    
+    vec3 ph;
+    float sh=1.;
+    
+    Vector toSky=Vector(surfPos,lightDir);
+    ph=phong(toSky,lightColor);
+    if(marchShadow&&hitWhich!=1){//not the light scene
+        sh=shadowmarch(toSky,100.);
+    }
+    
+     return lightColor.w*sh*ph; 
+    
+}
+
+
+
+vec3 ambientLight(vec4 lightColor){
+    return lightColor.w*lightColor.rgb*surfColor;
+}
+
+
+vec3 skyLight(vec3 lightDir, vec4 lightColor, bool marchShadows){
+    
+    vec3 color=vec3(0.);
+    
+    color+=ambientLight(lightColor);
+    color+=dirLight(lightDir,lightColor,false);
+    return color;
+}
 
 
 //// phong shading
@@ -159,12 +202,12 @@ vec3 skyFog( in vec3  pixelColor,      // original color of the pixel
            )  // sun light direction
 {
     
-    float a=0.05;
-    float b=0.05;
+    float a=15.;
+    float b=15.;
     vec3 skyColor=vec3(0.5,0.6,0.7);
     
-    float extinction = exp( -distance*a );
-    float inscatter =  1.0 - exp( -distance*b );
+    float extinction = exp( -distance/a );
+    float inscatter =  1.0 - exp( -distance/b );
     
     return pixelColor*extinction + skyColor*inscatter;
 }
