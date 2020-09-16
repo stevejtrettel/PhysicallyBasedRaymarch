@@ -5,7 +5,7 @@ vec3 ambLights(bool marchShadow){
     
     vec3 color=vec3(0.);
     
-    color+=ambientLight(vec4(1.,1.,1.,0.4));
+    color+=ambientLight(vec4(1.,1.,1.,0.7));
     
     color+=dirLight(vec3(0.,0.,1.),vec4(1.,1.,1.,0.2),false);
 
@@ -95,10 +95,10 @@ vec3 getPixelColor(Vector rayDir){
     
     rayDistance+=distToViewer;//accumulate distance travelled
     
-    col1=ambLights(true);
+    col1=ambLights(false);
     col1=skyFog(col1,rayDistance);
         
-    ph1=sceneLights(true);
+    ph1=sceneLights(false);
     ph1=skyFog(ph1,rayDistance);    
     r1=refl;
     vec3 s1=normalize(vec3(0.1)+surfColor);
