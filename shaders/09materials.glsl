@@ -25,6 +25,42 @@ Vector surfaceNormal(Vector tv){
 
 
 
+//----calculate Frensel reflection
+//from https://www.shadertoy.com/view/4tyXDR
+//============================================================
+vec2 fresnelReflectUpdate(inout vec2 surfRefl, float n1, float n2, Vector normal, Vector incident)
+{
+   
+    
+    //----THIS CRASHES THE COMPUTER -------
+    //n1=index of refraction you are currently inside of
+    //n2=index of refraction you are entering
+    
+        // Schlick aproximation
+        float r0 = (n1-n2) / (n1+n2);
+        r0 *= r0;
+        float cosX = -dot(normal.dir,incident.dir);
+        if (n1 > n2)
+        {
+            float n = n1/n2;
+            float sinT2 = n*n*(1.0-cosX*cosX);
+            // Total internal reflection
+            if (abs(sinT2) > 1.0){
+               return vec2(0.,1.0);
+            }
+            cosX = sqrt(1.0-sinT2);
+        }
+        float x = 1.0-cosX;
+        float ret = clamp(r0+(1.0-r0)*x*x*x*x*x,0.,1.);
+
+        // adjust reflect multiplier for object reflectivity
+        ret = (surfRefl.y + surfRefl.x* ret);
+        return vec2(1.-ret,ret);
+    
+}
+
+
+
 //----------------------------------------------------------------------------------------------------------------------
 // Coloring functions
 //----------------------------------------------------------------------------------------------------------------------
@@ -63,6 +99,7 @@ void materialProperties(int hitWhich){
             surfColor=vec3(.5);
             surfShine=5.;
             surfRefl=vec2(1.,0.);
+            surfRefract=1.;
             lightThis=1;
             break;
             
@@ -70,6 +107,7 @@ void materialProperties(int hitWhich){
             surfColor=checkerboard(sampletv.pos.coords.xy);
             surfShine=5.;
             surfRefl=vec2(0.8,0.2);
+            surfRefract=1.;
             lightThis=1;
             break;
                 //0.2*surfaceNormal(sampletv).dir;
@@ -77,7 +115,8 @@ void materialProperties(int hitWhich){
         case 3: //Spheres
             surfColor=0.6*vec3(0.1,0.2,0.35);
             surfShine=15.;
-            surfRefl=vec2(0.5,0.5);
+            surfRefl=vec2(0.95,0.05);
+            surfRefract=1.55;//glass
             lightThis=1;
             break;
 
@@ -113,6 +152,8 @@ void surfaceData(Vector tv,int hitWhich){
     //set the material colors, reflectivity etc
     materialProperties(hitWhich);
     
+    //reset the reflectivity using the frensel equation
+  surfRefl=fresnelReflectUpdate(surfRefl,1.,surfRefract,surfNormal, tv);
 }
 
 
