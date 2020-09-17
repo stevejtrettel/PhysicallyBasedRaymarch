@@ -55,29 +55,29 @@ void materialProperties(int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
            surfColor=skyColor.w*skyColor.rgb;
-            refl=vec2(0.,1.);
+            surfRefl=vec2(1.,0.);
             lightThis=0;
             break;//sky
         
         case 1://Lightsource
             surfColor=vec3(.5);
             surfShine=5.;
-            refl=vec2(0.,1.);
+            surfRefl=vec2(1.,0.);
             lightThis=1;
             break;
             
         case 2://Plane
             surfColor=checkerboard(sampletv.pos.coords.xy);
             surfShine=5.;
-            refl=vec2(0.2,0.8);
+            surfRefl=vec2(0.8,0.2);
             lightThis=1;
             break;
                 //0.2*surfaceNormal(sampletv).dir;
             
         case 3: //Spheres
-            surfColor=0.8*vec3(0.1,0.2,0.35);
+            surfColor=0.6*vec3(0.1,0.2,0.35);
             surfShine=15.;
-            refl=vec2(0.9,0.1);
+            surfRefl=vec2(0.8,0.2);
             lightThis=1;
             break;
 
@@ -108,7 +108,7 @@ void surfaceData(Vector tv,int hitWhich){
     toViewer=turnAround(tv);
     surfPos=tv.pos;
     surfNormal=surfaceNormal(tv);
-    reflectIncident=reflectOff(sampletv,surfNormal);
+    reflectedRay=reflectOff(sampletv,surfNormal);
     
     //set the material colors, reflectivity etc
     materialProperties(hitWhich);

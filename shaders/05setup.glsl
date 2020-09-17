@@ -68,7 +68,7 @@ Point  surfPos;
 Vector surfNormal;
 vec3 surfColor;
 float surfShine;
-vec2 refl;//this vector contains the absorbtion and reflectivity, 
+vec2 surfRefl;//this vector contains the absorbtion and reflectivity, 
 //for example vec2(0.2,0.8) means 20 percent reflective;
 int lightThis;//set by hitWhich; tells us if we should light the object or not.
 
@@ -81,15 +81,13 @@ vec4 colorOfLight;
 
 Vector toViewer;
 float distToViewer;
-Vector reflectIncident;//reflection of incident ray in surface normal
+Vector reflectedRay;//reflection of incident ray in surface normal
 
 
 //color of the sky
 //vec4 skyColor=vec4(0.,0.,0.,1.);
 vec4 skyColor=vec4(0.5,0.6,0.7,.8);
 
-float surfRefl;
-bool surfTransparency;
 
 
 Isometry totalFixIsom;
