@@ -108,7 +108,7 @@ void surfaceData(Vector tv,int hitWhich){
     toViewer=turnAround(tv);
     surfPos=tv.pos;
     surfNormal=surfaceNormal(tv);
-    reflectedRay=reflectOff(sampletv,surfNormal);
+    reflectedRay=reflectOff(tv,surfNormal);
     
     //set the material colors, reflectivity etc
     materialProperties(hitWhich);
