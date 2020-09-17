@@ -77,7 +77,7 @@ void materialProperties(int hitWhich){
         case 3: //Spheres
             surfColor=0.6*vec3(0.1,0.2,0.35);
             surfShine=15.;
-            surfRefl=vec2(0.8,0.2);
+            surfRefl=vec2(0.5,0.5);
             lightThis=1;
             break;
 
