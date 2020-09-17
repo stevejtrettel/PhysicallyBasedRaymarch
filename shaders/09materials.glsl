@@ -25,6 +25,19 @@ Vector surfaceNormal(Vector tv){
 
 
 
+//----------------------------------------------------------------------------------------------------------------------
+// Coloring functions
+//----------------------------------------------------------------------------------------------------------------------
+
+vec3 checkerboard(vec2 v){
+    float x=mod(v.x,2.);
+    float y=mod(v.y,2.);
+    
+    if(x<1.&&y<1.||x>1.&&y>1.){
+        return vec3(0.7);
+    }
+    else return vec3(0.2);
+}
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -41,20 +54,23 @@ Vector surfaceNormal(Vector tv){
 void materialProperties(int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
-           surfColor=skyColor.rgb;
+           surfColor=skyColor.w*skyColor.rgb;
             refl=vec2(0.,1.);
+            lightThis=0;
             break;//sky
         
         case 1://Lightsource
             surfColor=vec3(.5);
             surfShine=5.;
             refl=vec2(0.,1.);
+            lightThis=1;
             break;
             
         case 2://Plane
-            surfColor=vec3(0.1,0.35,0.2);
+            surfColor=checkerboard(sampletv.pos.coords.xy);
             surfShine=5.;
             refl=vec2(0.2,0.8);
+            lightThis=1;
             break;
                 //0.2*surfaceNormal(sampletv).dir;
             
@@ -62,10 +78,12 @@ void materialProperties(int hitWhich){
             surfColor=0.8*vec3(0.1,0.2,0.35);
             surfShine=15.;
             refl=vec2(0.9,0.1);
+            lightThis=1;
             break;
 
         case 5://debug
             surfColor=vec3(0.,0.,1.);
+            lightThis=0;
             break;
     }
 }

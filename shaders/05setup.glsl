@@ -24,7 +24,7 @@ vec3 debugColor = vec3(0.5, 0, 0.8);
 //----------------------------------------------------------------------------------------------------------------------
 int MAX_MARCHING_STEPS =  300;
 const float MIN_DIST = 0.0;
-float MAX_DIST = 40.0;
+float MAX_DIST = 30.0;
 
 
 void setResolution(int UIVar){
@@ -70,6 +70,7 @@ vec3 surfColor;
 float surfShine;
 vec2 refl;//this vector contains the absorbtion and reflectivity, 
 //for example vec2(0.2,0.8) means 20 percent reflective;
+int lightThis;//set by hitWhich; tells us if we should light the object or not.
 
 Vector toLight;
 float distToLight;
@@ -85,7 +86,7 @@ Vector reflectIncident;//reflection of incident ray in surface normal
 
 //color of the sky
 //vec4 skyColor=vec4(0.,0.,0.,1.);
-vec4 skyColor=vec4(0.5,0.6,0.7,.4);
+vec4 skyColor=vec4(0.5,0.6,0.7,.8);
 
 float surfRefl;
 bool surfTransparency;
