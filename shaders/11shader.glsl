@@ -85,7 +85,7 @@ vec3 getPixelColor(Vector rayDir){
     float reflectedLight=1.;
     
     //-----do the original raymarch
-    raymarch(rayDir, totalFixIsom);
+    raymarch(rayDir, stdRes);
     currentSurface=surfColor;
     newColor=surfaceColor(true,rayDistance,reflectedLight);
     totalColor+=newColor;
@@ -98,7 +98,7 @@ vec3 getPixelColor(Vector rayDir){
     //-----now do a reflection
     //surfaceData, which runs in the function above, sets all the surface properties, including reflecting the incident ray
     reflectedRay=flow(reflectedRay,0.1);//push it off a little
-    reflectmarch(reflectedRay,totalFixIsom);//do the reflection march
+   raymarch(reflectedRay,reflRes);//do the reflection march
     
     //calculate the reflected color
     newColor=surfaceColor(false,rayDistance,reflectedLight);

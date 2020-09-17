@@ -202,4 +202,111 @@ Vector rotateByFacing(mat4 mat, Vector v){
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// STRUCTURES FOR SHADING / MARCHING
+//----------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Struct Accuracy
+//----------------------------------------------------------------------------------------------------------------------
+
+
+
+//Data type for storing the parameters that the raymarch needs to run (or other things, like shadows etc)
+
+
+struct Accuracy{
+    float maxDist;
+    int marchSteps;
+    float threshhold;
+    
+    
+};
+
+//Accuracy setAccuracy(float mD, int mS,float thresh ){
+//    Accuracy acc;
+//    acc.maxDist=mD;
+//    acc.threshhold=thresh;
+//    acc.marchSteps=mS;
+//    return acc;
+//}
+
+Accuracy stdRes=Accuracy(40.,300,0.0001);
+
+Accuracy reflRes=Accuracy(5.,100,0.0001);
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Struct Material Properties
+//----------------------------------------------------------------------------------------------------------------------
+
+
+struct Phong{
+    float shiny;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+
+//Data type for storing the parameters of a material: its index of refraction, reflectivity, transparency, color, etc.
+
+
+struct Material{
+    vec3 color;
+    Phong phong;
+    float reflect;
+    float refract;
+    float transparency;
+    
+};
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Struct Surface Data
+//----------------------------------------------------------------------------------------------------------------------
+
+
+
+//Local geometric data at a point on the surface. 
+
+
+struct surfData{
+    
+    Vector incident;
+    Point pos;
+    Vector normal;
+    Vector reflectedRay;
+    Vector refractedRay;
+    
+};
  
+
+
