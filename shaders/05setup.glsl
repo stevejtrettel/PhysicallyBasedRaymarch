@@ -1,7 +1,10 @@
 //----------------------------------------------------------------------------------------------------------------------
 // PARAMETERS
 //----------------------------------------------------------------------------------------------------------------------
-
+float test;
+vec2 test2;
+vec3 test3;
+vec4 test4;
 /*
 
 Some parameters that can be changed to change the scence
@@ -69,6 +72,7 @@ Vector surfNormal;
 vec3 surfColor;
 float surfShine;
 vec2 surfRefl;//this vector contains the absorbtion and reflectivity, 
+float surfRefract;//index of refraction of the surface.
 //for example vec2(0.2,0.8) means 20 percent reflective;
 int lightThis;//set by hitWhich; tells us if we should light the object or not.
 

@@ -5,9 +5,9 @@ vec3 ambLights(bool marchShadow){
     
     vec3 color=vec3(0.);
     
-    color+=ambientLight(vec4(1.,1.,1.,0.7));
+    color+=ambientLight(vec4(1.,1.,1.,0.4));
     
-    color+=dirLight(vec3(0.,0.,1.),vec4(1.,1.,1.,0.2),true);
+    color+=dirLight(vec3(0.,0.,1.),vec4(1.,1.,1.,0.2),marchShadow);
 
     return color;
 }
@@ -80,15 +80,21 @@ vec3 getPixelColor(Vector rayDir){
     vec3 newColor=vec3(0.);
     vec3 totalColor=vec3(0.);
     
+    int numRefl=0;
     float rayDistance=0.;
     float reflectedLight=1.;
     
     //-----do the original raymarch
     raymarch(rayDir, totalFixIsom);
     currentSurface=surfColor;
-    totalColor+=surfaceColor(true,rayDistance,reflectedLight);
+    newColor=surfaceColor(true,rayDistance,reflectedLight);
+    totalColor+=newColor;
     
-    while(reflectedLight>0.005){
+
+    while(reflectedLight>0.005&&numRefl<5){
+        
+        if(hitWhich==0){break;}//if your last pass hit the sky, stop.
+        
     //-----now do a reflection
     //surfaceData, which runs in the function above, sets all the surface properties, including reflecting the incident ray
     reflectedRay=flow(reflectedRay,0.1);//push it off a little
@@ -99,7 +105,9 @@ vec3 getPixelColor(Vector rayDir){
     newColor=(vec3(0.3)+currentSurface)*newColor;//STILL HAVE TO WEIGHT THIS BY THE COLOR OF THE SURFACE ITS REFLECTING OFF OF
     totalColor+=newColor;
         
+    numRefl+=1;
     }
+ 
     
     return totalColor;
 }
