@@ -111,47 +111,37 @@ vec3 checkerboard(vec2 v){
 void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
-           mat.color=skyColor.rgb;
-            mat.phong=noPhong;//noPhong
-            mat.reflect=0.;
-            mat.refract=1.;
-            mat.opacity=1.;
+            mat.color=skyColor.rgb;
             mat.lightThis=0;
             break;//sky
         
         case 1://Lightsource
             mat.color=vec3(.5);
-            mat.phong.shiny=5.;
-            mat.phong.diffuse=vec3(1.);
-            mat.phong.specular=vec3(1.);
+            mat.phong=defaultPhong;
             mat.reflect=0.;
             mat.refract=1.;
             mat.opacity=1.;
-            mat.absorb=vec3(0.);
             mat.lightThis=1;
             break;
             
         case 2://Plane
             mat.color=checkerboard(sampletv.pos.coords.xy);
-            mat.phong.shiny=5.;
-            mat.phong.diffuse=vec3(1.);
-            mat.phong.specular=vec3(1.);
             mat.reflect=0.2;
             mat.refract=1.1;
             mat.opacity=1.;
-            mat.absorb=vec3(0.);
+            mat.phong=defaultPhong;
             mat.lightThis=1;
             break;
             
         case 3: //Spheres
             mat.color=0.6*vec3(0.1,0.2,0.35);
-            mat.phong.shiny=15.;
-            mat.phong.diffuse=vec3(1.);
-            mat.phong.specular=vec3(1.);
             mat.reflect=0.05;
             mat.refract=1.55;
             mat.opacity=0.;
             mat.absorb=vec3(8.0, 8.0, 3.0);
+            mat.phong.shiny=15.;
+            mat.phong.diffuse=vec3(1.);
+            mat.phong.specular=vec3(1.);
             mat.lightThis=1;
             break;
 

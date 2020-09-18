@@ -143,6 +143,7 @@ uniform int display;
 //vec4 skyColor=vec4(0.,0.,0.,1.);
 vec4 skyColor=vec4(0.5,0.6,0.7,.8);
 
+Phong defaultPhong;
 
 Light pointLight1, pointLight2, dirLight1;
 
@@ -159,11 +160,17 @@ void setVariables(){
     cellBoost = Isometry(cellBoostMat);
     invCellBoost = Isometry(invCellBoostMat);
     
+    //nice to have a default phong value to set
+    defaultPhong=Phong(10.,vec3(1.),vec3(1.));
+    
 }
     
     
     //--- build the lights
    void createLights(){
+       
+       
+       
        pointLight1=createPointLight(createPoint(1.,1.,1.),vec3(1.,1.,1.),1.,0.2);
     pointLight2=createPointLight(createPoint(-1.,-1.,0.),vec3(1.,1.,1.),1.,0.2);
     
