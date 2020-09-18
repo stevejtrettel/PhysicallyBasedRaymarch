@@ -2,7 +2,16 @@
 // Scene Definitions
 //----------------------------------------------------------------------------------------------------------------------
 
-//scenes named by hitWhich
+
+float lightSDF(Point p,Light light){
+     float distance=sphere(p,light.pos,light.radius);
+    if(distance<EPSILON){
+        hitWhich=1;
+        colorOfLight3=light.color;
+        return distance;
+    }
+    return distance;
+}
 
 
 
@@ -18,23 +27,16 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-
-
 float sceneLights(Point p){
     float distance=MAX_DIST;
-        //light
-    distance=min(distance,sphere(p,createPoint(1.,1.,1.),0.2));
-    if(distance<EPSILON){
-        hitWhich=1;
-        colorOfLight=vec4(1.,1.,1.,1.);
-        return distance;
-    }
-        distance=min(distance,sphere(p,createPoint(-1.,-1.,0.),0.2));
-    if(distance<EPSILON){
-        hitWhich=1;
-        colorOfLight=vec4(1.,1.,1.,1.);
-        return distance;
-    }
+    float lightDist;
+    
+    //light
+   lightDist=lightSDF(p,pointLight1);
+    distance=min(distance,lightDist);
+    
+   lightDist=lightSDF(p,pointLight2);
+    distance=min(distance,lightDist);
     
     return distance;
 }

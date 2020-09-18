@@ -19,7 +19,7 @@ void raymarch(Vector rayDir,Accuracy res){
     float depth=0.;
     Vector tv = rayDir;
     
-    totalFixIsom = identity;
+    //totalFixIsom = identity;
 
         for (int i = 0; i < res.marchSteps; i++){
             

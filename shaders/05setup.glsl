@@ -18,17 +18,11 @@ const float PI = 3.1415926538;
 const float sqrt3 = 1.7320508075688772;
 const float sqrt2 = 1.4142135623730951;
 
-vec3 debugColor = vec3(0.5, 0, 0.8);
-
-
 
 //----------------------------------------------------------------------------------------------------------------------
 // Global Constants
 //----------------------------------------------------------------------------------------------------------------------
-int MAX_MARCHING_STEPS =  300;
-const float MIN_DIST = 0.0;
 float MAX_DIST = 30.0;
-
 
 void setResolution(int UIVar){
 //use this to reset MAX MARCHING, etc...
@@ -44,37 +38,35 @@ const float fov = 90.0;
 //----------------------------------------------------------------------------------------------------------------------
 
 int hitWhich = 0;
-bool isLocal=true;
-
-
-
-
-Vector N;//normal vector
 Vector sampletv;
-vec4 globalLightColor;
-Isometry currentBoost;
-Isometry cellBoost;
-Isometry invCellBoost;
-Isometry globalObjectBoost;
+float distToViewer;
 
 
-Isometry gens[6];
-int numGens;
 
-//normal vector to faces in the affine model fundamental domain
-uniform vec3 nV[3];
-//face pairing in affine model fundamental domain
-uniform vec3 pV[3];
+//----------------------------------------------------------------------------------------------------------------------
+// Stuff For the Tiling
+//----------------------------------------------------------------------------------------------------------------------
+
+//Isometry gens[6];
+//int numGens;
+//
+////normal vector to faces in the affine model fundamental domain
+//uniform vec3 nV[3];
+////face pairing in affine model fundamental domain
+//uniform vec3 pV[3];
+//
+//
 
 
-Point  surfPos;
-Vector surfNormal;
-vec3 surfColor;
-float surfShine;
-vec2 surfRefl;//this vector contains the absorbtion and reflectivity, 
-float surfRefract;//index of refraction of the surface.
-//for example vec2(0.2,0.8) means 20 percent reflective;
-int lightThis;//set by hitWhich; tells us if we should light the object or not.
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Phong Shading Stuff
+//----------------------------------------------------------------------------------------------------------------------
 
 Vector toLight;
 float distToLight;
@@ -82,21 +74,13 @@ Vector fromLight;
 Vector reflLight;
 Vector atLight;
 vec4 colorOfLight;
-
-Vector toViewer;
-float distToViewer;
-Vector reflectedRay;//reflection of incident ray in surface normal
-
-
-//color of the sky
-//vec4 skyColor=vec4(0.,0.,0.,1.);
-vec4 skyColor=vec4(0.5,0.6,0.7,.8);
+vec3 colorOfLight3;
 
 
 
-Isometry totalFixIsom;
 
-float numSteps;
+
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // Translation & Utility Variables
@@ -110,18 +94,29 @@ uniform mat4 facing;
 uniform mat4 cellBoostMat;
 uniform mat4 invCellBoostMat;
 
+Isometry currentBoost;
+Isometry cellBoost;
+Isometry invCellBoost;
+
+
+
+
+
+
+
+
 //----------------------------------------------------------------------------------------------------------------------
 // Lighting Variables & Global Object Variables
 //----------------------------------------------------------------------------------------------------------------------
 uniform vec4 lightPositions[4];
 uniform vec4 lightIntensities[4];
 
-uniform mat4 globalObjectBoostMat;
-uniform float globalSphereRad;
+//uniform mat4 globalObjectBoostMat;
+//uniform float globalSphereRad;
 
 uniform samplerCube earthCubeTex;
 uniform float time;
-uniform float lightRad;
+//uniform float lightRad;
 //uniform float refl;
 uniform float foggy;
 uniform int planes;
@@ -133,40 +128,47 @@ uniform int display;
 //3=NoLight
 
 
+
+
+
+
+
+
 //----------------------------------------------------------------------------------------------------------------------
-// Re-packaging isometries, facings in the shader
+// Re-packaging Light Sources
 //----------------------------------------------------------------------------------------------------------------------
 
 
-//adding one local light (more to follow)
-Point localLightPos;
-vec4 localLightColor=vec4(1., 1., 1., 0.2);
+//color of the sky
+//vec4 skyColor=vec4(0.,0.,0.,1.);
+vec4 skyColor=vec4(0.5,0.6,0.7,.8);
 
-//variable which sets the light colors for drawing in hitWhich 1
-//vec3 colorOfLight=vec3(1., 1., 1.);
 
+Light pointLight1, pointLight2, dirLight1;
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Re-packaging Isometries and Positions
+//----------------------------------------------------------------------------------------------------------------------
 
 
 void setVariables(){
     
-//    //right now make the generators manually - later do this correctly
-//    Isometry g0=makeLeftTranslation(createPoint(-1.,0.,0.));
-//    Isometry g1=makeLeftTranslation(createPoint(1.,0.,0.));
-//    Isometry g2=makeLeftTranslation(createPoint(0.,-1.,0.));
-//    Isometry g3=makeLeftTranslation(createPoint(0.,1.,0.));
-//    Isometry g4=makeLeftTranslation(createPoint(0.,0.,-1.));
-//    Isometry g5=makeLeftTranslation(createPoint(0.,0.,1.));
-//    
-//    gens=Isometry[6](g0,g1,g2,g3,g4,g5);
-    
-    
-    
-
-     
-    totalFixIsom=identity;
     currentBoost = Isometry(currentBoostMat);
     cellBoost = Isometry(cellBoostMat);
     invCellBoost = Isometry(invCellBoostMat);
-    globalObjectBoost = Isometry(globalObjectBoostMat);
+    
 }
+    
+    
+    //--- build the lights
+   void createLights(){
+       pointLight1=createPointLight(createPoint(1.,1.,1.),vec3(1.,1.,1.),1.,0.2);
+    pointLight2=createPointLight(createPoint(-1.,-1.,0.),vec3(1.,1.,1.),1.,0.2);
+    
+    dirLight1=createDirLight(vec3(0.,0.,1.),skyColor.rgb,skyColor.w);
+
+   }
+
 

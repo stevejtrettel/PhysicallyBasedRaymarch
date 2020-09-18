@@ -108,7 +108,6 @@ vec3 checkerboard(vec2 v){
 
 
 
-
 void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything

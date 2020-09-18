@@ -51,10 +51,10 @@ void main(){
      
     
     setVariables();
+    createLights();
     
     //generators(display,gens);
-    
-    setResolution(resol);
+   // setResolution(resol);
     
     Vector rayDir=setRayDir();
     

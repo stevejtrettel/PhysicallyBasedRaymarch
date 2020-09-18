@@ -9,7 +9,7 @@ vec3 ambLights(surfData surface, Material mat, bool marchShadow){
     
     color+=ambientLight(vec4(1.,1.,1.,0.4),mat);
     
-    color+=dirLight(vec3(0.,0.,1.),vec4(1.,1.,1.,0.2),surface, mat,marchShadow);
+    color+=dirLight(dirLight1,surface, mat,marchShadow);
 
     return color;
 }
@@ -20,14 +20,9 @@ vec3 ambLights(surfData surface, Material mat, bool marchShadow){
 vec3 sceneLights(surfData surface, Material mat,bool marchShadow){
     
     vec3 color=vec3(0.);
-    
-    Point lightPos1=createPoint(1.,1.,1.);
-    vec4 lightColor1=vec4(1,1.,1.,1.);
-    Point lightPos2=createPoint(-1.,-1.,0.);
-    vec4 lightColor2=vec4(1,1.,1.,1.);
-    
-    color+=pointLight(lightPos1,lightColor1,surface, mat,marchShadow);
-    color+=pointLight(lightPos2,lightColor2,surface,mat,marchShadow);
+
+    color+=pointLight(pointLight1,surface, mat,marchShadow);
+    color+=pointLight(pointLight2,surface,mat,marchShadow);
 
     return color;
 }

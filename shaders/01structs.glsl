@@ -224,9 +224,35 @@ Vector rotateByFacing(mat4 mat, Vector v){
 
 
 
+//----------------------------------------------------------------------------------------------------------------------
+// Struct Light
+//----------------------------------------------------------------------------------------------------------------------
+
+struct Light{
+    Point pos;//position of light (point source)
+    vec3 dir;//direction to light (directional)
+    vec3 color;//color of light
+    float intensity;//intensity of light
+    float radius;//radius of ball for point source
+};
+
+Light createPointLight(Point pos, vec3 color, float intensity, float radius){
+    Light light;
+    light.pos=pos;
+    light.color=color;
+    light.intensity=intensity;
+    light.radius=radius;
+    return light;
+}
 
 
-
+Light createDirLight(vec3 dir, vec3 color, float intensity){
+    Light light;
+    light.dir=dir;
+    light.color=color;
+    light.intensity=intensity;
+    return light;
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Accuracy
