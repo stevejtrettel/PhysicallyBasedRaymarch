@@ -60,7 +60,7 @@ void main(){
     
     
 //do the first raymarch and get the color
-    vec3 pixelColor=getPixelColor(rayDir);
+    vec3 pixelColor=getPixelColorNew(rayDir);
    
    //do the post processing: gamma correction
    pixelColor= pow( pixelColor, vec3(1.0/2.2) );

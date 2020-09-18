@@ -271,6 +271,8 @@ struct Phong{
     vec3 specular;
 };
 
+//some default values
+Phong noPhong=Phong(1.,vec3(1.),vec3(1.));
 
 //Data type for storing the parameters of a material: its index of refraction, reflectivity, transparency, color, etc.
 
@@ -280,13 +282,22 @@ struct Material{
     Phong phong;
     float reflect;
     float refract;
-    float transparency;
+    float opacity;
+    vec3 absorb;
+    int lightThis;
     
 };
 
-
-
-
+//Material air=Material(
+//    vec3(1.),
+//    noPhong,
+//    0.,
+//    1.,
+//    0.,
+//    vec3(0.),
+//    0);
+//
+//
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -301,6 +312,7 @@ struct Material{
 struct surfData{
     
     Vector incident;
+    Vector toViewer;
     Point pos;
     Vector normal;
     Vector reflectedRay;

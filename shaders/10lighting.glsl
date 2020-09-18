@@ -1,14 +1,7 @@
 
 
-//vec3 fresnel( vec3 F0, vec3 h, vec3 l ) {
-//	return F0 + ( 1.0 - F0 ) * pow( clamp( 1.0 - dot( h, l ), 0.0, 1.0 ), 5.0 );
-//}
-//
-//
-
-
 //material properties are already set in the background
-vec3 phong(Vector toLight, vec4 lightColor,float surfShine){
+vec3 phong(Vector toLight, vec4 lightColor, float surfShine){
     
     fromLight=turnAround(toLight);
     reflLight=reflectOff(fromLight,surfNormal);
@@ -26,6 +19,31 @@ vec3 phong(Vector toLight, vec4 lightColor,float surfShine){
     return diffuse+specular;
 
 }
+
+
+//----NEW PHONG USING MATERIAL
+//material properties are already set in the background
+vec3 phong(Vector toLight, vec4 lightColor, surfData surface, Material mat){
+    
+    fromLight=turnAround(toLight);
+    reflLight=reflectOff(fromLight,surface.normal);
+    
+    //diffuse lighting
+    float nDotL = max(cosAng(surface.normal, toLight), 0.0);
+    vec3 diffuse = nDotL*lightColor.rgb*mat.color;
+    
+    //Calculate Specular Component
+    //should this be toViewer or reflectIncident?
+    float rDotV = max(cosAng(reflLight, surface.toViewer), 0.0);
+    vec3 specular = vec3(pow(rDotV,mat.phong.shiny));
+    specular=clamp(specular,0.,1.)*lightColor.rgb;
+    
+    return diffuse+specular;
+
+}
+
+
+
 
 
 
@@ -54,6 +72,39 @@ vec3 pointLight(Point lightPos, vec4 lightColor,bool marchShadow){
 
 
 
+
+
+
+//----- NEW POINT LIGHT USING MATERIAL
+
+//do phong, do shadow, do everything for this light
+vec3 pointLight(Point lightPos, vec4 lightColor, surfData surface,Material mat,bool marchShadow){
+    
+    vec3 ph;
+    float sh=1.;
+    
+    //toLight, fromLight, distToLight are STILL GLOBALS...
+    
+    //set toLight and distToLight
+    tangDirection(surfPos,lightPos,toLight,distToLight);
+    fromLight=toLight;//doesnt matter here cuz isotropic
+    
+    ph=phong(toLight,lightColor,surface,mat);
+    
+    if(marchShadow&&hitWhich!=1){//not the light scene
+        sh=shadowmarch(toLight,distToLight,50.);
+    }
+    float intensity=1.;
+    if(hitWhich!=1){
+      intensity=3.*lightColor.w/areaDensity(distToLight,fromLight);
+    }
+    
+    return intensity*sh*ph;
+}
+
+
+
+
 vec3 dirLight(vec3 lightDir,vec4 lightColor,bool marchShadow){
     
     vec3 ph;
@@ -74,8 +125,39 @@ vec3 dirLight(vec3 lightDir,vec4 lightColor,bool marchShadow){
 
 
 
+//---- new DIR LIGHT USING MATERIAL
+vec3 dirLight(vec3 lightDir,vec4 lightColor,surfData surface, Material mat,bool marchShadow){
+    
+    vec3 ph;
+    float sh=1.;
+    
+    Vector toSky=Vector(surface.pos,lightDir);
+    
+    //NEED TO DEAL WITH THE SHINYNESS IF WE GO THIS WAY
+    //float shiny = max(surface.phong.shine/5.,2.);
+    ph=phong(toSky,lightColor,surface, mat);
+    
+    if(marchShadow&&hitWhich!=1){//not the light scene
+        sh=shadowmarch(toSky,20.,2.);
+    }
+    
+     return lightColor.w*sh*ph; 
+    
+}
+
+
+
 vec3 ambientLight(vec4 lightColor){
     return lightColor.w*lightColor.rgb*surfColor;
+}
+
+
+
+
+
+//----NEW AMBIENT USING MATERIAL
+vec3 ambientLight(vec4 lightColor,Material mat){
+    return lightColor.w*lightColor.rgb*mat.color;
 }
 
 
@@ -92,13 +174,7 @@ vec3 ambientLight(vec4 lightColor){
 
 
 
-
-
-
-
-
-
-
+//----THESE DON'T NEED ANY CHANGES!
 
 
 

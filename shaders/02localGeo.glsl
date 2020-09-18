@@ -60,3 +60,17 @@ Vector reflectOff(Vector v, Vector n){
 }
 
 
+//refract the vector v through the surface with normal vector n, coming from a material with refactive index n1 and entering a material with index n2.
+Vector refractThrough(Vector v, Vector n, float n1, float n2){
+   
+    float r=n1/n2;
+    float cosI=-tangDot(n,v);
+    float sinT2=r*r* (1.0 - cosI * cosI);
+    if(sinT2>1.){return Vector(v.pos,vec3(0.,0.,0.));}//TIR  
+    //if we are not in this case, then refraction actually occurs
+    float cosT=sqrt(1.0 - sinT2);
+    vec3 dir=r*v.dir+(r * cosI - cosT) * n.dir;
+    return Vector(v.pos, dir);
+}
+
+

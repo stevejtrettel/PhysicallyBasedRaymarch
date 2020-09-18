@@ -25,14 +25,15 @@ Vector surfaceNormal(Vector tv){
 
 
 
+
+
+
+
 //----calculate Frensel reflection
 //from https://www.shadertoy.com/view/4tyXDR
 //============================================================
-vec2 fresnelReflectUpdate(inout vec2 surfRefl, float n1, float n2, Vector normal, Vector incident)
+vec2 fresnelReflectUpdate(vec2 surfRefl, float n1, float n2, Vector normal, Vector incident)
 {
-   
-    
-    //----THIS CRASHES THE COMPUTER -------
     //n1=index of refraction you are currently inside of
     //n2=index of refraction you are entering
     
@@ -58,6 +59,27 @@ vec2 fresnelReflectUpdate(inout vec2 surfRefl, float n1, float n2, Vector normal
         return vec2(1.-ret,ret);
     
 }
+
+
+
+//================compute all the useful vectors for a surface
+//update the reflectivity of the surface you are hitting
+void setSurfData(inout surfData dat, Vector tv, inout Material enter,float currentRefract){
+    dat.incident=tv;
+    dat.toViewer=turnAround(tv);
+    dat.pos=tv.pos;
+    Vector normal=surfaceNormal(tv);
+    dat.normal=normal;
+    dat.reflectedRay=reflectOff(tv,normal);
+    dat.refractedRay=refractThrough(tv,normal,currentRefract,enter.refract);
+    
+    //should I have this function update Material enter via frensel?
+    enter.reflect=fresnelReflectUpdate(vec2(1.-enter.reflect,enter.reflect),currentRefract,enter.refract,normal,tv).y;
+    
+}
+
+
+
 
 
 
@@ -128,6 +150,62 @@ void materialProperties(int hitWhich){
 }
 
 
+
+
+void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
+    switch(hitWhich){
+        case 0:// Didnt hit anything
+           mat.color=skyColor.rgb;
+            mat.phong=noPhong;//noPhong
+            mat.reflect=0.;
+            mat.refract=1.;
+            mat.opacity=1.;
+            mat.lightThis=0;
+            break;//sky
+        
+        case 1://Lightsource
+            mat.color=vec3(.5);
+            mat.phong.shiny=5.;
+            mat.phong.diffuse=vec3(1.);
+            mat.phong.specular=vec3(1.);
+            mat.reflect=0.;
+            mat.refract=1.;
+            mat.opacity=1.;
+            mat.absorb=vec3(0.);
+            mat.lightThis=1;
+            break;
+            
+        case 2://Plane
+            mat.color=checkerboard(sampletv.pos.coords.xy);
+            mat.phong.shiny=5.;
+            mat.phong.diffuse=vec3(1.);
+            mat.phong.specular=vec3(1.);
+            mat.reflect=0.2;
+            mat.refract=1.1;
+            mat.opacity=1.;
+            mat.absorb=vec3(0.);
+            mat.lightThis=1;
+            break;
+            
+        case 3: //Spheres
+            mat.color=0.6*vec3(0.1,0.2,0.35);
+            mat.phong.shiny=15.;
+            mat.phong.diffuse=vec3(1.);
+            mat.phong.specular=vec3(1.);
+            mat.reflect=0.05;
+            mat.refract=1.55;
+            mat.opacity=0.;
+            mat.absorb=vec3(8.0, 8.0, 3.0);
+            mat.lightThis=1;
+            break;
+
+
+        case 5://debug
+            mat.color=vec3(0.,0.,1.);
+            mat.lightThis=0;
+            break;
+    }
+}
 
 
 

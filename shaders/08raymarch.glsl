@@ -54,47 +54,6 @@ void raymarch(Vector rayDir,Accuracy res){
 
 
 
-void reflectmarch(Vector rayDir, Accuracy res){
-    
-    hitWhich=0;
-    distToViewer=0.;
-    float marchStep =0.;
-    float depth=0.;
-    Vector tv = rayDir;
-    
-    totalFixIsom = identity;
-
-        for (int i = 0; i < MAX_MARCHING_STEPS; i++){
-            
-                float localDist = sceneSDF(tv.pos);
-                if (localDist < EPSILON){
-                    sampletv =tv;
-                    distToViewer=depth;
-                    numSteps=float(i);
-                    break;
-                }
-                marchStep = localDist;
-                depth += marchStep;
-            if(depth>5.){//shorter distance 
-                hitWhich=0;
-                break;
-            }
-            tv = flow(tv, marchStep);
-        }
-
-    
-    
-    
-    
-    
-}
-
-
-
-
-
-
-
 //improving the shadows using some ideas of iq on shadertoy
 float shadowmarch(in Vector toLight, float distToLight,float k)
     {
@@ -126,7 +85,7 @@ float shadowmarch(in Vector toLight, float distToLight,float k)
                 return 0.;
             }
         
-            if(depth>distToLight-0.1){
+            if(depth>distToLight-0.1||depth>MAX_DIST){
                 break;
             }
     }    
