@@ -80,7 +80,6 @@ vec3 surfaceColor(surfData surface, Material mat, bool marchShadow, inout float 
 
 
 
-
 //--new version running with the structs.
 vec3 getPixelColor(Vector rayDir){
     
@@ -92,6 +91,8 @@ vec3 getPixelColor(Vector rayDir){
     
     surfData surface;
     Material mat;
+    
+    int numRefl=0;
     
     //-----do the original raymarch
     raymarch(rayDir, stdRes);
@@ -105,10 +106,13 @@ vec3 getPixelColor(Vector rayDir){
     totalColor+=newColor;
     
     
-    
-
-    if(hitWhich!=0){
-       nudge(surface.reflectedRay);//move the ray a little
+    //----do recursive reflections
+    while(reflectedLight>0.005&&numRefl<5){
+        
+        if(hitWhich==0){break;}//if your last pass hit the sky, stop.
+        
+    //-----now do a reflection
+        nudge(surface.reflectedRay);//move the ray a little
        raymarch(surface.reflectedRay,reflRes);//do the reflection march
        setMaterial(mat, sampletv, hitWhich);
        setSurfData(surface, sampletv, mat, 1.);
@@ -116,10 +120,11 @@ vec3 getPixelColor(Vector rayDir){
         
     newColor=surfaceColor(surface, mat,true,rayDistance,reflectedLight);
     totalColor+=newColor;
-
+        
+    numRefl+=1;
     }
     
-
+    
     
     return totalColor;
 }

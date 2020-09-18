@@ -32,7 +32,7 @@ Vector surfaceNormal(Vector tv){
 //----calculate Frensel reflection
 //from https://www.shadertoy.com/view/4tyXDR
 //============================================================
-vec2 fresnelReflectUpdate(vec2 surfRefl, float n1, float n2, Vector normal, Vector incident)
+void fresnelReflectUpdate(inout float refl, float n1, float n2, Vector normal, Vector incident)
 {
     //n1=index of refraction you are currently inside of
     //n2=index of refraction you are entering
@@ -47,7 +47,7 @@ vec2 fresnelReflectUpdate(vec2 surfRefl, float n1, float n2, Vector normal, Vect
             float sinT2 = n*n*(1.0-cosX*cosX);
             // Total internal reflection
             if (abs(sinT2) > 1.0){
-               return vec2(0.,1.0);
+               refl=1.;
             }
             cosX = sqrt(1.0-sinT2);
         }
@@ -55,8 +55,9 @@ vec2 fresnelReflectUpdate(vec2 surfRefl, float n1, float n2, Vector normal, Vect
         float ret = clamp(r0+(1.0-r0)*x*x*x*x*x,0.,1.);
 
         // adjust reflect multiplier for object reflectivity
-        ret = (surfRefl.y + surfRefl.x* ret);
-        return vec2(1.-ret,ret);
+        ret = (refl + (1.-refl)*ret);
+    
+        refl=ret;
     
 }
 
@@ -74,7 +75,7 @@ void setSurfData(inout surfData dat, Vector tv, inout Material enter,float curre
     dat.refractedRay=refractThrough(tv,normal,currentRefract,enter.refract);
     
     //should I have this function update Material enter via frensel?
-    enter.reflect=fresnelReflectUpdate(vec2(1.-enter.reflect,enter.reflect),currentRefract,enter.refract,normal,tv).y;
+ fresnelReflectUpdate(enter.reflect,currentRefract,enter.refract,normal,tv);
     
 }
 
@@ -111,7 +112,7 @@ vec3 checkerboard(vec2 v){
 void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
-            mat.color=skyColor.rgb;
+            mat.color=0.4*skyColor.rgb;
             mat.lightThis=0;
             break;//sky
         
@@ -126,7 +127,7 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             
         case 2://Plane
             mat.color=checkerboard(sampletv.pos.coords.xy);
-            mat.reflect=0.2;
+            mat.reflect=0.02;
             mat.refract=1.1;
             mat.opacity=1.;
             mat.phong=defaultPhong;
