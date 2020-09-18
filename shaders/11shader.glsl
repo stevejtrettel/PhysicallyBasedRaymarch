@@ -2,7 +2,7 @@
 // The Lights in the Scene
 //----------------------------------------------------------------------------------------------------------------------
 
-//----remake using material and surface
+
 vec3 ambLights(surfData surface, Material mat, bool marchShadow){
     
     vec3 color=vec3(0.);
@@ -15,7 +15,6 @@ vec3 ambLights(surfData surface, Material mat, bool marchShadow){
 }
 
 
-//----with material and surface
 
 vec3 sceneLights(surfData surface, Material mat,bool marchShadow){
     
@@ -35,10 +34,6 @@ vec3 sceneLights(surfData surface, Material mat,bool marchShadow){
 // Color from a reflection
 //----------------------------------------------------------------------------------------------------------------------
 
-
-
-
-//remake using the surface and material structs
 
 vec3 surfaceColor(surfData surface, Material mat, bool marchShadow, inout float rayDistance, inout float refl){
    
@@ -76,11 +71,24 @@ vec3 surfaceColor(surfData surface, Material mat, bool marchShadow, inout float 
 
 
 
+//start at a point, raymarch to the next intersection with the scene.
+//update the total color, taking into account (1) color accumulated along path and (2) color contributed by final surface reached.
+void marchColor(inout vec3 totalColor, inout surfData surface,inout Material mat, inout vec3 volumetric, inout float rayDistance, inout float lightAmt){
+    
+    //check if entering or leaving an object by dot(normal, incident)
+    
+    //start with the raymarch
+    //add up color along the way
+    //reset surface, mat etc.
+    //compute color at the back
+    
+    //refl=amt of light reflected at surface
+    //(1-refl)*opacity=amt of light scattered at surface
+    //(1-refl)*(1-opacity)= amt of light transmitted by surface
+}
 
 
 
-
-//--new version running with the structs.
 vec3 getPixelColor(Vector rayDir){
     
     vec3 newColor=vec3(0.);

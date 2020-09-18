@@ -127,7 +127,7 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             
         case 2://Plane
             mat.color=checkerboard(sampletv.pos.coords.xy);
-            mat.reflect=0.02;
+            mat.reflect=0.2;
             mat.refract=1.1;
             mat.opacity=1.;
             mat.phong=defaultPhong;
@@ -136,8 +136,8 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             
         case 3: //Spheres
             mat.color=0.6*vec3(0.1,0.2,0.35);
-            mat.reflect=0.05;
-            mat.refract=1.55;
+            mat.reflect=0.35;
+            mat.refract=2.55;
             mat.opacity=0.;
             mat.absorb=vec3(8.0, 8.0, 3.0);
             mat.phong.shiny=15.;

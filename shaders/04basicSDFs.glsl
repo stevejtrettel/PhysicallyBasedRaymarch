@@ -12,6 +12,7 @@ float halfSpaceX(Point p,float h){
 }
 
 float halfSpaceZ(Point p,float h){
+   // return p.coords.z+h;
     return abs(p.coords.z+h+0.1)-0.1;
 }
 

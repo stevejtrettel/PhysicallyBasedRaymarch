@@ -1,6 +1,4 @@
 
-
-//----NEW PHONG USING MATERIAL
 //material properties are already set in the background
 vec3 phong(Vector toLight, vec3 lightColor, surfData surface, vec3 color, float shiny){
     
@@ -15,7 +13,7 @@ vec3 phong(Vector toLight, vec3 lightColor, surfData surface, vec3 color, float 
     //should this be toViewer or reflectIncident?
     float rDotV = max(cosAng(reflLight, surface.toViewer), 0.0);
     vec3 specular = vec3(pow(rDotV,shiny));
-    specular=clamp(specular,0.,1.)*lightColor;
+    specular=clamp(0.5*specular,0.,1.)*lightColor;
     
     return diffuse+specular;
 
@@ -25,8 +23,6 @@ vec3 phong(Vector toLight, vec3 lightColor, surfData surface, vec3 color, float 
 
 
 
-
-//----- NEW POINT LIGHT USING MATERIAL
 
 //do phong, do shadow, do everything for this light
 vec3 pointLight(Light light, surfData surface,Material mat,bool marchShadow){
@@ -57,7 +53,6 @@ vec3 pointLight(Light light, surfData surface,Material mat,bool marchShadow){
 
 
 
-//---- new DIR LIGHT USING MATERIAL
 vec3 dirLight(Light light,surfData surface, Material mat,bool marchShadow){
     
     vec3 ph;
@@ -67,7 +62,7 @@ vec3 dirLight(Light light,surfData surface, Material mat,bool marchShadow){
     
     //NEED TO DEAL WITH THE SHINYNESS IF WE GO THIS WAY
     //float shiny = max(surface.phong.shine/5.,2.);
-    ph=phong(toSky,light.color,surface, mat.color,mat.phong.shiny);
+    ph=phong(toSky,light.color,surface, mat.color,3.);
     
     if(marchShadow&&hitWhich!=1){//not the light scene
         sh=shadowmarch(toSky,20.,2.);
