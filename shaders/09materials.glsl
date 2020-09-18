@@ -107,49 +107,6 @@ vec3 checkerboard(vec2 v){
 //in the future, this function will also contain more data, like its rerflectivity etc
 
 
-//this sets a bunch of global parameters for materials;
-
-void materialProperties(int hitWhich){
-    switch(hitWhich){
-        case 0:// Didnt hit anything
-           surfColor=skyColor.w*skyColor.rgb;
-            surfRefl=vec2(1.,0.);
-            lightThis=0;
-            break;//sky
-        
-        case 1://Lightsource
-            surfColor=vec3(.5);
-            surfShine=5.;
-            surfRefl=vec2(1.,0.);
-            surfRefract=1.;
-            lightThis=1;
-            break;
-            
-        case 2://Plane
-            surfColor=checkerboard(sampletv.pos.coords.xy);
-            surfShine=5.;
-            surfRefl=vec2(0.8,0.2);
-            surfRefract=1.;
-            lightThis=1;
-            break;
-                //0.2*surfaceNormal(sampletv).dir;
-            
-        case 3: //Spheres
-            surfColor=0.6*vec3(0.1,0.2,0.35);
-            surfShine=15.;
-            surfRefl=vec2(0.95,0.05);
-            surfRefract=1.55;//glass
-            lightThis=1;
-            break;
-
-        case 5://debug
-            surfColor=vec3(0.,0.,1.);
-            lightThis=0;
-            break;
-    }
-}
-
-
 
 
 void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
@@ -209,29 +166,5 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
 
 
 
-
-
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// SETTING ALL THE LOCAL DATA
-//----------------------------------------------------------------------------------------------------------------------
-
-
-
-void surfaceData(Vector tv,int hitWhich){
-    
-    //set the local data once you hit a point on the surface
-    toViewer=turnAround(tv);
-    surfPos=tv.pos;
-    surfNormal=surfaceNormal(tv);
-    reflectedRay=reflectOff(tv,surfNormal);
-    
-    //set the material colors, reflectivity etc
-    materialProperties(hitWhich);
-    
-    //reset the reflectivity using the frensel equation
-  surfRefl=fresnelReflectUpdate(surfRefl,1.,surfRefract,surfNormal, tv);
-}
 
 

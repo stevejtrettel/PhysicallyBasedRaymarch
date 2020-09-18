@@ -32,7 +32,7 @@ void raymarch(Vector rayDir,Accuracy res){
                 }
                 marchStep = localDist;
                depth += marchStep;
-            if(distToViewer>res.maxDist){
+            if(depth>res.maxDist){
                 hitWhich=0;
                 distToViewer=res.maxDist;
                 break;
