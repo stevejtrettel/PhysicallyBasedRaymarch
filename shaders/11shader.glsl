@@ -31,6 +31,32 @@ vec3 sceneLights(localData data, Material mat,bool marchShadow){
 
 
 //----------------------------------------------------------------------------------------------------------------------
+// TotalInternalRefraction
+//----------------------------------------------------------------------------------------------------------------------
+int totalReflections;
+
+void refract(inout localData data,Volume inside, Volume outside){
+    bool totalReflect=true;
+    int numReflect=0;
+    
+    while(totalReflect&&numReflect<50){
+    nudge(data.refractedRay);
+    raymarch(data.refractedRay,-1.,stdRes);//we are refracting on the inside of an object.
+    setLocalData(data,sampletv,inside,outside);
+    //if we are totally internally reflecting; keep going
+    totalReflect=TIR(data,inside,outside);
+    numReflect+=1;
+    }
+    totalReflections=numReflect;
+    
+   //when it leaves, local Data has been set to the parameters at the final intersection with the surface so we can start picking up colors again. 
+}
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
 // Color from a reflection
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -154,6 +180,7 @@ vec3 getPixelColorNew(Vector rayDir){
     
     int numRefl=0;
     
+    
     //-----do the original raymarch
     raymarch(rayDir,1., stdRes);//start outside
     rayDistance+=distToViewer;
@@ -181,9 +208,22 @@ vec3 getPixelColorNew(Vector rayDir){
         
         if(outVol.opacity<1.){
             //then we need to do refraction!
-            nudge(data.refractedRay);
-            raymarch(data.refractedRay,-data.side,stdRes);//changed sides when we nudged it
-            setParameters(sampletv,data,mat,curVol,outVol);
+            
+            
+            
+            
+//            nudge(data.refractedRay);
+//            raymarch(data.refractedRay,-data.side,stdRes);//changed sides when we nudged it
+//            setParameters(sampletv,data,mat,curVol,outVol);
+//            
+//            
+//            totalColor+=vec3(mat.reflect,0.,0.);
+            
+            
+            refract(data,outVol,curVol);
+            
+            totalColor+=vec3(float(totalReflections)/10.,0.,0.);
+            
             
             //inside the material, at the back wall now.
             nudge(data.refractedRay);

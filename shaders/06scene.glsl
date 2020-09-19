@@ -25,9 +25,10 @@ float planeDistance(Point p){
 float sphereDistance(Point p){
     float distance=
          sphere(p,createPoint(-0.5,0.5,-1.),1.);
-    distance=min(distance, sphere(p,createPoint(1.5,-0.5,-1.),0.5));
-    return distance;
+    distance=min(distance, vertCyl(p,createPoint(1.5,-0.5,-1.),0.5));
     
+    distance=min(distance, cube(p,createPoint(0.,0.5,-1.5),0.5));
+    return distance;
 }
 
 

@@ -33,7 +33,7 @@ Vector surfaceNormal(Vector tv){
 
 //================compute all the useful vectors for a surface
 //update the reflectivity of the surface you are hitting
-void setLocalData(inout localData dat, Vector tv, inout Material mat, Volume currentVol, Volume outerVol){
+void setLocalData(inout localData dat, Vector tv, Volume currentVol, Volume outerVol){
     dat.incident=tv;
     dat.toViewer=turnAround(tv);
     dat.pos=tv.pos;
@@ -86,6 +86,20 @@ void updateReflectivity(localData dat, inout Material mat, Volume currentVol, Vo
     
      //fresnelReflectUpdate(mat.reflect,currentVol.refract,outerVol.refract,dat.normal,dat.incident);
     
+}
+
+
+//decide if we are totally internally reflecting
+bool TIR(localData dat,Volume inside, Volume outside){
+    
+        float cosX = -dot(dat.normal.dir,dat.incident.dir);
+        float n = inside.refract/outside.refract;
+        float sinT2 = n*n*(1.0-cosX*cosX);
+    
+            if (abs(sinT2) > 1.0 ){
+                return true;
+            }
+    else{return false;}
 }
 
 
@@ -181,7 +195,7 @@ void setVolume(inout Volume vol, int inWhich){
             
         case 3: //Spheres
             vol.refract=1.25;
-            vol.opacity=0.1;
+            vol.opacity=0.02;
             vol.absorb=vec3(8.,3.,3.);
             break;
     }
@@ -231,7 +245,7 @@ void setParameters(Vector sampletv,inout localData data, inout Material mat, ino
         setMaterial(mat, sampletv, hitWhich);
         setCurrentVolume(curVol,sampletv);
         setOuterVolume(outVol,sampletv);
-        setLocalData(data, sampletv, mat, curVol,outVol);
+        setLocalData(data, sampletv, curVol,outVol);
         updateReflectivity(data,mat,curVol,outVol);
 
 }
