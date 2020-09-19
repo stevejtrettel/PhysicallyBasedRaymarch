@@ -37,14 +37,20 @@ void setLocalData(inout localData dat, Vector tv, inout Material mat, Volume cur
     dat.incident=tv;
     dat.toViewer=turnAround(tv);
     dat.pos=tv.pos;
+    
     Vector normal=surfaceNormal(tv);
-    dat.normal=normal;
+    float side=-sign(tangDot(tv,normal));
+    
+    //make inward pointing normal if we are on the inside
+    if(side==-1.){normal=turnAround(normal);}
+    
     dat.reflectedRay=reflectOff(tv,normal);
+
     dat.refractedRay=refractThrough(tv,normal,currentVol.refract,outerVol.refract);
     
-    dat.side=-sign(tangDot(tv,normal));//1 for outside, -1 for inside
+    dat.normal=normal;
+    dat.side=side;
 }
-
 
 
 //----- calculate fresnel reflectivity
@@ -119,23 +125,19 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             mat.color=vec3(.5);
             mat.phong=defaultPhong;
             mat.reflect=0.;
-            mat.opacity=1.;
             mat.lightThis=1;
             break;
             
         case 2://Plane
             mat.color=checkerboard(sampletv.pos.coords.xy);
             mat.reflect=0.2;
-            mat.opacity=1.;
             mat.phong=defaultPhong;
             mat.lightThis=1;
             break;
             
         case 3: //Spheres
             mat.color=0.6*vec3(0.1,0.2,0.35);
-            mat.reflect=0.02;
-            mat.opacity=0.;
-            mat.absorb=vec3(8.0, 8.0, 3.0);
+            mat.reflect=0.05;
             mat.phong.shiny=15.;
             mat.phong.diffuse=vec3(1.);
             mat.phong.specular=vec3(1.);
@@ -168,18 +170,20 @@ void setVolume(inout Volume vol, int inWhich){
      switch(inWhich){
         case 0:// in the air
             vol.refract=1.;
+            vol.opacity=1.;
             break;//sky
         
         case 2://Plane
             vol.refract=1.;
+            vol.opacity=1.;
             //opaque material
             break;
             
         case 3: //Spheres
-            vol.refract=1.55;
+            vol.refract=1.25;
+            vol.opacity=0.1;
             vol.absorb=vec3(8.,3.,3.);
             break;
-
     }
     
 }
@@ -231,4 +235,3 @@ void setParameters(Vector sampletv,inout localData data, inout Material mat, ino
         updateReflectivity(data,mat,curVol,outVol);
 
 }
-

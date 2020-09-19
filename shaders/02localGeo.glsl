@@ -73,4 +73,3 @@ Vector refractThrough(Vector v, Vector n, float n1, float n2){
     return Vector(v.pos, dir);
 }
 
-

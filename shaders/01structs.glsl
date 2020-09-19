@@ -307,8 +307,6 @@ struct Material{
     vec3 color;
     Phong phong;
     float reflect;
-    float opacity;
-    vec3 absorb;
     int lightThis;
     
 };
@@ -316,11 +314,12 @@ struct Material{
 
 struct Volume{
     float refract;
+    float opacity;
     vec3 absorb;
     vec3 emit;
 };
 
-Volume air=Volume(1.,vec3(0.),vec3(0.));
+Volume air=Volume(1.,0.,vec3(0.),vec3(0.));
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Surface Data
 //----------------------------------------------------------------------------------------------------------------------

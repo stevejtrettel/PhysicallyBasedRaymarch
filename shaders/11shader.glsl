@@ -74,7 +74,7 @@ vec3 surfaceColor(localData data, Material mat, bool marchShadow, inout float ra
 
 
 
-vec3 getPixelColorNew(Vector rayDir){
+vec3 getPixelColor(Vector rayDir){
     Volume curVol;
     Volume outVol;
     
@@ -123,5 +123,120 @@ vec3 getPixelColorNew(Vector rayDir){
     return totalColor;
 }
 
+
+
+
+
+
+vec3 getPixelColorNew(Vector rayDir){
+    Volume curVol;
+    Volume outVol;
+    
+    Volume reflCVol;
+    Volume reflOVol;
+    
+    vec3 surfColor=vec3(0.);
+    vec3 reflectColor=vec3(0.);
+    vec3 refractColor=vec3(0.);
+    vec3 totalColor=vec3(0.);
+    
+    float rayDistance=0.;
+    float reflectedLight=1.;
+    float refractedLight=1.;
+    
+    localData data;
+    Material mat;
+    localData reflData;
+    Material
+        
+        
+        reflMat;
+    
+    int numRefl=0;
+    
+    //-----do the original raymarch
+    raymarch(rayDir,1., stdRes);//start outside
+    rayDistance+=distToViewer;
+    //now that we are at a point, we can set the surface data and material properties
+    setParameters(sampletv,data,mat,curVol,outVol);
+        
+    //whether or not we need the surface color depends on the volume we are entering: is it transparent or opaque?
+    surfColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
+    
+    totalColor+=outVol.opacity*surfColor;
+    //how do I weight by volume opacity but NOT destroy the skybox?
+    
+    
+    //now run reflections and refractions
+    //first: the reflected ray at this location.
+    if(hitWhich!=0){//not the skybox
+        nudge(data.reflectedRay);//move the ray a little
+        raymarch(data.reflectedRay,data.side,reflRes);//stayed on the same side!
+        
+        
+        setParameters(sampletv,reflData,reflMat,reflCVol,reflOVol);
+        reflectColor=surfaceColor(reflData, reflMat,true,rayDistance,reflectedLight);
+        totalColor+=reflectColor;
+        
+        
+        if(outVol.opacity<1.){
+            //then we need to do refraction!
+            nudge(data.refractedRay);
+            raymarch(data.refractedRay,-data.side,stdRes);//changed sides when we nudged it
+            setParameters(sampletv,data,mat,curVol,outVol);
+            
+            //inside the material, at the back wall now.
+            nudge(data.refractedRay);
+            raymarch(data.refractedRay,-data.side,stdRes);//
+            setParameters(sampletv,data,mat,curVol,outVol);
+            
+
+            reflectedLight=1.;//turn off annoying counter right now.
+            refractColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
+            
+            //now need to add the reflected component of this one
+            
+            nudge(data.reflectedRay);//move the ray a little
+        raymarch(data.reflectedRay,data.side,reflRes);//stayed on the same side!
+        
+        
+        setParameters(sampletv,reflData,reflMat,reflCVol,reflOVol);
+        reflectColor=surfaceColor(reflData, reflMat,true,rayDistance,reflectedLight);
+        totalColor+=reflectColor;
+            
+            
+            
+            
+            totalColor+=refractColor;
+            
+        }
+        
+        
+        
+    }
+    
+    
+//    //----do recursive reflections
+//    while(reflectedLight>0.005&&numRefl<5){
+//        
+//        if(hitWhich==0){break;}//if your last pass hit the sky, stop.
+//        
+//    //-----now do a reflection
+//        nudge(data.reflectedRay);//move the ray a little
+//       raymarch(data.reflectedRay,data.side,reflRes);//do the reflection march
+//   
+//        setParameters(sampletv,data,mat,curVol,outVol);
+//        
+//   
+//    newColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
+//    totalColor+=newColor;
+//        
+//    numRefl+=1;
+//    }
+//    
+    
+    
+    return totalColor;
+}
 
 
