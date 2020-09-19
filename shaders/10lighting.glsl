@@ -1,6 +1,13 @@
 
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Lighting the material surfaces.
+//----------------------------------------------------------------------------------------------------------------------
+
 //material properties are already set in the background
-vec3 phong(Vector toLight, vec3 lightColor, surfData surface, vec3 color, float shiny){
+vec3 phong(Vector toLight, vec3 lightColor, localData surface, vec3 color, float shiny){
     
     fromLight=turnAround(toLight);
     reflLight=reflectOff(fromLight,surface.normal);
@@ -20,12 +27,8 @@ vec3 phong(Vector toLight, vec3 lightColor, surfData surface, vec3 color, float 
 }
 
 
-
-
-
-
 //do phong, do shadow, do everything for this light
-vec3 pointLight(Light light, surfData surface,Material mat,bool marchShadow){
+vec3 pointLight(Light light, localData surface,Material mat,bool marchShadow){
     
     vec3 ph;
     float sh=1.;
@@ -53,7 +56,7 @@ vec3 pointLight(Light light, surfData surface,Material mat,bool marchShadow){
 
 
 
-vec3 dirLight(Light light,surfData surface, Material mat,bool marchShadow){
+vec3 dirLight(Light light,localData surface, Material mat,bool marchShadow){
     
     vec3 ph;
     float sh=1.;
@@ -94,8 +97,9 @@ vec3 ambientLight(vec4 lightColor,Material mat){
 
 
 
-//----THESE DON'T NEED ANY CHANGES!
-
+//----------------------------------------------------------------------------------------------------------------------
+// Volumetric Fog (this will go away, and be replaced with beers law in materials)
+//----------------------------------------------------------------------------------------------------------------------
 
 
 

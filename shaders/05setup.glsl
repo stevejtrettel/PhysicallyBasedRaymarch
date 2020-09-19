@@ -37,6 +37,7 @@ const float fov = 90.0;
 // Global Variables
 //----------------------------------------------------------------------------------------------------------------------
 
+int inWhich=0;
 int hitWhich = 0;
 Vector sampletv;
 float distToViewer;

@@ -29,35 +29,20 @@ Vector surfaceNormal(Vector tv){
 
 
 
-//----calculate Frensel reflection
-//from https://www.shadertoy.com/view/4tyXDR
-//============================================================
-void fresnelReflectUpdate(inout float refl, float n1, float n2, Vector normal, Vector incident)
-{
-    //n1=index of refraction you are currently inside of
-    //n2=index of refraction you are entering
-    
-        // Schlick aproximation
-        float r0 = (n1-n2) / (n1+n2);
-        r0 *= r0;
-        float cosX = -dot(normal.dir,incident.dir);
-        if (n1 > n2)
-        {
-            float n = n1/n2;
-            float sinT2 = n*n*(1.0-cosX*cosX);
-            // Total internal reflection
-            if (abs(sinT2) > 1.0){
-               refl=1.;
-            }
-            cosX = sqrt(1.0-sinT2);
-        }
-        float x = 1.0-cosX;
-        float ret = clamp(r0+(1.0-r0)*x*x*x*x*x,0.,1.);
 
-        // adjust reflect multiplier for object reflectivity
-        ret = (refl + (1.-refl)*ret);
+//================compute all the useful vectors for a surface
+//update the reflectivity of the surface you are hitting
+void setLocalData(inout localData dat, Vector tv, inout Material mat,float currentRefract){
+    dat.incident=tv;
+    dat.toViewer=turnAround(tv);
+    dat.pos=tv.pos;
+    Vector normal=surfaceNormal(tv);
+    dat.normal=normal;
+    dat.reflectedRay=reflectOff(tv,normal);
+    dat.refractedRay=refractThrough(tv,normal,currentRefract,1.);
     
-        refl=ret;
+    //should I have this function update Material enter via frensel?
+ fresnelReflectUpdate(mat.reflect,currentRefract,1.,normal,tv);
     
 }
 
@@ -65,23 +50,52 @@ void fresnelReflectUpdate(inout float refl, float n1, float n2, Vector normal, V
 
 //================compute all the useful vectors for a surface
 //update the reflectivity of the surface you are hitting
-void setSurfData(inout surfData dat, Vector tv, inout Material enter,float currentRefract){
+void setLocalData(inout localData dat, Vector tv, inout Material mat, Volume currentVol, Volume outerVol){
     dat.incident=tv;
     dat.toViewer=turnAround(tv);
     dat.pos=tv.pos;
     Vector normal=surfaceNormal(tv);
     dat.normal=normal;
     dat.reflectedRay=reflectOff(tv,normal);
-    dat.refractedRay=refractThrough(tv,normal,currentRefract,enter.refract);
-    
-    //should I have this function update Material enter via frensel?
- fresnelReflectUpdate(enter.reflect,currentRefract,enter.refract,normal,tv);
-    
+    dat.refractedRay=refractThrough(tv,normal,currentVol.refract,outerVol.refract);
 }
 
 
 
+//----- calculate fresnel reflectivity
+void updateReflectivity(localData dat, inout Material mat, Volume currentVol, Volume outerVol){
+    
+    
+    //n1=index of refraction you are currently inside of
+    //n2=index of refraction you are entering
+    float n1=currentVol.refract;
+    float n2=outerVol.refract;
+    
+        // Schlick aproximation
+        float r0 = (n1-n2) / (n1+n2);
+        r0 *= r0;
+        float cosX = -dot(dat.normal.dir,dat.incident.dir);
+        if (n1 > n2)
+        {
+            float n = n1/n2;
+            float sinT2 = n*n*(1.0-cosX*cosX);
+            // Total internal reflection
+            if (abs(sinT2) > 1.0){
+               mat.reflect=1.;
+            }
+            cosX = sqrt(1.0-sinT2);
+        }
+        float x = 1.0-cosX;
+        float ret = clamp(r0+(1.0-r0)*x*x*x*x*x,0.,1.);
 
+        // adjust reflect multiplier for object reflectivity
+        mat.reflect=(mat.reflect + (1.-mat.reflect)*ret);
+    
+    
+    
+     //fresnelReflectUpdate(mat.reflect,currentVol.refract,outerVol.refract,dat.normal,dat.incident);
+    
+}
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -120,7 +134,6 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             mat.color=vec3(.5);
             mat.phong=defaultPhong;
             mat.reflect=0.;
-            mat.refract=1.;
             mat.opacity=1.;
             mat.lightThis=1;
             break;
@@ -128,7 +141,6 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
         case 2://Plane
             mat.color=checkerboard(sampletv.pos.coords.xy);
             mat.reflect=0.2;
-            mat.refract=1.1;
             mat.opacity=1.;
             mat.phong=defaultPhong;
             mat.lightThis=1;
@@ -137,7 +149,6 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
         case 3: //Spheres
             mat.color=0.6*vec3(0.1,0.2,0.35);
             mat.reflect=0.35;
-            mat.refract=2.55;
             mat.opacity=0.;
             mat.absorb=vec3(8.0, 8.0, 3.0);
             mat.phong.shiny=15.;
@@ -157,4 +168,82 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
 
 
 
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// DECIDING WHICH VOLUME YOU ARE INSIDE OF
+//----------------------------------------------------------------------------------------------------------------------
+
+
+
+
+void setVolume(inout Volume vol, int inWhich){
+    
+     switch(inWhich){
+        case 0:// in the air
+            vol.refract=1.;
+            break;//sky
+        
+        case 2://Plane
+            vol.refract=1.;
+            //opaque material
+            break;
+            
+        case 3: //Spheres
+            vol.refract=1.55;
+            vol.absorb=vec3(8.,3.,3.);
+            break;
+
+    }
+    
+}
+
+
+void setCurrentVolume(inout Volume vol,Vector sampletv){
+    
+    //tv starts at the surface you just reached, facing forward.
+    Vector tv=turnAround(sampletv);
+    nudge(tv);//back up a little bit
+    Point p=tv.pos;
+    setInWhich(p);
+    
+    setVolume(vol,inWhich);
+    
+}
+
+
+
+
+void setOuterVolume(inout Volume vol,Vector sampletv){
+    
+    //tv starts at the surface you just reached, facing forward.
+    Vector tv=sampletv;
+    nudge(tv);//move forward a little bit
+    Point p=tv.pos;
+    setInWhich(p);
+    
+    setVolume(vol,inWhich);
+    
+}
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// SET PARAMETERS
+//----------------------------------------------------------------------------------------------------------------------
+
+void setParameters(Vector sampletv,inout localData data, inout Material mat, inout Volume curVol, inout Volume outVol){
+    
+        setMaterial(mat, sampletv, hitWhich);
+        setCurrentVolume(curVol,sampletv);
+        setOuterVolume(outVol,sampletv);
+        setLocalData(data, sampletv, mat, curVol,outVol);
+        updateReflectivity(data,mat,curVol,outVol);
+
+}
 

@@ -307,7 +307,6 @@ struct Material{
     vec3 color;
     Phong phong;
     float reflect;
-    float refract;
     float opacity;
     vec3 absorb;
     int lightThis;
@@ -315,7 +314,13 @@ struct Material{
 };
 
 
+struct Volume{
+    float refract;
+    vec3 absorb;
+    vec3 emit;
+};
 
+Volume air=Volume(1.,vec3(0.),vec3(0.));
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Surface Data
 //----------------------------------------------------------------------------------------------------------------------
@@ -325,7 +330,7 @@ struct Material{
 //Local geometric data at a point on the surface. 
 
 
-struct surfData{
+struct localData{
     
     Vector incident;
     Vector toViewer;

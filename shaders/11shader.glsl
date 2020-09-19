@@ -3,25 +3,25 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-vec3 ambLights(surfData surface, Material mat, bool marchShadow){
+vec3 ambLights(localData data, Material mat, bool marchShadow){
     
     vec3 color=vec3(0.);
     
     color+=ambientLight(vec4(1.,1.,1.,0.4),mat);
     
-    color+=dirLight(dirLight1,surface, mat,marchShadow);
+    color+=dirLight(dirLight1,data, mat,marchShadow);
 
     return color;
 }
 
 
 
-vec3 sceneLights(surfData surface, Material mat,bool marchShadow){
+vec3 sceneLights(localData data, Material mat,bool marchShadow){
     
     vec3 color=vec3(0.);
 
-    color+=pointLight(pointLight1,surface, mat,marchShadow);
-    color+=pointLight(pointLight2,surface,mat,marchShadow);
+    color+=pointLight(pointLight1,data, mat,marchShadow);
+    color+=pointLight(pointLight2,data,mat,marchShadow);
 
     return color;
 }
@@ -35,7 +35,7 @@ vec3 sceneLights(surfData surface, Material mat,bool marchShadow){
 //----------------------------------------------------------------------------------------------------------------------
 
 
-vec3 surfaceColor(surfData surface, Material mat, bool marchShadow, inout float rayDistance, inout float refl){
+vec3 surfaceColor(localData data, Material mat, bool marchShadow, inout float rayDistance, inout float refl){
    
     //surface and mat are the location we are currently at
     //rayDistance is the distance the ray has already traveled since it left the camera
@@ -50,8 +50,8 @@ vec3 surfaceColor(surfData surface, Material mat, bool marchShadow, inout float 
         totalColor=refl*mat.color;//weight by amount of surviving light
     }
     else{
-    amb=ambLights(surface, mat,marchShadow);
-    scn=sceneLights(surface, mat, marchShadow);//add lights
+    amb=ambLights(data, mat,marchShadow);
+    scn=sceneLights(data, mat, marchShadow);//add lights
     
     totalColor=amb+scn;
     //totalColor=skyFog(totalColor,rayDistance);
@@ -71,25 +71,12 @@ vec3 surfaceColor(surfData surface, Material mat, bool marchShadow, inout float 
 
 
 
-//start at a point, raymarch to the next intersection with the scene.
-//update the total color, taking into account (1) color accumulated along path and (2) color contributed by final surface reached.
-void marchColor(inout vec3 totalColor, inout surfData surface,inout Material mat, inout vec3 volumetric, inout float rayDistance, inout float lightAmt){
-    
-    //check if entering or leaving an object by dot(normal, incident)
-    
-    //start with the raymarch
-    //add up color along the way
-    //reset surface, mat etc.
-    //compute color at the back
-    
-    //refl=amt of light reflected at surface
-    //(1-refl)*opacity=amt of light scattered at surface
-    //(1-refl)*(1-opacity)= amt of light transmitted by surface
-}
 
 
 
-vec3 getPixelColor(Vector rayDir){
+vec3 getPixelColorNew(Vector rayDir){
+    Volume curVol;
+    Volume outVol;
     
     vec3 newColor=vec3(0.);
     vec3 totalColor=vec3(0.);
@@ -97,7 +84,7 @@ vec3 getPixelColor(Vector rayDir){
     float rayDistance=0.;
     float reflectedLight=1.;
     
-    surfData surface;
+    localData data;
     Material mat;
     
     int numRefl=0;
@@ -106,11 +93,10 @@ vec3 getPixelColor(Vector rayDir){
     raymarch(rayDir, stdRes);
     rayDistance+=distToViewer;
     //now that we are at a point, we can set the surface data and material properties
-    setMaterial(mat, sampletv, hitWhich);
-    setSurfData(surface, sampletv, mat, 1.);
+    setParameters(sampletv,data,mat,curVol,outVol);
+        
     
-    
-    newColor=surfaceColor(surface, mat,true,rayDistance,reflectedLight);
+    newColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
     totalColor+=newColor;
     
     
@@ -120,13 +106,13 @@ vec3 getPixelColor(Vector rayDir){
         if(hitWhich==0){break;}//if your last pass hit the sky, stop.
         
     //-----now do a reflection
-        nudge(surface.reflectedRay);//move the ray a little
-       raymarch(surface.reflectedRay,reflRes);//do the reflection march
-       setMaterial(mat, sampletv, hitWhich);
-       setSurfData(surface, sampletv, mat, 1.);
-     
+        nudge(data.reflectedRay);//move the ray a little
+       raymarch(data.reflectedRay,reflRes);//do the reflection march
+   
+        setParameters(sampletv,data,mat,curVol,outVol);
         
-    newColor=surfaceColor(surface, mat,true,rayDistance,reflectedLight);
+   
+    newColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
     totalColor+=newColor;
         
     numRefl+=1;
