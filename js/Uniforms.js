@@ -116,7 +116,7 @@ function setupMaterial(fShader) {
 
             earthCubeTex: { //earth texture to global object
                 type: "t",
-                value: new CubeTextureLoader().setPath('images/cubemap512/')
+                value: new CubeTextureLoader().setPath('images/SkyCube/')
                     .load([ //Cubemap derived from http://www.humus.name/index.php?page=Textures&start=120
                         'posx.jpg',
                         'negx.jpg',

@@ -16,6 +16,17 @@ vec3 checkerboard(vec2 v){
 }
 
 
+
+
+
+vec3 skyTexture(Vector tv){
+
+    // vec3 color = vec3(0.5,0.5,0.5);
+    vec3 color = texture(earthCubeTex, tv.pos.coords.yxz).rgb;
+return color;
+}
+
+
 //----------------------------------------------------------------------------------------------------------------------
 // DECIDING BASE COLOR OF HIT OBJECTS, AND MATERIAL PROPERTIES
 //----------------------------------------------------------------------------------------------------------------------
@@ -29,7 +40,8 @@ vec3 checkerboard(vec2 v){
 void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
-            mat.color=0.4*skyColor.rgb;
+            //mat.color=0.4*skyColor.rgb;
+            mat.color=skyTexture(sampletv);
             mat.lightThis=0;
             mat.reflect=0.;
             break;//sky
