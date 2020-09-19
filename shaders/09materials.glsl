@@ -30,23 +30,6 @@ Vector surfaceNormal(Vector tv){
 
 
 
-//================compute all the useful vectors for a surface
-//update the reflectivity of the surface you are hitting
-void setLocalData(inout localData dat, Vector tv, inout Material mat,float currentRefract){
-    dat.incident=tv;
-    dat.toViewer=turnAround(tv);
-    dat.pos=tv.pos;
-    Vector normal=surfaceNormal(tv);
-    dat.normal=normal;
-    dat.reflectedRay=reflectOff(tv,normal);
-    dat.refractedRay=refractThrough(tv,normal,currentRefract,1.);
-    
-    //should I have this function update Material enter via frensel?
- fresnelReflectUpdate(mat.reflect,currentRefract,1.,normal,tv);
-    
-}
-
-
 
 //================compute all the useful vectors for a surface
 //update the reflectivity of the surface you are hitting
