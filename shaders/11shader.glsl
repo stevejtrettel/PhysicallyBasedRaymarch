@@ -1,31 +1,3 @@
-//----------------------------------------------------------------------------------------------------------------------
-// The Lights in the Scene
-//----------------------------------------------------------------------------------------------------------------------
-
-
-vec3 ambLights(localData data, Material mat, bool marchShadow){
-    
-    vec3 color=vec3(0.);
-    
-    color+=ambientLight(vec4(1.,1.,1.,0.4),mat);
-    
-    color+=dirLight(dirLight1,data, mat,marchShadow);
-
-    return color;
-}
-
-
-
-vec3 sceneLights(localData data, Material mat,bool marchShadow){
-    
-    vec3 color=vec3(0.);
-
-    color+=pointLight(pointLight1,data, mat,marchShadow);
-    color+=pointLight(pointLight2,data,mat,marchShadow);
-
-    return color;
-}
-
 
 
 
@@ -33,22 +5,30 @@ vec3 sceneLights(localData data, Material mat,bool marchShadow){
 //----------------------------------------------------------------------------------------------------------------------
 // TotalInternalRefraction
 //----------------------------------------------------------------------------------------------------------------------
-int totalReflections;
 
-void refract(inout localData data,Volume inside, Volume outside){
+
+//bounce around inside of an object until total internal refraction stops.  then you are at the surface of the object, and some of your ray will reflect and some will refract.
+float refract(inout localData data, Volume inside, Volume outside){
+    float dist=0.;
     bool totalReflect=true;
-    int numReflect=0;
+    int numReflect=-1;
     
-    while(totalReflect&&numReflect<50){
+    while(totalReflect&&numReflect<10){
     nudge(data.refractedRay);
-    raymarch(data.refractedRay,-1.,stdRes);//we are refracting on the inside of an object.
+    raymarch(data.refractedRay,-1.,stdRes);
+    //we are refracting on the inside of an object.
+    dist+=distToViewer;
+    
     setLocalData(data,sampletv,inside,outside);
     //if we are totally internally reflecting; keep going
     totalReflect=TIR(data,inside,outside);
     numReflect+=1;
     }
-    totalReflections=numReflect;
     
+    
+    //dist is the total distance traveled inside the material
+    return dist;
+
    //when it leaves, local Data has been set to the parameters at the final intersection with the surface so we can start picking up colors again. 
 }
 
@@ -57,15 +37,12 @@ void refract(inout localData data,Volume inside, Volume outside){
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Color from a reflection
+// Color from a raymarch
 //----------------------------------------------------------------------------------------------------------------------
 
-
-vec3 surfaceColor(localData data, Material mat, bool marchShadow, inout float rayDistance, inout float refl){
-   
-    //surface and mat are the location we are currently at
-    //rayDistance is the distance the ray has already traveled since it left the camera
-    //refl keeps track of the amount of light left that still is reflected.
+//get the color at the surface location given by localData, weighted by the intensity of light left at this point
+//then update the intensity remaining
+vec3 getSurfaceColor(localData data, Material mat, Volume objVol,bool marchShadow){
     
     vec3 amb;//ambient lighting
     vec3 scn;//lights in scene
@@ -73,75 +50,74 @@ vec3 surfaceColor(localData data, Material mat, bool marchShadow, inout float ra
     
    
     if(mat.lightThis==0){//hit the background
-        totalColor=refl*mat.color;//weight by amount of surviving light
+        totalColor=mat.color;//weight by amount of surviving light
     }
     else{
     amb=ambLights(data, mat,marchShadow);
     scn=sceneLights(data, mat, marchShadow);//add lights
     
     totalColor=amb+scn;
-    //totalColor=skyFog(totalColor,rayDistance);
-    totalColor*=refl*(1.-mat.reflect);//refl gives the orig amt of light, mat.reflect is the proportion reflected at this surface.
-    
+        
     }
     
-    //after the color has been added, now update the amount of remaining light
-    refl*=mat.reflect;
-    
+    //data.intensity is how much light was left at this stage.
+    //mat.reflect is reflectivity of surface.
+    //objVol.opacity is the opacity of the object we struck
+    totalColor*=data.intensity*(1.-mat.reflect)*objVol.opacity;
+
     return totalColor;
-    
     
 }
 
 
 
-
-
-
-
-
-vec3 getPixelColor(Vector rayDir){
-    Volume curVol;
-    Volume outVol;
+//after marching through volume "vol" for distance "dist", update the color multiplier you use on colors.
+//this does NOT change the intensity in local data (the decrease is accounted for in "color")
+void updateColorMultiplier(inout vec3 color,Volume vol,float dist){
+    vec3 absorb=exp(vol.absorb*dist);
+    color*=absorb;
     
-    vec3 newColor=vec3(0.);
+}
+
+//update the light intensity of a local data, depending on if we are continuing on for reflection or transmission
+void updateReflectIntensity(inout localData data, Material mat){
+    data.intensity*=mat.reflect;
+    //amt left is determiend by reflectivity
+}
+
+void updateTransmitIntensity(inout localData data, Material mat, Volume entering){
+    data.intensity*=(1.-mat.reflect)*(1.-entering.opacity);
+    
+}
+
+//start where you are, and reflect around picking up colors
+//stop when you hit a transparent object, or when you run out of light intensity, hit max reflections.
+vec3 getOpaqueReflect(inout localData data,Material mat){
+    int numRefl=0;
+    Volume objVol;
+    Volume airVol;
+    
+    //orig object is opaque
+    objVol.opacity=1.;
+    
+    vec3 reflColor;
     vec3 totalColor=vec3(0.);
     
-    float rayDistance=0.;
-    float reflectedLight=1.;
     
-    localData data;
-    Material mat;
-    
-    int numRefl=0;
-    
-    //-----do the original raymarch
-    raymarch(rayDir,1., stdRes);//start outside
-    rayDistance+=distToViewer;
-    //now that we are at a point, we can set the surface data and material properties
-    setParameters(sampletv,data,mat,curVol,outVol);
-        
-    
-    newColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
-    totalColor+=newColor;
-    
-    
-    //----do recursive reflections
-    while(reflectedLight>0.005&&numRefl<5){
+    //objVol.opacity==1.&&
+    while(data.intensity>0.005&&numRefl<5){
         
         if(hitWhich==0){break;}//if your last pass hit the sky, stop.
         
-    //-----now do a reflection
+        //if not, do a reflection.
         nudge(data.reflectedRay);//move the ray a little
-       raymarch(data.reflectedRay,data.side,reflRes);//do the reflection march
-   
-        setParameters(sampletv,data,mat,curVol,outVol);
+        raymarch(data.reflectedRay,1.,reflRes);//do the reflection march
+        setParameters(sampletv,data,mat,airVol,objVol);
+        totalColor+=getSurfaceColor(data, mat,objVol,true);
         
-   
-    newColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
-    totalColor+=newColor;
+        updateReflectIntensity(data,mat);
         
-    numRefl+=1;
+        numRefl+=1;
     }
     
     
@@ -153,130 +129,111 @@ vec3 getPixelColor(Vector rayDir){
 
 
 
-
-vec3 getPixelColorNew(Vector rayDir){
-    Volume curVol;
-    Volume outVol;
+vec3 getPixelColorMirror(Vector rayDir){
     
-    Volume reflCVol;
-    Volume reflOVol;
-    
-    vec3 surfColor=vec3(0.);
-    vec3 reflectColor=vec3(0.);
-    vec3 refractColor=vec3(0.);
-    vec3 totalColor=vec3(0.);
-    
-    float rayDistance=0.;
-    float reflectedLight=1.;
-    float refractedLight=1.;
+    Volume airVol;
+    Volume objVol;
     
     localData data;
+    resetIntensity(data);//make it so we start with intensity 1.
+    
     Material mat;
-    localData reflData;
-    Material
-        
-        
-        reflMat;
     
-    int numRefl=0;
-    
+    vec3 totalColor;
     
     //-----do the original raymarch
     raymarch(rayDir,1., stdRes);//start outside
-    rayDistance+=distToViewer;
-    //now that we are at a point, we can set the surface data and material properties
-    setParameters(sampletv,data,mat,curVol,outVol);
-        
-    //whether or not we need the surface color depends on the volume we are entering: is it transparent or opaque?
-    surfColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
-    
-    totalColor+=outVol.opacity*surfColor;
-    //how do I weight by volume opacity but NOT destroy the skybox?
+    setParameters(sampletv,data,mat,airVol,objVol);
     
     
-    //now run reflections and refractions
-    //first: the reflected ray at this location.
-    if(hitWhich!=0){//not the skybox
-        nudge(data.reflectedRay);//move the ray a little
-        raymarch(data.reflectedRay,data.side,reflRes);//stayed on the same side!
-        
-        
-        setParameters(sampletv,reflData,reflMat,reflCVol,reflOVol);
-        reflectColor=surfaceColor(reflData, reflMat,true,rayDistance,reflectedLight);
-        totalColor+=reflectColor;
-        
-        
-        if(outVol.opacity<1.){
-            //then we need to do refraction!
-            
-            
-            
-            
-//            nudge(data.refractedRay);
-//            raymarch(data.refractedRay,-data.side,stdRes);//changed sides when we nudged it
-//            setParameters(sampletv,data,mat,curVol,outVol);
-//            
-//            
-//            totalColor+=vec3(mat.reflect,0.,0.);
-            
-            
-            refract(data,outVol,curVol);
-            
-            totalColor+=vec3(float(totalReflections)/10.,0.,0.);
-            
-            
-            //inside the material, at the back wall now.
-            nudge(data.refractedRay);
-            raymarch(data.refractedRay,-data.side,stdRes);//
-            setParameters(sampletv,data,mat,curVol,outVol);
-            
-
-            reflectedLight=1.;//turn off annoying counter right now.
-            refractColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
-            
-            //now need to add the reflected component of this one
-            
-            nudge(data.reflectedRay);//move the ray a little
-        raymarch(data.reflectedRay,data.side,reflRes);//stayed on the same side!
-        
-        
-        setParameters(sampletv,reflData,reflMat,reflCVol,reflOVol);
-        reflectColor=surfaceColor(reflData, reflMat,true,rayDistance,reflectedLight);
-        totalColor+=reflectColor;
-            
-            
-            
-            
-            totalColor+=refractColor;
-            
-        }
-        
-        
-        
-    }
-    
-    
-//    //----do recursive reflections
-//    while(reflectedLight>0.005&&numRefl<5){
-//        
-//        if(hitWhich==0){break;}//if your last pass hit the sky, stop.
-//        
-//    //-----now do a reflection
-//        nudge(data.reflectedRay);//move the ray a little
-//       raymarch(data.reflectedRay,data.side,reflRes);//do the reflection march
-//   
-//        setParameters(sampletv,data,mat,curVol,outVol);
-//        
-//   
-//    newColor=surfaceColor(data, mat,true,rayDistance,reflectedLight);
-//    totalColor+=newColor;
-//        
-//    numRefl+=1;
-//    }
-//    
-    
+    totalColor=getSurfaceColor(data, mat,objVol,true);
+    //now do reflections until you hit the sky or run out of light
+    totalColor+=getOpaqueReflect(data,mat);
     
     return totalColor;
 }
+
+
+
+
+
+vec3 getPixelColorGlass(Vector rayDir){
+    
+    Volume airVol;
+    Volume objVol;
+    
+    localData data;
+    localData reflData;
+    resetIntensity(data);//make it so we start with intensity 1.
+
+    float refractDist;
+    
+    Material mat;
+    
+    vec3 colorMultiplier=vec3(1.);
+
+    vec3 totalColor;
+    
+    //-----do the original raymarch
+    raymarch(rayDir,1., stdRes);//start outside
+    setParameters(sampletv,data,mat,airVol,objVol);  
+    if(hitWhich==0){
+        return mat.color;
+    }
+    
+    //add this bit of the color to the pixel
+    totalColor+=getSurfaceColor(data,mat,objVol,true);
+    
+    
+    //going to separate out and go two paths: reflection and transmission
+    reflData=data;//this way we don't change the actual data.
+    
+    //now update their relative intensities:
+    updateReflectIntensity(reflData,mat);
+    updateTransmitIntensity(data,mat,objVol);
+    
+    //do the reflections first:
+    totalColor+=getOpaqueReflect(reflData,mat);
+    
+    //now, run refractions until we are ready to leave the object
+    if(objVol.opacity<1.){
+       
+        //do the refractions, record distance travelled
+        refractDist=refract(data,objVol,airVol);
+        updateColorMultiplier(colorMultiplier,objVol,refractDist);
+        
+        //we are at the back wall of the object now: time to reset the data
+        setParameters(sampletv,data,mat,objVol,airVol); 
+        //now we are about to enter the air;
+        
+        //again, we are at a junction where things split: reflection adn transmission:
+        
+        //reflData=data;//copy it again
+        //updateReflectIntensity(reflData,mat);
+         //get the reflections
+       // totalColor+=colorMultiplier*getOpaqueReflect(reflData,mat);
+        totalColor+=vec3(mat.reflect,0.,0.);
+        
+        //continue forwards out the back
+        updateTransmitIntensity(data,mat,objVol);
+       
+        
+        //now, refract out the backside!
+        nudge(data.refractedRay);
+        raymarch(data.refractedRay,1.,stdRes);
+        //reset the parameters based on our new location
+        setParameters(sampletv,data,mat,airVol,objVol); 
+        
+        //add the resulting color:
+        totalColor+=colorMultiplier*getSurfaceColor(data,mat,objVol,true);
+         totalColor+=colorMultiplier*getOpaqueReflect(data,mat);
+        
+    }
+    
+    return totalColor;
+    
+}
+
+
 
 

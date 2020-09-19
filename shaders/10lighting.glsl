@@ -136,3 +136,44 @@ vec3 skyFog( in vec3  pixelColor,      // original color of the pixel
 
 
 
+
+
+
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// The Lights in the Scene
+//----------------------------------------------------------------------------------------------------------------------
+
+
+vec3 ambLights(localData data, Material mat, bool marchShadow){
+    
+    vec3 color=vec3(0.);
+    
+    color+=ambientLight(vec4(1.,1.,1.,0.4),mat);
+    
+    color+=dirLight(dirLight1,data, mat,marchShadow);
+
+    return color;
+}
+
+
+
+vec3 sceneLights(localData data, Material mat,bool marchShadow){
+    
+    vec3 color=vec3(0.);
+
+    color+=pointLight(pointLight1,data, mat,marchShadow);
+    color+=pointLight(pointLight2,data,mat,marchShadow);
+
+    return color;
+}
+
+
+
+

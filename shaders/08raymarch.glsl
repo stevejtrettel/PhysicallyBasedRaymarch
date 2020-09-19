@@ -105,7 +105,3 @@ float shadowmarch(in Vector toLight, float distToLight,float k)
 
 
 
-
-
-
-

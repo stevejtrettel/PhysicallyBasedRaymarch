@@ -338,7 +338,14 @@ struct localData{
     Vector reflectedRay;
     Vector refractedRay;
     float side;//inside or outside an object
+    float intensity;//how much light remains 
 };
- 
 
 
+void setIntensity(inout localData data, float intens){
+    data.intensity=intens;
+}
+
+void resetIntensity(inout localData data){
+    setIntensity(data,1.);
+}

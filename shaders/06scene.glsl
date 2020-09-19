@@ -22,12 +22,12 @@ float planeDistance(Point p){
 }
 
 
-float sphereDistance(Point p){
+float glassDistance(Point p){
     float distance=
          sphere(p,createPoint(-0.5,0.5,-1.),1.);
     distance=min(distance, vertCyl(p,createPoint(1.5,-0.5,-1.),0.5));
     
-    distance=min(distance, cube(p,createPoint(0.,0.5,-1.5),0.5));
+    distance=min(distance, cube(p,createPoint(-1.,-3.,0.5),0.5));
     return distance;
 }
 
@@ -66,7 +66,7 @@ float sceneObjs(Point p){
     }
     
 
-    distance=min(distance, sphereDistance(p));
+    distance=min(distance, glassDistance(p));
     if(distance<EPSILON){
         hitWhich=3;
         return distance;
@@ -111,7 +111,7 @@ void setInWhich(Point p){
         inWhich=2;
         return;
     }
-    else if(sphereDistance(p)<0.){
+    else if(glassDistance(p)<0.){
         inWhich=3;
         return;
     }

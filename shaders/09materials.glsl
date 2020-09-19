@@ -1,3 +1,105 @@
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Coloring functions
+//----------------------------------------------------------------------------------------------------------------------
+
+vec3 checkerboard(vec2 v){
+    float x=mod(v.x,2.);
+    float y=mod(v.y,2.);
+    
+    if(x<1.&&y<1.||x>1.&&y>1.){
+        return vec3(0.7);
+    }
+    else return vec3(0.2);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// DECIDING BASE COLOR OF HIT OBJECTS, AND MATERIAL PROPERTIES
+//----------------------------------------------------------------------------------------------------------------------
+
+
+//given the value of hitWhich, decide the initial color assigned to the surface you hit, before any lighting calculations
+//in the future, this function will also contain more data, like its rerflectivity etc
+
+
+
+void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
+    switch(hitWhich){
+        case 0:// Didnt hit anything
+            mat.color=0.4*skyColor.rgb;
+            mat.lightThis=0;
+            mat.reflect=0.;
+            break;//sky
+        
+        case 1://Lightsource
+            mat.color=vec3(.5);
+            mat.phong=defaultPhong;
+            mat.reflect=0.;
+            mat.lightThis=1;
+            break;
+            
+        case 2://Plane
+            mat.color=checkerboard(sampletv.pos.coords.xy);
+            mat.reflect=0.2;
+            mat.phong=defaultPhong;
+            mat.lightThis=1;
+            break;
+            
+        case 3: //Spheres
+            mat.color=0.6*vec3(0.1,0.2,0.35);
+            mat.reflect=0.05;
+            mat.phong.shiny=15.;
+            mat.phong.diffuse=vec3(1.);
+            mat.phong.specular=vec3(1.);
+            mat.lightThis=1;
+            break;
+
+
+        case 5://debug
+            mat.color=vec3(0.,0.,1.);
+            mat.lightThis=0;
+            break;
+    }
+}
+
+
+
+
+void setVolume(inout Volume vol, int inWhich){
+    
+     switch(inWhich){
+        case 0:// in the air
+            vol.refract=1.;
+            vol.opacity=1.;
+            break;//sky
+        
+        case 2://Plane
+            vol.refract=1.;
+            vol.opacity=1.;
+            //opaque material
+            break;
+            
+        case 3: //Spheres
+            vol.refract=1.25;
+            vol.opacity=0.05;
+            vol.absorb=vec3(0.3,0.05,0.2);
+            break;
+    }
+    
+}
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Setting materials, volumes etc.
+//----------------------------------------------------------------------------------------------------------------------
+
 Vector surfaceNormal(Point p){
     float ep=5.*EPSILON;
     vec3 bx = vec3(1.,0.,0.);
@@ -31,6 +133,8 @@ Vector surfaceNormal(Vector tv){
 
 
 
+
+
 //================compute all the useful vectors for a surface
 //update the reflectivity of the surface you are hitting
 void setLocalData(inout localData dat, Vector tv, Volume currentVol, Volume outerVol){
@@ -50,7 +154,13 @@ void setLocalData(inout localData dat, Vector tv, Volume currentVol, Volume oute
     
     dat.normal=normal;
     dat.side=side;
+    
+    //don't update the intensity!
+    //dat.intensity=1.;
 }
+
+
+
 
 
 //----- calculate fresnel reflectivity
@@ -103,68 +213,6 @@ bool TIR(localData dat,Volume inside, Volume outside){
 }
 
 
-//----------------------------------------------------------------------------------------------------------------------
-// Coloring functions
-//----------------------------------------------------------------------------------------------------------------------
-
-vec3 checkerboard(vec2 v){
-    float x=mod(v.x,2.);
-    float y=mod(v.y,2.);
-    
-    if(x<1.&&y<1.||x>1.&&y>1.){
-        return vec3(0.7);
-    }
-    else return vec3(0.2);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// DECIDING BASE COLOR OF HIT OBJECTS, AND MATERIAL PROPERTIES
-//----------------------------------------------------------------------------------------------------------------------
-
-
-//given the value of hitWhich, decide the initial color assigned to the surface you hit, before any lighting calculations
-//in the future, this function will also contain more data, like its rerflectivity etc
-
-
-
-void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
-    switch(hitWhich){
-        case 0:// Didnt hit anything
-            mat.color=0.4*skyColor.rgb;
-            mat.lightThis=0;
-            break;//sky
-        
-        case 1://Lightsource
-            mat.color=vec3(.5);
-            mat.phong=defaultPhong;
-            mat.reflect=0.;
-            mat.lightThis=1;
-            break;
-            
-        case 2://Plane
-            mat.color=checkerboard(sampletv.pos.coords.xy);
-            mat.reflect=0.2;
-            mat.phong=defaultPhong;
-            mat.lightThis=1;
-            break;
-            
-        case 3: //Spheres
-            mat.color=0.6*vec3(0.1,0.2,0.35);
-            mat.reflect=0.05;
-            mat.phong.shiny=15.;
-            mat.phong.diffuse=vec3(1.);
-            mat.phong.specular=vec3(1.);
-            mat.lightThis=1;
-            break;
-
-
-        case 5://debug
-            mat.color=vec3(0.,0.,1.);
-            mat.lightThis=0;
-            break;
-    }
-}
 
 
 
@@ -172,38 +220,21 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
 
 
 
-//----------------------------------------------------------------------------------------------------------------------
-// DECIDING WHICH VOLUME YOU ARE INSIDE OF
-//----------------------------------------------------------------------------------------------------------------------
 
 
 
 
-void setVolume(inout Volume vol, int inWhich){
-    
-     switch(inWhich){
-        case 0:// in the air
-            vol.refract=1.;
-            vol.opacity=1.;
-            break;//sky
-        
-        case 2://Plane
-            vol.refract=1.;
-            vol.opacity=1.;
-            //opaque material
-            break;
-            
-        case 3: //Spheres
-            vol.refract=1.25;
-            vol.opacity=0.02;
-            vol.absorb=vec3(8.,3.,3.);
-            break;
-    }
-    
-}
 
 
-void setCurrentVolume(inout Volume vol,Vector sampletv){
+
+
+
+
+
+
+
+
+void setBehindVolume(inout Volume vol,Vector sampletv){
     
     //tv starts at the surface you just reached, facing forward.
     Vector tv=turnAround(sampletv);
@@ -218,7 +249,7 @@ void setCurrentVolume(inout Volume vol,Vector sampletv){
 
 
 
-void setOuterVolume(inout Volume vol,Vector sampletv){
+void setInFrontVolume(inout Volume vol,Vector sampletv){
     
     //tv starts at the surface you just reached, facing forward.
     Vector tv=sampletv;
@@ -241,10 +272,11 @@ void setOuterVolume(inout Volume vol,Vector sampletv){
 //----------------------------------------------------------------------------------------------------------------------
 
 void setParameters(Vector sampletv,inout localData data, inout Material mat, inout Volume curVol, inout Volume outVol){
+
     
         setMaterial(mat, sampletv, hitWhich);
-        setCurrentVolume(curVol,sampletv);
-        setOuterVolume(outVol,sampletv);
+        setBehindVolume(curVol,sampletv);
+        setInFrontVolume(outVol,sampletv);
         setLocalData(data, sampletv, curVol,outVol);
         updateReflectivity(data,mat,curVol,outVol);
 
