@@ -41,6 +41,8 @@ void setLocalData(inout localData dat, Vector tv, inout Material mat, Volume cur
     dat.normal=normal;
     dat.reflectedRay=reflectOff(tv,normal);
     dat.refractedRay=refractThrough(tv,normal,currentVol.refract,outerVol.refract);
+    
+    dat.side=-sign(tangDot(tv,normal));//1 for outside, -1 for inside
 }
 
 
@@ -131,7 +133,7 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             
         case 3: //Spheres
             mat.color=0.6*vec3(0.1,0.2,0.35);
-            mat.reflect=0.35;
+            mat.reflect=0.02;
             mat.opacity=0.;
             mat.absorb=vec3(8.0, 8.0, 3.0);
             mat.phong.shiny=15.;

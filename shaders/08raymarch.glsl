@@ -11,8 +11,12 @@
 // done with general vectors
 
 
+//sets the side of the surface youy are CURRENTLY on 
+//1=on the outside of an object
+//-1=on the inside of an object
 
-void raymarch(Vector rayDir,Accuracy res){
+
+void raymarch(Vector rayDir,float side, Accuracy res){
     hitWhich=0;
     distToViewer=0.;
     float marchStep = 0.;
@@ -24,13 +28,14 @@ void raymarch(Vector rayDir,Accuracy res){
         for (int i = 0; i < res.marchSteps; i++){
             
                 float localDist = sceneSDF(tv.pos);
-                if (localDist < res.threshhold){
+            //this could be negative; side sets this.
+                if (side*localDist < res.threshhold){
                     sampletv =tv;
-                    distToViewer=depth;
+                    distToViewer=side*depth;
                     //numSteps=float(i);
                     break;
                 }
-                marchStep = localDist;
+                marchStep = side*localDist;
                depth += marchStep;
             if(depth>res.maxDist){
                 hitWhich=0;

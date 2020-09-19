@@ -338,7 +338,7 @@ struct localData{
     Vector normal;
     Vector reflectedRay;
     Vector refractedRay;
-    
+    float side;//inside or outside an object
 };
  
 

@@ -90,7 +90,7 @@ vec3 getPixelColorNew(Vector rayDir){
     int numRefl=0;
     
     //-----do the original raymarch
-    raymarch(rayDir, stdRes);
+    raymarch(rayDir,1., stdRes);//start outside
     rayDistance+=distToViewer;
     //now that we are at a point, we can set the surface data and material properties
     setParameters(sampletv,data,mat,curVol,outVol);
@@ -107,7 +107,7 @@ vec3 getPixelColorNew(Vector rayDir){
         
     //-----now do a reflection
         nudge(data.reflectedRay);//move the ray a little
-       raymarch(data.reflectedRay,reflRes);//do the reflection march
+       raymarch(data.reflectedRay,data.side,reflRes);//do the reflection march
    
         setParameters(sampletv,data,mat,curVol,outVol);
         

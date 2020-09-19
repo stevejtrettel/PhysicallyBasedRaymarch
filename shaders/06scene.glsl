@@ -23,13 +23,9 @@ float planeDistance(Point p){
 
 
 float sphereDistance(Point p){
-    float distance=MAX_DIST;
-        for(int i=-2;i<2;i++){
-   for(int j=-2;j<2;j++){ 
-       distance=min(distance,
-                sphere(p,createPoint(1.5*float(i),1.5*float(j),-1.),0.5));
-   }
-    }
+    float distance=
+         sphere(p,createPoint(-0.5,0.5,-1.),1.);
+    distance=min(distance, sphere(p,createPoint(1.5,-0.5,-1.),0.5));
     return distance;
     
 }
