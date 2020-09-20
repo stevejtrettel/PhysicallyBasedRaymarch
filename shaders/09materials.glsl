@@ -1,6 +1,5 @@
 
 
-
 //----------------------------------------------------------------------------------------------------------------------
 // Coloring functions
 //----------------------------------------------------------------------------------------------------------------------
@@ -22,7 +21,7 @@ vec3 checkerboard(vec2 v){
 vec3 skyTexture(Vector tv){
 
     // vec3 color = vec3(0.5,0.5,0.5);
-    vec3 color = texture(earthCubeTex, tv.pos.coords.yxz).rgb;
+    vec3 color = texture(earthCubeTex, tv.dir.yzx).rgb;
 return color;
 }
 
@@ -40,8 +39,11 @@ return color;
 void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
-            //mat.color=0.4*skyColor.rgb;
-            mat.color=skyTexture(sampletv);
+            mat.color=
+                SRGBToLinear(skyTexture(sampletv));
+            //skyColor.rgb);
+                //0.4*skyColor.rgb;
+            //mat.color=SRGBToLinear(skyTexture(sampletv));
             mat.lightThis=0;
             mat.reflect=0.;
             break;//sky
@@ -49,7 +51,7 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
         case 1://Lightsource
             mat.color=vec3(.5);
             mat.phong=defaultPhong;
-            mat.reflect=0.;
+            mat.reflect=0.02;
             mat.lightThis=1;
             break;
             

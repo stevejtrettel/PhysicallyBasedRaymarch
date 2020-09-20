@@ -49,21 +49,20 @@ vec3 getSurfaceColor(localData data, Material mat, Volume objVol,bool marchShado
     
    
     if(mat.lightThis==0){//hit the background
-        totalColor=mat.color;//weight by amount of surviving light
+        return data.intensity*mat.color;//weight by amount of surviving light
     }
-    else{
+    
+    //else
     amb=ambLights(data, mat,marchShadow);
     scn=sceneLights(data, mat, marchShadow);//add lights
     
     totalColor=amb+scn;
-        
-    }
     
     //data.intensity is how much light was left at this stage.
     //mat.reflect is reflectivity of surface.
     //objVol.opacity is the opacity of the object we struck
+   
     totalColor*=data.intensity*(1.-mat.reflect)*objVol.opacity;
-
     return totalColor;
     
 }
@@ -118,8 +117,6 @@ vec3 getOpaqueReflect(inout localData data,Material mat){
         
         numRefl+=1;
     }
-    
-    
     
     return totalColor;
 }
@@ -176,9 +173,9 @@ vec3 getPixelColorGlass(Vector rayDir){
     //-----do the original raymarch
     raymarch(rayDir,1., stdRes);//start outside
     setParameters(sampletv,data,mat,airVol,objVol);  
-    if(hitWhich==0){
-        return mat.color;
-    }
+//    if(hitWhich==0){
+//        return mat.color;
+//    }
     
     //add this bit of the color to the pixel
     totalColor+=getSurfaceColor(data,mat,objVol,true);
