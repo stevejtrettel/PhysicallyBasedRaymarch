@@ -160,7 +160,7 @@ vec3 getOpaqueReflect(inout localData data,Material mat){
         
         //if not, do a reflection.
         nudge(data.reflectedRay);//move the ray a little
-        raymarch(data.reflectedRay,1.,reflRes);//do the reflection march
+        raymarch(data.reflectedRay,1.,stdRes);//do the reflection march
         setParameters(sampletv,data,mat,airVol,objVol);
         totalColor+=getSurfaceColor(data, mat,objVol,true);
         

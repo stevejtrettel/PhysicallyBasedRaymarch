@@ -18,7 +18,8 @@ float lightSDF(Point p,Light light){
 
 
 float planeDistance(Point p){
-       return  halfSpaceZ(p,2.);
+return table(p);
+       //return  halfSpaceZ(p,2.);
 }
 
 
@@ -27,11 +28,16 @@ float glassDistance(Point p){
 }
 
 float iceDistance(Point p){
-    return cube(p,createPoint(-2.4,-1.4,-0.2),0.45)+0.01*sin(10.*p.coords.x+5.*p.coords.y-12.*p.coords.z);
+    return cube(p,createPoint(-2.2,-1.4,-0.2),0.45)+0.01*sin(10.*p.coords.x+5.*p.coords.y-12.*p.coords.z);
+}
+
+
+float strawDistance(Point p){
+    return straw(p);
 }
 
 float liquidDistance(Point p){
-    return max(liquid(p),-iceDistance(p)+0.01);
+    return max(liquid(p),-min(iceDistance(p)-0.01,strawDistance(p)+0.01));
 }
 
 
@@ -74,11 +80,20 @@ float sceneObjs(Point p){
         return distance;
     }
     
+        distance=min(distance, strawDistance(p));
+    if(distance<EPSILON){
+        hitWhich=6;
+        return distance;
+    }
+    
             distance=min(distance, liquidDistance(p));
     if(distance<EPSILON){
         hitWhich=5;
         return distance;
     }
+    
+
+    
     
       return distance;
    
@@ -100,7 +115,8 @@ float sceneObjs(Point p){
 
 float sceneSDF(Point p){
     
-    return min(sceneLights(p),sceneObjs(p));
+    return sceneObjs(p);
+        //min(sceneLights(p),sceneObjs(p));
     
 }
 
@@ -128,10 +144,16 @@ void setInWhich(Point p){
         return;
     }
     
-            else if(liquidDistance(p)<0.){
+    else if(strawDistance(p)<0.){
+        inWhich=6;
+        return;
+    }
+                
+    else if(liquidDistance(p)<0.){
         inWhich=5;
         return;
     }
+    
     //don't bother with the lights:
     else{
         inWhich=0;

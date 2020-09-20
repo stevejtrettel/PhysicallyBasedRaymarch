@@ -2,6 +2,7 @@ import {
     Vector4,
     Matrix4,
     ShaderMaterial,
+    TextureLoader,
     CubeTextureLoader
 } from "./module/three.module.js";
 
@@ -94,7 +95,7 @@ function initObjects() {
 //----------------------------------------------------------------------------------------------------------------------
 // Set up shader
 //----------------------------------------------------------------------------------------------------------------------
-
+var texture = new TextureLoader().load('images/glass_passage.jpg');
 /**
  * Pass all the data to the shader
  * @param fShader
@@ -127,6 +128,10 @@ function setupMaterial(fShader) {
                     ])
             },
 
+            tex: { //earth texture to global object
+                type: "t",
+                value: texture
+            },
 
             //--- geometry dependent stuff here ---//
             //--- lists of stuff that goes into each invGenerator

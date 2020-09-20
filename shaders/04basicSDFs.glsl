@@ -97,6 +97,36 @@ float sphere(Point p, Point center, float radius){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// complex scenes
+//----------------------------------------------------------------------------------------------------------------------
+
+
+
+
+//==== build a table
+
+float table(Point p){
+    Point center=createPoint(2.,1.,1.);
+    float radius=3.;
+    float thick=0.5;
+    float tableTop=cylBlock(p,center,radius,thick);
+    return tableTop;
+}
+
+
+
 //====== build a cocktail glass!
 float cocktailGlass(Point p){
     
@@ -133,4 +163,16 @@ float liquid(Point p){
     float cyl2=cylBlock(p,center2, radius,height);
     return cyl2;
 
+}
+
+
+
+float straw(Point p){
+Point center1=createPoint(2.5,1.,-.9);
+Point q=rotate(p,vec3(1.,0.,0.),0.5);
+
+float outside=cylBlock(q,center1,0.1,1.1);
+float inside=cylBlock(q,center1,0.09,1.1);
+    return smax(outside,-inside,0.02);
+    
 }

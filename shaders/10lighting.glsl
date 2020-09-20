@@ -169,7 +169,7 @@ vec3 sceneLights(localData data, Material mat,bool marchShadow){
     vec3 color=vec3(0.);
 
     color+=pointLight(pointLight1,data, mat,marchShadow);
-    color+=pointLight(pointLight2,data,mat,marchShadow);
+    //color+=pointLight(pointLight2,data,mat,marchShadow);
 
     return color;
 }
