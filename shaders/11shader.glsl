@@ -10,12 +10,19 @@
 //bounce around inside of an object until total internal refraction stops.  then you are at the surface of the object, and some of your ray will reflect and some will refract.
 float refract(inout localData data, Volume inside, Volume outside){
     float dist=0.;
-    bool totalReflect=true;
+    bool totalReflect;
     int numReflect=-1;
     
-    while(totalReflect&&numReflect<10){
     nudge(data.refractedRay);
     raymarch(data.refractedRay,-1.,stdRes);
+    //we are refracting on the inside of an object.
+    dist+=distToViewer;//dist traveled inside ball
+    setLocalData(data,sampletv,inside,outside);
+    totalReflect=TIR(data,inside,outside);
+    
+    while(totalReflect&&numReflect<10){
+    nudge(data.reflectedRay);
+    raymarch(data.reflectedRay,-1.,stdRes);
     //we are refracting on the inside of an object.
     dist+=distToViewer;
     
@@ -204,11 +211,12 @@ vec3 getPixelColorGlass(Vector rayDir){
         
         //again, we are at a junction where things split: reflection adn transmission:
         
-        //reflData=data;//copy it again
+       // reflData=data;//copy it again
         //updateReflectIntensity(reflData,mat);
+        //refractDist=refract(reflData,objVol,airVol);
          //get the reflections
        // totalColor+=colorMultiplier*getOpaqueReflect(reflData,mat);
-        totalColor+=vec3(mat.reflect,0.,0.);
+        //totalColor+=vec3(mat.reflect,0.,0.);
         
         //continue forwards out the back
         updateTransmitIntensity(data,mat,objVol);
