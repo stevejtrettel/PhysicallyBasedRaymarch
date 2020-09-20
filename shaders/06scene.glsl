@@ -23,17 +23,16 @@ float planeDistance(Point p){
 
 
 float glassDistance(Point p){
-    float distance=
-         sphere(p,createPoint(-0.5,0.5,-1.),1.);
-    distance=min(distance, vertCyl(p,createPoint(1.5,-0.5,-1.),0.5));
-    
-    distance=min(distance, cube(p,createPoint(-1.,-3.,0.5),0.5));
-    return distance;
+   return cocktailGlass(p);
 }
 
+float iceDistance(Point p){
+    return cube(p,createPoint(-2.4,-1.4,-0.2),0.45)+0.01*sin(10.*p.coords.x+5.*p.coords.y-12.*p.coords.z);
+}
 
-
-
+float liquidDistance(Point p){
+    return max(liquid(p),-iceDistance(p)+0.01);
+}
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -47,9 +46,6 @@ float sceneLights(Point p){
     
     //light
    lightDist=lightSDF(p,pointLight1);
-    distance=min(distance,lightDist);
-    
-   lightDist=lightSDF(p,pointLight2);
     distance=min(distance,lightDist);
     
     return distance;
@@ -69,6 +65,18 @@ float sceneObjs(Point p){
     distance=min(distance, glassDistance(p));
     if(distance<EPSILON){
         hitWhich=3;
+        return distance;
+    }
+    
+        distance=min(distance, iceDistance(p));
+    if(distance<EPSILON){
+        hitWhich=4;
+        return distance;
+    }
+    
+            distance=min(distance, liquidDistance(p));
+    if(distance<EPSILON){
+        hitWhich=5;
         return distance;
     }
     
@@ -113,6 +121,15 @@ void setInWhich(Point p){
     }
     else if(glassDistance(p)<0.){
         inWhich=3;
+        return;
+    }
+        else if(iceDistance(p)<0.){
+        inWhich=4;
+        return;
+    }
+    
+            else if(liquidDistance(p)<0.){
+        inWhich=5;
         return;
     }
     //don't bother with the lights:

@@ -78,6 +78,59 @@ float vertCyl(Point p, Point center, float radius){
     return length(p.coords.xy-center.coords.xy)-radius;
 
 }
+
+
+float cylBlock(Point p, Point center, float radius, float height){
+    float d1=vertCyl(p,center,radius);
+    float d2=slabZ(p,center.coords.z,height);
+    return smax(d1,d2,0.1);
+}
+
+
+
 float sphere(Point p, Point center, float radius){
     return exactDist(p,center)-radius;
+}
+
+
+
+
+
+
+//====== build a cocktail glass!
+float cocktailGlass(Point p){
+    
+    Point center1=createPoint(2.,1.,-1.);
+    Point center2=createPoint(2.,1.,-1.45);
+    Point center3=createPoint(2.,1.,-.8);
+    float radius=1.;
+    float height=1.;
+    
+    
+    float cyl1=cylBlock(p,center1, radius, height);
+    float cyl2=cylBlock(p,center2, 0.9*radius,height);
+    
+    float cup=smax(cyl1,-cyl2,0.1);
+    
+    float ball=sphere(p,center3,0.18);
+    
+    return smax(cup,-ball,0.2);
+    
+    
+}
+
+
+
+
+float liquid(Point p){
+    
+    
+    Point center2=createPoint(2.,1.,-.1);
+
+    float radius=0.89;
+    float height=0.3;
+    
+    float cyl2=cylBlock(p,center2, radius,height);
+    return cyl2;
+
 }

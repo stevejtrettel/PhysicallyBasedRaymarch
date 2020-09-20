@@ -9,9 +9,9 @@ vec3 checkerboard(vec2 v){
     float y=mod(v.y,2.);
     
     if(x<1.&&y<1.||x>1.&&y>1.){
-        return vec3(0.7);
+        return vec3(0.2);
     }
-    else return vec3(0.2);
+    else return vec3(0.01);
 }
 
 
@@ -41,9 +41,6 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
         case 0:// Didnt hit anything
             mat.color=
                 SRGBToLinear(skyTexture(sampletv));
-            //skyColor.rgb);
-                //0.4*skyColor.rgb;
-            //mat.color=SRGBToLinear(skyTexture(sampletv));
             mat.lightThis=0;
             mat.reflect=0.;
             break;//sky
@@ -57,25 +54,31 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             
         case 2://Plane
             mat.color=checkerboard(sampletv.pos.coords.xy);
-            mat.reflect=0.2;
+            mat.reflect=0.1;
             mat.phong=defaultPhong;
             mat.lightThis=1;
             break;
             
-        case 3: //Spheres
+        case 3: //Cocktail Glass
             mat.color=0.6*vec3(0.1,0.2,0.35);
-            mat.reflect=0.05;
+            mat.reflect=0.1;
             mat.phong.shiny=15.;
-            mat.phong.diffuse=vec3(1.);
-            mat.phong.specular=vec3(1.);
             mat.lightThis=1;
             break;
 
+        case 4: //Ice
+            mat.color=vec3(1.);
+            mat.reflect=0.1;
+            mat.phong.shiny=5.;
+            mat.lightThis=1;
+            break;  
 
-        case 5://debug
-            mat.color=vec3(0.,0.,1.);
-            mat.lightThis=0;
-            break;
+        case 5: //Negroni
+            mat.color=vec3(1.);
+            mat.reflect=0.1;
+            mat.phong.shiny=15.;
+            mat.lightThis=1;
+            break;  
     }
 }
 
@@ -95,12 +98,26 @@ void setVolume(inout Volume vol, int inWhich){
             vol.opacity=1.;
             //opaque material
             break;
+             
+                      case 5: //Negroni
+            vol.refract=1.33;
+            vol.opacity=0.;
+            vol.absorb=5.*vec3(0.05,0.8,0.6);
+            break;
             
-        case 3: //Spheres
-            vol.refract=1.25;
+        case 3: //Glass
+            vol.refract=1.55;
             vol.opacity=0.05;
             vol.absorb=vec3(0.3,0.05,0.2);
             break;
+             
+        case 4: //Ice
+            vol.refract=1.31;
+            vol.opacity=0.5;
+            vol.absorb=vec3(0.3,0.05,0.2);
+            break;
+             
+
     }
     
 }

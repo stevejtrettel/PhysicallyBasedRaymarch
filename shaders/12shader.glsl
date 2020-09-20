@@ -129,12 +129,46 @@ vec3 getPixelColorGlass(Vector rayDir){
         raymarch(data.refractedRay,1.,stdRes);
         //reset the parameters based on our new location
         setParameters(sampletv,data,mat,airVol,objVol); 
+             
+        reflData=data;//save a duplicate in case we must retransmit
+        
+        //add the resulting color:
+        totalColor+=colorMultiplier*getSurfaceColor(data,mat,objVol,true);
+        totalColor+=colorMultiplier*getOpaqueReflect(data,mat);
+         
+        
+        
+        
+        data=reflData;//reset to orig data
+        
+        
+        
+        
+        
+                ////now what if the surface is transparent?!
+         if(objVol.opacity<1.){
+             
+        //do the refractions, record distance travelled
+        refractDist=refract(data,objVol,airVol);
+        updateColorMultiplier(colorMultiplier,objVol,refractDist);
+        
+        //we are at the back wall of the object now: time to reset the data
+        setParameters(sampletv,data,mat,objVol,airVol); 
+        //continue forwards out the back
+        updateTransmitIntensity(data,mat,objVol);
+       
+        //now, refract out the backside!
+        nudge(data.refractedRay);
+        raymarch(data.refractedRay,1.,stdRes);
+        //reset the parameters based on our new location
+        setParameters(sampletv,data,mat,airVol,objVol); 
         
         //add the resulting color:
         totalColor+=colorMultiplier*getSurfaceColor(data,mat,objVol,true);
         totalColor+=colorMultiplier*getOpaqueReflect(data,mat);
          }
         
+    }
         
     }
     
