@@ -116,6 +116,9 @@ uniform vec4 lightIntensities[4];
 //uniform float globalSphereRad;
 
 uniform samplerCube earthCubeTex;
+uniform sampler2D tex;
+
+
 
 
 uniform float time;

@@ -27,7 +27,7 @@ float glassDistance(Point p){
          sphere(p,createPoint(-0.5,0.5,-1.),1.);
     distance=min(distance, vertCyl(p,createPoint(1.5,-0.5,-1.),0.5));
     
-    distance=min(distance, cube(p,createPoint(-1.,-3.,0.5),0.5));
+    distance=min(distance, cube(p,createPoint(2.,-3.,0.5),0.6));
     return distance;
 }
 
@@ -59,12 +59,12 @@ float sceneObjs(Point p){
     float distance = MAX_DIST;
     
         //plane
-    distance=planeDistance(p);
-    if(distance<EPSILON){
-        hitWhich=2;
-        return distance;
-    }
-    
+//    distance=planeDistance(p);
+//    if(distance<EPSILON){
+//        hitWhich=2;
+//        return distance;
+//    }
+//    
 
     distance=min(distance, glassDistance(p));
     if(distance<EPSILON){
@@ -107,11 +107,12 @@ float sceneSDF(Point p){
 
 void setInWhich(Point p){
     
-    if(planeDistance(p)<0.){
-        inWhich=2;
-        return;
-    }
-    else if(glassDistance(p)<0.){
+//    if(planeDistance(p)<0.){
+//        inWhich=2;
+//        return;
+//    }
+    //else
+        if(glassDistance(p)<0.){
         inWhich=3;
         return;
     }

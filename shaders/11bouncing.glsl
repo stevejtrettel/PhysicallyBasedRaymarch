@@ -173,3 +173,41 @@ vec3 getOpaqueReflect(inout localData data,Material mat){
 }
 
 
+vec3 getTransmitIterate(inout localData data, inout vec3 colorMultiplier, inout Material mat, inout Volume objVol, inout Volume airVol){
+    
+int numRefract=0;
+vec3 totalColor=vec3(0.);
+localData reflData;
+float refractDist;
+    
+while(objVol.opacity<1.&&numRefract<7){
+    
+            //do the refractions, record distance travelled
+        refractDist=refract(data,objVol,airVol);
+        updateColorMultiplier(colorMultiplier,objVol,refractDist);
+        
+        //we are at the back wall of the object now: time to reset the data
+        setParameters(sampletv,data,mat,objVol,airVol); 
+        //continue forwards out the back
+        updateTransmitIntensity(data,mat,objVol);
+    
+        //SHOULD ALSO CALCULATE THE REFLECTED RAY WHICH STAYS INSIDE THE GLASS HERE
+       
+        //now, refract out the backside!
+        nudge(data.refractedRay);
+        raymarch(data.refractedRay,1.,stdRes);
+        //reset the parameters based on our new location
+        setParameters(sampletv,data,mat,airVol,objVol); 
+        
+    reflData=data;//get the surface color and start bouncing around
+    
+        //add the resulting color by bouncing around
+   totalColor+=colorMultiplier*getSurfaceColor(reflData,mat,objVol,true);
+        totalColor+=colorMultiplier*getOpaqueReflect(reflData,mat);
+    numRefract+=1;
+
+}
+    
+   return totalColor; 
+
+}

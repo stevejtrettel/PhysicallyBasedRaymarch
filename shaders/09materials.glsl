@@ -17,6 +17,25 @@ vec3 checkerboard(vec2 v){
 
 
 
+vec2 toSphCoords(vec3 v){
+float theta=atan(v.y,v.x);
+float phi=acos(v.z);
+return vec2(theta,phi);
+}
+
+vec3 rectTex(Vector tv){
+
+vec2 angles=toSphCoords(tv.dir);
+float x=(angles.x+3.1415)/(2.*3.1415);
+float y=1.-angles.y/3.1415;
+
+return texture(tex,vec2(x,y)).rgb;
+
+}
+
+
+
+
 
 vec3 skyTexture(Vector tv){
 
@@ -40,7 +59,8 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
             mat.color=
-                SRGBToLinear(skyTexture(sampletv));
+                SRGBToLinear(rectTex(sampletv));
+              //  (skyTexture(sampletv));
             //skyColor.rgb);
                 //0.4*skyColor.rgb;
             //mat.color=SRGBToLinear(skyTexture(sampletv));

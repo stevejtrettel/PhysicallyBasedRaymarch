@@ -2,7 +2,8 @@ import {
     Vector4,
     Matrix4,
     ShaderMaterial,
-    CubeTextureLoader
+    CubeTextureLoader,
+    TextureLoader
 } from "./module/three.module.js";
 
 import {
@@ -95,6 +96,9 @@ function initObjects() {
 // Set up shader
 //----------------------------------------------------------------------------------------------------------------------
 
+var texture = new TextureLoader().load('images/sunset_fairway.jpg');
+
+
 /**
  * Pass all the data to the shader
  * @param fShader
@@ -125,6 +129,12 @@ function setupMaterial(fShader) {
                         'posz.jpg',
                         'negz.jpg'
                     ])
+            },
+
+            
+            tex: { //earth texture to global object
+                type: "t",
+                value: texture
             },
 
 
