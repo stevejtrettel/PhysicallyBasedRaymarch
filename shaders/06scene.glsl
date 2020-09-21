@@ -24,7 +24,8 @@ return table(p);
 
 
 float glassDistance(Point p){
-   return cocktailGlass(p);
+   // return cocktailGlass(p);
+   return min(tallGlass(p),cocktailGlass(p));
 }
 
 float iceDistance(Point p){
@@ -33,13 +34,17 @@ float iceDistance(Point p){
 
 
 float strawDistance(Point p){
-    return straw(p);
+    return min(straw(p),straw2(p));
 }
 
 float liquidDistance(Point p){
-    return max(liquid(p),-min(iceDistance(p)-0.01,strawDistance(p)+0.01));
+    return max(cocktailLiquid(p),-min(iceDistance(p)-0.01,straw(p)+0.01));
 }
 
+
+float tallLiquidDistance(Point p){
+    return max(tallLiquid(p),-straw2(p)-0.01);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 // Scene Components
@@ -67,6 +72,17 @@ float sceneObjs(Point p){
         return distance;
     }
     
+        distance=min(distance, straw2(p));
+    if(distance<EPSILON){
+        hitWhich=7;
+        return distance;
+    }
+    
+    distance=min(distance, straw(p));
+    if(distance<EPSILON){
+        hitWhich=7;
+        return distance;
+    }
 
     distance=min(distance, glassDistance(p));
     if(distance<EPSILON){
@@ -80,18 +96,17 @@ float sceneObjs(Point p){
         return distance;
     }
     
-        distance=min(distance, strawDistance(p));
-    if(distance<EPSILON){
-        hitWhich=6;
-        return distance;
-    }
-    
-            distance=min(distance, liquidDistance(p));
+    distance=min(distance, liquidDistance(p));
     if(distance<EPSILON){
         hitWhich=5;
         return distance;
     }
     
+    distance=min(distance, tallLiquidDistance(p));
+    if(distance<EPSILON){
+        hitWhich=6;//champagne
+        return distance;
+    }
 
     
     
@@ -135,25 +150,39 @@ void setInWhich(Point p){
         inWhich=2;
         return;
     }
-    else if(glassDistance(p)<0.){
-        inWhich=3;
-        return;
-    }
+
         else if(iceDistance(p)<0.){
         inWhich=4;
         return;
     }
     
-    else if(strawDistance(p)<0.){
-        inWhich=6;
+        else if(straw2(p)<0.){
+        inWhich=7;
         return;
     }
-                
+        
+    
+    else if(straw(p)<0.){
+        inWhich=7;
+        return;
+    }
+         
+ 
+    
     else if(liquidDistance(p)<0.){
         inWhich=5;
         return;
     }
     
+        else if(tallLiquidDistance(p)<0.){
+        inWhich=6;
+        return;
+    }
+    
+        else if(glassDistance(p)<0.){
+        inWhich=3;
+        return;
+    }
     //don't bother with the lights:
     else{
         inWhich=0;

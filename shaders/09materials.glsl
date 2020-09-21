@@ -54,7 +54,7 @@ return color;
 void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
     switch(hitWhich){
         case 0:// Didnt hit anything
-            mat.color=SRGBToLinear(rectTex(sampletv));
+            mat.color=0.9*SRGBToLinear(rectTex(sampletv));
             mat.lightThis=0;
             mat.reflect=0.;
             break;//sky
@@ -87,20 +87,35 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             mat.lightThis=1;
             break;  
 
-        case 5: //Negroni
+        case 5: //Negroni,Champagne
             mat.color=vec3(1.);
             mat.reflect=0.1;
             mat.phong.shiny=15.;
             mat.lightThis=1;
             break;  
             
-        case 6: //Straw
+        case 6: //Negroni,Champagne
+            mat.color=vec3(1.);
+            mat.reflect=0.1;
+            mat.phong.shiny=15.;
+            mat.lightThis=1;
+            break; 
+            
+        case 7: //StrawMetal
             mat.color=vec3(0.);
             mat.reflect=0.5;
             mat.phong.shiny=15.;
             mat.lightThis=1;
             break; 
-    }
+            
+            
+        case 8: //StrawGlass
+            mat.color=vec3(0.);
+            mat.reflect=0.1;
+            mat.phong.shiny=15.;
+            mat.lightThis=1;
+            break; 
+}
 }
 
 
@@ -111,7 +126,7 @@ void setVolume(inout Volume vol, int inWhich){
      switch(inWhich){
         case 0:// in the air
             vol.refract=1.;
-            vol.opacity=1.;
+            vol.opacity=0.9;
             break;//sky
         
         case 2://Plane
@@ -130,7 +145,7 @@ void setVolume(inout Volume vol, int inWhich){
              
         case 4: //Ice
             vol.refract=1.31;
-            vol.opacity=0.15;
+            vol.opacity=0.1;
             vol.absorb=vec3(0.3,0.05,0.2);
             break;
              
@@ -140,12 +155,25 @@ void setVolume(inout Volume vol, int inWhich){
             vol.absorb=3.*vec3(0.05,0.7,0.5);
             break;
              
-        case 6: //Straw
+        case 6: //Champagne
             vol.refract=1.;
+            vol.opacity=0.;
+            vol.absorb=2.*(vec3(1.)-vec3(0.4,0.34,0.95));
+            break;
+             
+             
+        case 7: //StrawMetal
+            vol.refract=1.55;
             vol.opacity=0.75;
             vol.absorb=vec3(2.,2.,2.);
             break;
              
+             
+        case 8: //StrawGlass
+            vol.refract=1.55;
+            vol.opacity=1.;
+            vol.absorb=vec3(0.3,0.05,0.2);
+            break;
 
     }
     

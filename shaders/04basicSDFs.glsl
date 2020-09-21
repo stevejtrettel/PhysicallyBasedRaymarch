@@ -118,7 +118,9 @@ float sphere(Point p, Point center, float radius){
 //==== build a table
 
 float table(Point p){
-    Point center=createPoint(2.,1.,1.);
+    //single glass center:(2,1,1)
+    //both cocktails (1.,2.,1.);
+    Point center=createPoint(1.,2.,1.);
     float radius=3.;
     float thick=0.5;
     float tableTop=cylBlock(p,center,radius,thick);
@@ -151,13 +153,12 @@ float cocktailGlass(Point p){
 
 
 
-
-float liquid(Point p){
+float cocktailLiquid(Point p){
     
     
     Point center2=createPoint(2.,1.,-.1);
 
-    float radius=0.89;
+    float radius=0.98;
     float height=0.3;
     
     float cyl2=cylBlock(p,center2, radius,height);
@@ -167,12 +168,72 @@ float liquid(Point p){
 
 
 
+
+
+
+float tallGlass(Point p){
+    
+    Point center1=createPoint(-0.5,2.5,-2.4);
+    Point center2=createPoint(-0.5,2.5,-3.1);
+    Point center3=createPoint(-0.5,2.5,-0.7);
+    float radius=.6;
+    float height=1.7;
+    
+    
+    float cyl1=cylBlock(p,center1, radius, height);
+    float cyl2=cylBlock(p,center2, 0.8*radius,height);
+    
+    float cup=smax(cyl1,-cyl2,0.1);
+    
+    float ball=sphere(p,center3,0.25);
+    
+    return smax(cup,-ball,0.3);
+    
+    
+}
+
+
+
+
+float tallLiquid(Point p){
+    
+    
+    Point center2=createPoint(-0.5,2.5,-1.4);
+
+    float radius=0.58;
+    float height=0.85;
+    
+    float cyl2=cylBlock(p,center2, radius,height);
+    return cyl2;
+
+}
+
+
+
+
+
+
+
+
 float straw(Point p){
-Point center1=createPoint(2.5,1.,-.9);
+Point center1=createPoint(2.5,1.,-1.1);
 Point q=rotate(p,vec3(1.,0.,0.),0.5);
 
 float outside=cylBlock(q,center1,0.1,1.1);
 float inside=cylBlock(q,center1,0.09,1.1);
+    return smax(outside,-inside,0.02);
+    
+}
+
+
+
+
+float straw2(Point p){
+Point center1=createPoint(-0.5,2.5,-3.3);
+Point q=rotate(p,vec3(0.,1.,0.),0.17);
+
+float outside=cylBlock(q,center1,0.1,1.8);
+float inside=cylBlock(q,center1,0.09,1.8);
     return smax(outside,-inside,0.02);
     
 }
