@@ -16,7 +16,7 @@
 //-1=on the inside of an object
 
 
-void raymarch(Vector rayDir,float side, Accuracy res){
+void raymarch(Vector rayDir,float side, marchRes res){
     hitWhich=0;
     distToViewer=0.;
     float marchStep = 0.;

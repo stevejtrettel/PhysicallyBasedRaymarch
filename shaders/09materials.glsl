@@ -50,104 +50,56 @@ return color;
 //----------------------------------------------------------------------------------------------------------------------
 
 
-//given the value of hitWhich, decide the initial color assigned to the surface you hit, before any lighting calculations
-//in the future, this function will also contain more data, like its rerflectivity etc
-
-
-
-void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
-    switch(hitWhich){
-        case 0:// Didnt hit anything
-            mat.color=
-                SRGBToLinear(rectTex(sampletv));
-              //  (skyTexture(sampletv));
-            //skyColor.rgb);
-                //0.4*skyColor.rgb;
-            //mat.color=SRGBToLinear(skyTexture(sampletv));
-            mat.lightThis=0;
-            mat.reflect=0.;
-            break;//sky
-        
-        case 1://Lightsource
-            mat.color=vec3(.5);
-            mat.phong=defaultPhong;
-            mat.reflect=0.02;
-            mat.lightThis=1;
-            break;
-            
-        case 2://Plane
-            mat.color=checkerboard(sampletv.pos.coords.xy);
-            mat.reflect=0.2;
-            mat.phong=defaultPhong;
-            mat.lightThis=1;
-            break;
-            
-        case 3: //Glass
-            mat.color=0.6*vec3(0.1,0.2,0.35);
-            mat.reflect=0.05;
-            mat.phong.shiny=15.;
-            mat.phong.diffuse=vec3(1.);
-            mat.phong.specular=vec3(1.);
-            mat.lightThis=1;
-            break;
-
-            
-        case 4: //Mirror
-            mat.color=0.6*vec3(0.05);//absorbs whatever doesnt reflect
-            mat.reflect=0.85;
-            mat.phong.shiny=15.;
-            mat.lightThis=1;
-            break;
-
-        case 5://debug
-            mat.color=vec3(0.,0.,1.);
-            mat.lightThis=0;
-            break;
-    }
-}
-
-
-
-
-void setVolume(inout Volume vol, int inWhich){
+//====update the material given a position and what you hit.
+void updateNewMaterial(inout newMaterial mat, Vector sampletv, int hitWhich){
     
-     switch(inWhich){
-        case 0:// in the air
-            vol.refract=1.;
-            vol.opacity=1.;
-            break;//sky
+     switch(hitWhich){
+             
+        case 0://sky
+            mat.surf.color=SRGBToLinear(rectTex(sampletv));
+            mat.surf.lightThis=0;
+            break;
         
-        case 2://Plane
-            vol.refract=1.;
-            vol.opacity=1.;
-            //opaque material
-            break;
-            
-        case 3: //Spheres
-            vol.refract=1.25;
-            vol.opacity=0.05;
-            vol.absorb=vec3(0.3,0.05,0.2);
-            break;
              
+         case 3://glass
+            mat.surf.color=vec3(0.2);
+            mat.surf.reflect=0.05;
+            mat.surf.phong.shiny=15.;
+            mat.surf.lightThis=1;
              
-        case 4: //Mirror
-            vol.refract=1.25;
-            vol.opacity=1.;
+            mat.vol.refract=1.55;
+            mat.vol.opacity=1.;
+            mat.vol.absorb=vec3(0.3,0.05,0.2);
+            mat.vol.emit=vec3(0.);
+
             break;
+
+             
+        case 4://mirror
+            mat.surf.color=vec3(0.2);
+            mat.surf.reflect=0.8;
+            mat.surf.phong.shiny=15.;
+            mat.surf.lightThis=1;
+             
+            mat.vol.refract=1.25;
+            mat.vol.opacity=1.;
+            mat.vol.absorb=vec3(0.);
+            mat.vol.emit=vec3(0.);
+
+            break;
+
+        
     }
     
 }
 
 
 
-
-
-
 //----------------------------------------------------------------------------------------------------------------------
-// Setting materials, volumes etc.
+// Getting Normals, Reflectivities, etc.
 //----------------------------------------------------------------------------------------------------------------------
 
-Vector surfaceNormal(Point p){
+Vector getSurfaceNormal(Point p){
     float ep=5.*EPSILON;
     vec3 bx = vec3(1.,0.,0.);
     vec3 by = vec3(0.,1.,0.);
@@ -166,70 +118,36 @@ Vector surfaceNormal(Point p){
     
 }
 
-Vector surfaceNormal(Vector tv){
+Vector getSurfaceNormal(Vector tv){
     Point p=tv.pos;
-    return surfaceNormal(p);
+    return getSurfaceNormal(p);
 }
 
 
 
 
-
-
-
-
-
-
-
-
-//================compute all the useful vectors for a surface
-//update the reflectivity of the surface you are hitting
-void setLocalData(inout localData dat, Vector tv, Volume currentVol, Volume outerVol){
-    dat.incident=tv;
-    dat.toViewer=turnAround(tv);
-    dat.pos=tv.pos;
-    
-    Vector normal=surfaceNormal(tv);
-    float side=-sign(tangDot(tv,normal));
-    
-    //make inward pointing normal if we are on the inside
-    if(side==-1.){normal=turnAround(normal);}
-    
-    dat.reflectedRay=reflectOff(tv,normal);
-
-    dat.refractedRay=refractThrough(tv,normal,currentVol.refract,outerVol.refract);
-    
-    dat.normal=normal;
-    dat.side=side;
-    
-    //don't update the intensity!
-    //dat.intensity=1.;
-}
-
-
-
-
-
-//----- calculate fresnel reflectivity
-void updateReflectivity(localData dat, inout Material mat, Volume currentVol, Volume outerVol){
-    
+//calculate the reflectivity of a surface, with fresnel reflection
+float getFresnel(Path path, newMaterial behindMat, newMaterial frontMat){
     
     //n1=index of refraction you are currently inside of
     //n2=index of refraction you are entering
-    float n1=currentVol.refract;
-    float n2=outerVol.refract;
+    float n1=behindMat.vol.refract;
+    float n2=frontMat.vol.refract;
+    
+    //what is the bigger reflectivity between the two surfaces at the interface?
+    float refl=max(behindMat.surf.reflect, frontMat.surf.reflect);
     
         // Schlick aproximation
         float r0 = (n1-n2) / (n1+n2);
         r0 *= r0;
-        float cosX = -dot(dat.normal.dir,dat.incident.dir);
+        float cosX = -dot(path.dat.normal.dir,path.dat.incident.dir);
         if (n1 > n2)
         {
             float n = n1/n2;
             float sinT2 = n*n*(1.0-cosX*cosX);
             // Total internal reflection
             if (abs(sinT2) > 1.0){
-               mat.reflect=1.;
+               return 1.;
             }
             cosX = sqrt(1.0-sinT2);
         }
@@ -237,93 +155,103 @@ void updateReflectivity(localData dat, inout Material mat, Volume currentVol, Vo
         float ret = clamp(r0+(1.0-r0)*x*x*x*x*x,0.,1.);
 
         // adjust reflect multiplier for object reflectivity
-        mat.reflect=(mat.reflect + (1.-mat.reflect)*ret);
-    
-    
-    
-     //fresnelReflectUpdate(mat.reflect,currentVol.refract,outerVol.refract,dat.normal,dat.incident);
+        //
+        return (refl + (1.-refl)*ret);
     
 }
 
 
+
+
 //decide if we are totally internally reflecting
-bool needTIR(localData dat,Volume inside, Volume outside){
+bool needTIR(Path path,newMaterial currentMat, newMaterial outside){
     
-        float cosX = -dot(dat.normal.dir,dat.incident.dir);
-        float n = inside.refract/outside.refract;
+        float cosX = -dot(path.dat.normal.dir,path.dat.incident.dir);
+        float n = currentMat.vol.refract/outside.vol.refract;
         float sinT2 = n*n*(1.0-cosX*cosX);
     
             if (abs(sinT2) > 1.0 ){
                 return true;
             }
     else{return false;}
-    //could save/export some of these values to save a couple computations when we have to redo them to run TIR
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void setBehindVolume(inout Volume vol,Vector sampletv){
-    
-    //tv starts at the surface you just reached, facing forward.
-    Vector tv=turnAround(sampletv);
-    nudge(tv);//back up a little bit
-    Point p=tv.pos;
-    setInWhich(p);
-    
-    setVolume(vol,inWhich);
-    
-}
-
-
-
-
-void setInFrontVolume(inout Volume vol,Vector sampletv){
-    
-    //tv starts at the surface you just reached, facing forward.
-    Vector tv=sampletv;
-    nudge(tv);//move forward a little bit
-    Point p=tv.pos;
-    setInWhich(p);
-    
-    setVolume(vol,inWhich);
-    
-}
-
-
+//void setInFrontVolume(inout Volume vol,Vector sampletv){
+//    
+//    //tv starts at the surface you just reached, facing forward.
+//    Vector tv=sampletv;
+//    nudge(tv);//move forward a little bit
+//    Point p=tv.pos;
+//    setInWhich(p);
+//    
+//    setVolume(vol,inWhich);
+//    
+//}
+//
+//
 
 
 
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// SET PARAMETERS
+// Update Data
 //----------------------------------------------------------------------------------------------------------------------
 
-void setParameters(Vector sampletv,inout localData data, inout Material mat, inout Volume curVol, inout Volume outVol){
+
+//====new function to update the local data: reflection refraction etc
+void updateLocalData(inout Path path, Vector tv, newMaterial behindMat, newMaterial frontMat){
 
     
-        setMaterial(mat, sampletv, hitWhich);
-        setBehindVolume(curVol,sampletv);
-        setInFrontVolume(outVol,sampletv);
-        setLocalData(data, sampletv, curVol,outVol);
-        updateReflectivity(data,mat,curVol,outVol);
+    path.dat.incident=tv;
+    path.dat.toViewer=turnAround(tv);
+    path.dat.pos=tv.pos;
+    
+    Vector normal=getSurfaceNormal(tv);
+    float side=-sign(tangDot(tv,normal));
+    
+    //make inward pointing normal if we are on the inside
+    if(side==-1.){normal=turnAround(normal);}
+    
+    path.dat.reflectedRay=reflectOff(tv,normal);
 
+    path.dat.refractedRay=refractThrough(tv,normal,behindMat.vol.refract,frontMat.vol.refract);
+    
+    path.dat.normal=normal;
+    path.dat.side=side;
+    
+    //update the reflectivity float in the local data: this tells us how much needs to be reflected at this given point!
+    path.dat.reflect=getFresnel(path,behindMat, frontMat);
+    
 }
+
+
+
+
+//======new version==========
+void updateAccColor(inout Path path, newMaterial inside,float dist){
+    path.acc.color *= exp(-inside.vol.absorb*dist);
+}
+
+
+
+
+//update the light intensity of a local data, depending on if we are continuing on for reflection or transmission
+void updateReflectIntensity(inout Path path){
+    
+    //need to make sure the reflectivity has been properly updated in path
+    path.acc.intensity*=path.dat.reflect;
+   
+}
+
+
+void updateTransmitIntensity(inout Path path, newMaterial entering){
+    
+    //need to make sure the reflectivity has been properly updated in path
+    path.acc.intensity*=(1.-path.dat.reflect)*(1.-entering.vol.opacity);
+}
+
+

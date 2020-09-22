@@ -263,7 +263,7 @@ Light createDirLight(vec3 dir, vec3 color, float intensity){
 //Data type for storing the parameters that the raymarch needs to run (or other things, like shadows etc)
 
 
-struct Accuracy{
+struct marchRes{
     float maxDist;
     int marchSteps;
     float threshhold;
@@ -272,17 +272,9 @@ struct Accuracy{
 };
 
 
-//Accuracy Acc(float maxDist,int marchSteps,float threshhold){
-//    new Accuracy acc;
-//    acc.maxDist=maxDist;
-//    acc.marchSteps=marchSteps;
-//    acc.threshhold=threshhold;
-//    return acc;
-//}
+marchRes stdRes=marchRes(40.,300,0.0001);
 
-Accuracy stdRes=Accuracy(40.,300,0.0001);
-
-Accuracy reflRes=Accuracy(5.,100,0.0001);
+marchRes reflRes=marchRes(5.,100,0.0001);
 
 
 
@@ -299,19 +291,19 @@ struct Phong{
 };
 
 //some default values
-Phong noPhong=Phong(1.,vec3(1.),vec3(1.));
+const Phong noPhong=Phong(1.,vec3(1.),vec3(1.));
 
 //Data type for storing the parameters of a material: its index of refraction, reflectivity, transparency, color, etc.
 
 
-struct Material{
+struct Surface{
     vec3 color;
     Phong phong;
     float reflect;
     int lightThis;
-    
 };
 
+const Surface noSurface=Surface(vec3(0.),noPhong,0.,0);
 
 struct Volume{
     float refract;
@@ -320,16 +312,40 @@ struct Volume{
     vec3 emit;
 };
 
-Volume air=Volume(1.,0.,vec3(0.),vec3(0.));
+const Volume air=Volume(1.,0.,vec3(0.),vec3(0.));
+
+
+//materials have surface properties,
+//and also volume properties.
+struct newMaterial{
+    Surface surf;
+    Volume vol;
+};
+
+newMaterial airMaterial=newMaterial(noSurface,air);
+
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Surface Data
 //----------------------------------------------------------------------------------------------------------------------
 
+struct Accumulate{//stuff that accumulates along a path
+    vec3 color;//color absorbtion from beers law;
+    float intensity;//total intensity left on the ray
+    float dist; //total distance traveled from the viewer;
+};
 
+void resetAcc(inout Accumulate acc){
+    acc.color=vec3(1.);
+    acc.intensity=1.;
+    acc.dist=0.;
+}
+
+
+    
 
 //Local geometric data at a point on the surface. 
 
-
+//=======OLD=====
 struct localData{
     
     Vector incident;
@@ -339,16 +355,28 @@ struct localData{
     Vector reflectedRay;
     Vector refractedRay;
     float side;//inside or outside an object
-    float intensity;//how much light remains 
-    vec3 colorMultiplier;//keeps track of all the color picked up along the marching
+    float reflect;//reflectivity of the surface we are currently at.
+    
 };
 
 
-void setIntensity(inout localData data, float intens){
-    data.intensity=intens;
+
+
+//store data as we move along a path in the raymarch:
+//instead of just tracking the tangent vector, we can keep one of these objects in tow;
+struct Path{
+    localData dat;
+    Accumulate acc;
+    bool keepGoing;//do we kill this ray?
+};
+
+
+void initializePath(inout Path path){
+    //set the initial data
+    resetAcc(path.acc);
+    path.keepGoing=true;
 }
 
-void resetIntensity(inout localData data){
-    data.intensity=1.;
-    data.colorMultiplier=vec3(1.);
-}
+
+
+

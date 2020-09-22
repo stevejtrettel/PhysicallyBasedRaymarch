@@ -60,6 +60,16 @@ float distToViewer;
 
 
 
+//----------------------------------------------------------------------------------------------------------------------
+// materials and paths
+//----------------------------------------------------------------------------------------------------------------------
+
+//in case you need to save something 
+Path extraPath;
+newMaterial extraMat;
+
+//make our functions not have to carry around the outside material?
+newMaterial outsideMat;
 
 
 
