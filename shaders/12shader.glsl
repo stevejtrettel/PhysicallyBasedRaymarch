@@ -3,7 +3,7 @@
 
 
 
-vec3 beamSplit(inout Path path,inout newMaterial mat,newMaterial outside){
+vec3 beamSplit(inout Path path,inout Material mat,Material outside){
     vec3 totalColor=vec3(0.);
     //pick up color from path
     //return final data of dominant ray
@@ -14,10 +14,10 @@ vec3 beamSplit(inout Path path,inout newMaterial mat,newMaterial outside){
     
     //now, copy the initial data in two, so we can split 
     Path reflPath=path;
-    newMaterial reflMat=mat;
+    Material reflMat=mat;
     
     Path transPath=path;
-    newMaterial transMat=mat;
+    Material transMat=mat;
     
     //from here on, don't use the original inputs until we set something equal to them back at the end.
     
@@ -105,8 +105,8 @@ vec3 getPixelColor(Vector rayDir){
     
     vec3 totalColor=vec3(0.);
     
-    newMaterial outside=airMaterial;
-    newMaterial mat;
+    Material outside=airMaterial;
+    Material mat;
     
     Path path;
     initializePath(path);//set the intensity to 1, accumulated color to 0, distance traveled to 0., set keepGoing to true

@@ -51,7 +51,7 @@ return color;
 
 
 //====update the material given a position and what you hit.
-void updateNewMaterial(inout newMaterial mat, Vector sampletv, int hitWhich){
+void updateNewMaterial(inout Material mat, Vector sampletv, int hitWhich){
     
      switch(hitWhich){
              
@@ -127,7 +127,7 @@ Vector getSurfaceNormal(Vector tv){
 
 
 //calculate the reflectivity of a surface, with fresnel reflection
-float getFresnel(Path path, newMaterial behindMat, newMaterial frontMat){
+float getFresnel(Path path, Material behindMat, Material frontMat){
     
     //n1=index of refraction you are currently inside of
     //n2=index of refraction you are entering
@@ -164,7 +164,7 @@ float getFresnel(Path path, newMaterial behindMat, newMaterial frontMat){
 
 
 //decide if we are totally internally reflecting
-bool needTIR(Path path,newMaterial currentMat, newMaterial outside){
+bool needTIR(Path path,Material currentMat, Material outside){
     
         float cosX = -dot(path.dat.normal.dir,path.dat.incident.dir);
         float n = currentMat.vol.refract/outside.vol.refract;
@@ -203,7 +203,7 @@ bool needTIR(Path path,newMaterial currentMat, newMaterial outside){
 
 
 //====new function to update the local data: reflection refraction etc
-void updateLocalData(inout Path path, Vector tv, newMaterial behindMat, newMaterial frontMat){
+void updateLocalData(inout Path path, Vector tv, Material behindMat, Material frontMat){
 
     
     path.dat.incident=tv;
@@ -232,7 +232,7 @@ void updateLocalData(inout Path path, Vector tv, newMaterial behindMat, newMater
 
 
 //======new version==========
-void updateAccColor(inout Path path, newMaterial inside,float dist){
+void updateAccColor(inout Path path, Material inside,float dist){
     path.acc.color *= exp(-inside.vol.absorb*dist);
 }
 
@@ -248,7 +248,7 @@ void updateReflectIntensity(inout Path path){
 }
 
 
-void updateTransmitIntensity(inout Path path, newMaterial entering){
+void updateTransmitIntensity(inout Path path, Material entering){
     
     //need to make sure the reflectivity has been properly updated in path
     path.acc.intensity*=(1.-path.dat.reflect)*(1.-entering.vol.opacity);

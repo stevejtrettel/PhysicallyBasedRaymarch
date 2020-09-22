@@ -23,7 +23,7 @@ vec3 phong(Vector toLight, vec3 lightColor, Path path, vec3 color, float shiny){
 }
 
 
-vec3 pointLight(Light light, Path path,newMaterial mat,bool marchShadow){
+vec3 pointLight(Light light, Path path,Material mat,bool marchShadow){
     
     vec3 ph;
     float sh=1.;
@@ -52,7 +52,7 @@ vec3 pointLight(Light light, Path path,newMaterial mat,bool marchShadow){
 
 
 
-vec3 dirLight(Light light,Path path, newMaterial mat,bool marchShadow){
+vec3 dirLight(Light light,Path path, Material mat,bool marchShadow){
     
     vec3 ph;
     float sh=1.;
@@ -75,7 +75,7 @@ vec3 dirLight(Light light,Path path, newMaterial mat,bool marchShadow){
 
 
 
-vec3 ambientLight(vec4 lightColor,newMaterial mat){
+vec3 ambientLight(vec4 lightColor,Material mat){
     return lightColor.w*lightColor.rgb*mat.surf.color;
 }
 
@@ -95,7 +95,7 @@ vec3 ambientLight(vec4 lightColor,newMaterial mat){
 
 
 
-vec3 ambLights(Path path, newMaterial mat, bool marchShadow){
+vec3 ambLights(Path path, Material mat, bool marchShadow){
     
     vec3 color=vec3(0.);
     
@@ -108,7 +108,7 @@ vec3 ambLights(Path path, newMaterial mat, bool marchShadow){
 
 
 
-vec3 sceneLights(Path path, newMaterial mat,bool marchShadow){
+vec3 sceneLights(Path path, Material mat,bool marchShadow){
     
     vec3 color=vec3(0.);
 
@@ -133,7 +133,7 @@ vec3 sceneLights(Path path, newMaterial mat,bool marchShadow){
 //----------------------------------------------------------------------------------------------------------------------
 
 
-vec3 getSurfaceColor(inout Path path, newMaterial mat, bool marchShadow){
+vec3 getSurfaceColor(inout Path path, Material mat, bool marchShadow){
     //mat is the matmerial we are about to enter.
     
     if(mat.surf.lightThis==0){//hit the background

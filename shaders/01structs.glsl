@@ -317,12 +317,12 @@ const Volume air=Volume(1.,0.,vec3(0.),vec3(0.));
 
 //materials have surface properties,
 //and also volume properties.
-struct newMaterial{
+struct Material{
     Surface surf;
     Volume vol;
 };
 
-newMaterial airMaterial=newMaterial(noSurface,air);
+Material airMaterial=Material(noSurface,air);
 
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Surface Data

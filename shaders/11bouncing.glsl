@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-float doTIR(inout Path path, inout newMaterial currentMat, newMaterial outside){
+float doTIR(inout Path path, inout Material currentMat, Material outside){
     float dist=0.;
     bool keepGoing=true;
     int numReflect=-1;
@@ -28,7 +28,7 @@ float doTIR(inout Path path, inout newMaterial currentMat, newMaterial outside){
 
 
 //starting at the outside of a transparent surface, refract into it, bounce around via TIR if required, and stop when you reach the backside, with nonunity reflectivity.
-void doRefract(inout Path path, inout newMaterial currentMat, newMaterial outside){
+void doRefract(inout Path path, inout Material currentMat, Material outside){
     float dist=0.;
 
     //refract through surface, and march to the next intersection point
@@ -67,7 +67,7 @@ void doRefract(inout Path path, inout newMaterial currentMat, newMaterial outsid
 
 
 
-vec3 getReflect(inout Path path, inout newMaterial mat, newMaterial outside){
+vec3 getReflect(inout Path path, inout Material mat, Material outside){
     //start with path at a location you just arrived at, and HAVE NOT PICKED UP ANY COLOR YET.
     //first determine if the surface is reflective:
     int numRefl=0;
