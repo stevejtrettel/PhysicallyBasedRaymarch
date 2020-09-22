@@ -1,5 +1,39 @@
 
 //----------------------------------------------------------------------------------------------------------------------
+// Update Available Light
+//----------------------------------------------------------------------------------------------------------------------
+
+
+//after marching through volume "vol" for distance "dist", update the color multiplier you use on colors.
+//this does NOT change the intensity in local data (the decrease is accounted for in "color")
+void updateColorMultiplier(inout vec3 color,Volume vol,float dist){
+    vec3 absorb=exp(vol.absorb*dist);
+    color*=absorb;
+    
+}
+
+
+
+void updateBeersLaw(inout vec3 color, vec3 absorb, float dist){
+    color *= exp(-absorb*dist);
+}
+
+
+//update the light intensity of a local data, depending on if we are continuing on for reflection or transmission
+void updateReflectIntensity(inout localData data, Material mat){
+    data.intensity*=mat.reflect;
+    //amt left is determiend by reflectivity
+}
+
+void updateTransmitIntensity(inout localData data, Material mat, Volume entering){
+    data.intensity*=(1.-mat.reflect)*(1.-entering.opacity);
+    
+}
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
 // TotalInternalRefraction
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -19,7 +53,7 @@ float refract(inout localData data, Volume inside, Volume outside){
     setLocalData(data,sampletv,inside,outside);
     
     //check if we have to continue totally reflecting internally
-    totalReflect=TIR(data,inside,outside);
+    totalReflect=needTIR(data,inside,outside);
     
     while(totalReflect&&numReflect<10){
     nudge(data.reflectedRay);
@@ -29,23 +63,29 @@ float refract(inout localData data, Volume inside, Volume outside){
     
     setLocalData(data,sampletv,inside,outside);
     //if we are totally internally reflecting; keep going
-    totalReflect=TIR(data,inside,outside);
+    totalReflect=needTIR(data,inside,outside);
     numReflect+=1;
     }
     
     
+    
     //dist is the total distance traveled inside the material
-    return dist;
+    updateColorMultiplier(data.colorMultiplier,inside,dist);
+    return dist;//in future: make this void.
 
    //when it leaves, local Data has been set to the parameters at the final intersection with the surface so we can start picking up colors again. 
 }
+
+
+
+
 
 float doTIR(inout localData data, Volume inside, Volume outside){
     float dist=0.;
-    bool totalReflect=true;
+    bool keepGoing=true;
     int numReflect=-1;
     
-    while(totalReflect&&numReflect<10){
+    while(keepGoing&&numReflect<10){
     nudge(data.reflectedRay);
     raymarch(data.reflectedRay,-1.,stdRes);
     //we are refracting on the inside of an object.
@@ -53,16 +93,21 @@ float doTIR(inout localData data, Volume inside, Volume outside){
     
     setLocalData(data,sampletv,inside,outside);
     //if we are totally internally reflecting; keep going
-    totalReflect=TIR(data,inside,outside);
+    keepGoing=needTIR(data,inside,outside);
     numReflect+=1;
     }
-    
     
     //dist is the total distance traveled inside the material
     return dist;
 
    //when it leaves, local Data has been set to the parameters at the final intersection with the surface so we can start picking up colors again. 
 }
+
+
+
+
+
+
 
 
 
@@ -103,29 +148,6 @@ vec3 getSurfaceColor(localData data, Material mat, Volume objVol,bool marchShado
 
 
 
-//----------------------------------------------------------------------------------------------------------------------
-// Update Available Light
-//----------------------------------------------------------------------------------------------------------------------
-
-
-//after marching through volume "vol" for distance "dist", update the color multiplier you use on colors.
-//this does NOT change the intensity in local data (the decrease is accounted for in "color")
-void updateColorMultiplier(inout vec3 color,Volume vol,float dist){
-    vec3 absorb=exp(vol.absorb*dist);
-    color*=absorb;
-    
-}
-
-//update the light intensity of a local data, depending on if we are continuing on for reflection or transmission
-void updateReflectIntensity(inout localData data, Material mat){
-    data.intensity*=mat.reflect;
-    //amt left is determiend by reflectivity
-}
-
-void updateTransmitIntensity(inout localData data, Material mat, Volume entering){
-    data.intensity*=(1.-mat.reflect)*(1.-entering.opacity);
-    
-}
 
 
 
@@ -141,20 +163,18 @@ void updateTransmitIntensity(inout localData data, Material mat, Volume entering
 
 //start where you are, and reflect around picking up colors
 //stop when you hit a transparent object, or when you run out of light intensity, hit max reflections.
-vec3 getOpaqueReflect(inout localData data,Material mat){
+vec3 getOpaqueReflect(inout localData data,Material mat, inout Volume objVol,inout bool keepGoing){
     int numRefl=0;
-    Volume objVol;
+    //Volume objVol;
     Volume airVol;
-    
-    //orig object is opaque
-    objVol.opacity=1.;
     
     vec3 reflColor;
     vec3 totalColor=vec3(0.);
     
-    
+    int MAX_REFL=10;
+    keepGoing=false;
     //objVol.opacity==1.&&
-    while(data.intensity>0.005&&numRefl<5){
+    while(data.intensity>0.005&&numRefl<MAX_REFL){
         
         if(hitWhich==0){break;}//if your last pass hit the sky, stop.
         
@@ -162,8 +182,12 @@ vec3 getOpaqueReflect(inout localData data,Material mat){
         nudge(data.reflectedRay);//move the ray a little
         raymarch(data.reflectedRay,1.,reflRes);//do the reflection march
         setParameters(sampletv,data,mat,airVol,objVol);
-        totalColor+=getSurfaceColor(data, mat,objVol,true);
         
+        if(objVol.opacity!=1.){
+            keepGoing=true;
+            break;}//get out of loop if you should transmit light as well as reflect at the next step.
+        
+        totalColor+=getSurfaceColor(data, mat,objVol,true);
         updateReflectIntensity(data,mat);
         
         numRefl+=1;
@@ -171,16 +195,18 @@ vec3 getOpaqueReflect(inout localData data,Material mat){
     
     return totalColor;
 }
+//returns a color: final position of objVol, mat, data is set up right at the surface of a transparent object whose (need to pick up surface, color, as well as reflect and refract color next.)
 
 
-vec3 getTransmitIterate(inout localData data, inout vec3 colorMultiplier, inout Material mat, inout Volume objVol, inout Volume airVol){
+vec3 getTransmitIterate(inout localData data, inout vec3 colorMultiplier, inout Material mat, inout Volume objVol, inout Volume airVol,inout bool keepGoing){
     
 int numRefract=0;
 vec3 totalColor=vec3(0.);
 localData reflData;
 float refractDist;
+
     
-while(objVol.opacity<1.&&numRefract<7){
+while(objVol.opacity<1.&&numRefract<10){
     
             //do the refractions, record distance travelled
         refractDist=refract(data,objVol,airVol);
@@ -201,13 +227,29 @@ while(objVol.opacity<1.&&numRefract<7){
         
     reflData=data;//get the surface color and start bouncing around
     
-        //add the resulting color by bouncing around
+    //add the contribution of the next surface's color.
    totalColor+=colorMultiplier*getSurfaceColor(reflData,mat,objVol,true);
-        totalColor+=colorMultiplier*getOpaqueReflect(reflData,mat);
+    
+    //add the resulting color by bouncing around the reflected component
+    
+        totalColor+=colorMultiplier*getOpaqueReflect(reflData,mat,objVol,keepGoing);
+    //this resets keepGoing to be true if the final surface is transparent.
     numRefract+=1;
 
 }
-    
+
+if(keepGoing){
+    data=reflData;
+}
    return totalColor; 
 
 }
+//returns a color.  When process terminates, you have either run out of iterates, or impacted an opaque object (where you got its surface color, and its reflectivity - so you should be good?!)
+//GUESS THE WORRY CASE IS AFTER DOING THESE OPAQUE REFLECT FUNCTIONS, YOU END UP HITTING SOMEMTHING TRANSPARENT YOU NEED TO THEN MARCH THROUGH?
+
+
+
+
+
+
+

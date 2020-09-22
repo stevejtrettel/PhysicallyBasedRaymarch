@@ -271,11 +271,12 @@ struct Accuracy{
     
 };
 
-//Accuracy setAccuracy(float mD, int mS,float thresh ){
-//    Accuracy acc;
-//    acc.maxDist=mD;
-//    acc.threshhold=thresh;
-//    acc.marchSteps=mS;
+
+//Accuracy Acc(float maxDist,int marchSteps,float threshhold){
+//    new Accuracy acc;
+//    acc.maxDist=maxDist;
+//    acc.marchSteps=marchSteps;
+//    acc.threshhold=threshhold;
 //    return acc;
 //}
 
@@ -339,6 +340,7 @@ struct localData{
     Vector refractedRay;
     float side;//inside or outside an object
     float intensity;//how much light remains 
+    vec3 colorMultiplier;//keeps track of all the color picked up along the marching
 };
 
 
@@ -347,5 +349,6 @@ void setIntensity(inout localData data, float intens){
 }
 
 void resetIntensity(inout localData data){
-    setIntensity(data,1.);
+    data.intensity=1.;
+    data.colorMultiplier=vec3(1.);
 }

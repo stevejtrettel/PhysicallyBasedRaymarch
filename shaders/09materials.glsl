@@ -82,7 +82,7 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             mat.lightThis=1;
             break;
             
-        case 3: //Spheres
+        case 3: //Glass
             mat.color=0.6*vec3(0.1,0.2,0.35);
             mat.reflect=0.05;
             mat.phong.shiny=15.;
@@ -91,6 +91,13 @@ void setMaterial(inout Material mat, Vector sampletv, int hitWhich){
             mat.lightThis=1;
             break;
 
+            
+        case 4: //Mirror
+            mat.color=0.6*vec3(0.05);//absorbs whatever doesnt reflect
+            mat.reflect=0.85;
+            mat.phong.shiny=15.;
+            mat.lightThis=1;
+            break;
 
         case 5://debug
             mat.color=vec3(0.,0.,1.);
@@ -120,6 +127,12 @@ void setVolume(inout Volume vol, int inWhich){
             vol.refract=1.25;
             vol.opacity=0.05;
             vol.absorb=vec3(0.3,0.05,0.2);
+            break;
+             
+             
+        case 4: //Mirror
+            vol.refract=1.25;
+            vol.opacity=1.;
             break;
     }
     
@@ -234,7 +247,7 @@ void updateReflectivity(localData dat, inout Material mat, Volume currentVol, Vo
 
 
 //decide if we are totally internally reflecting
-bool TIR(localData dat,Volume inside, Volume outside){
+bool needTIR(localData dat,Volume inside, Volume outside){
     
         float cosX = -dot(dat.normal.dir,dat.incident.dir);
         float n = inside.refract/outside.refract;
@@ -244,9 +257,8 @@ bool TIR(localData dat,Volume inside, Volume outside){
                 return true;
             }
     else{return false;}
+    //could save/export some of these values to save a couple computations when we have to redo them to run TIR
 }
-
-
 
 
 
