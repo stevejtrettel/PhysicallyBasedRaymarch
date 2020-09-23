@@ -101,11 +101,13 @@ float sceneSDF(Point p){
 
 
 
-void setHitWhich(Vector tv){//side is +-1
+void setHitWhich(Vector tv,float ep){//side is +-1
     
+    
+    hitWhich=0;
     //when the raymarch stops, you are infintesimally before the new object
     //need to move forward to be inside of it
-    nudge(tv);
+    tv=flow(tv,ep);
     
 //    if(planeDistance(p)<0.){
 //        inWhich=2;
@@ -123,8 +125,8 @@ void setHitWhich(Vector tv){//side is +-1
         return;
     }
     //nothing
-    else{
-        hitWhich=0;
-    }
-    
+//    else{
+//        hitWhich=0;
+//    }
+//    
 }

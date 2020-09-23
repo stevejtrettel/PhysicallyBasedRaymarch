@@ -16,26 +16,24 @@
 //-1=on the inside of an object
 
 
-void raymarch(Vector rayDir,float side, marchRes res){
+void raymarch(Vector tv, marchRes res){
     hitWhich=0;
     distToViewer=0.;
     float marchStep = 0.;
     float depth=0.;
-    Vector tv = rayDir;
     
-    //totalFixIsom = identity;
+    float side=sign(sceneSDF(tv.pos));
 
         for (int i = 0; i < res.marchSteps; i++){
             
-                float localDist = sceneSDF(tv.pos);
-            //this could be negative; side sets this.
-                if (side*localDist < res.threshhold){
+                float localDist = side*sceneSDF(tv.pos);
+            
+                if (localDist < res.threshhold){
                     sampletv =tv;
-                    distToViewer=side*depth;
-                    //numSteps=float(i);
+                    distToViewer=depth;
                     break;
                 }
-                marchStep = side*localDist;
+                marchStep = localDist;
                depth += marchStep;
             if(depth>res.maxDist){
                 hitWhich=0;

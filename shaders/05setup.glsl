@@ -42,6 +42,8 @@ int hitWhich = 0;
 Vector sampletv;
 float distToViewer;
 
+float side;
+//remember which side of the object youre on when the raymarch ends
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -70,8 +72,6 @@ Material extraMat;
 
 //make our functions not have to carry around the outside material?
 Material outsideMat;
-
-
 
 
 

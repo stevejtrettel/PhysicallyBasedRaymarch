@@ -367,7 +367,9 @@ struct Path{
     Accumulate acc;
     
     Material mat;//the material we are currently inside of
-    //auxillary materials to help 
+    //this is the "memory" between marches
+    
+    //auxillary materials to help with computations before marches
     Material backMat;
     Material frontMat;
     
