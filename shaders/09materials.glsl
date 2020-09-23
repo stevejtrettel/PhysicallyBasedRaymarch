@@ -60,21 +60,21 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
      switch(hitWhich){
              
         case 0://sky
+            mat=air;
             mat.bkgnd=true;
             mat.surf.color=SRGBToLinear(rectTex(sampletv));
-            mat.vol.opacity=1.;
             break;
         
              
          case 3://glass
             mat.bkgnd=false;
              
-            mat.surf.color=vec3(0.2);
-            mat.surf.reflect=0.05;
+            mat.surf.color=vec3(0.05);
             mat.surf.phong.shiny=15.;
-             
+            mat.surf.reflect=0.0;
+            
             mat.vol.refract=1.55;
-            mat.vol.opacity=0.05;
+            mat.vol.opacity=0.0;
             mat.vol.absorb=vec3(0.3,0.05,0.2);
             mat.vol.emit=vec3(0.);
 
@@ -84,8 +84,8 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
         case 4://mirror
             mat.bkgnd=false;
              
-            mat.surf.color=vec3(0.2);
-            mat.surf.reflect=0.8;
+            mat.surf.color=vec3(0.03,0.05,0.2);
+            mat.surf.reflect=0.95;
             mat.surf.phong.shiny=15.;
              
              
@@ -192,7 +192,7 @@ void updateReflect(inout Path path){
     
     //what is the bigger reflectivity between the two surfaces at the interface?
     float refl=max(path.backMat.surf.reflect, path.frontMat.surf.reflect);
-    
+
         // Schlick aproximation
         float r0 = (n1-n2) / (n1+n2);
         r0 *= r0;
@@ -202,7 +202,7 @@ void updateReflect(inout Path path){
             float n = n1/n2;
             float sinT2 = n*n*(1.0-cosX*cosX);
             // Total internal reflection
-            if (abs(sinT2) > 1.0){
+            if (sinT2 > 1.0){
                path.dat.reflect= 1.;
             }
             cosX = sqrt(1.0-sinT2);
@@ -225,10 +225,10 @@ void updatePath(inout Path path, Vector tv){
     updateMaterial(path.backMat, tv,-0.01);
     updateMaterial(path.frontMat, tv,0.01);
     
-    if(path.frontMat.bkgnd){//hit the sky
-    path.keepGoing=false;
-    return;
-    }
+//    if(path.frontMat.bkgnd){//hit the sky
+//    path.keepGoing=false;
+//    return;
+//    }
     
     //update all of our local tangent vector data based on this location.
     path.dat.incident=tv;
@@ -266,21 +266,16 @@ void updateAccColor(inout Path path, float dist){
 }
 
 
-
-
 //update the light intensity of a local data, depending on if we are continuing on for reflection or transmission
 void updateReflectIntensity(inout Path path){
-    
     //need to make sure the reflectivity has been properly updated in path
     path.acc.intensity*=path.dat.reflect;
-   
 }
 
 
 void updateTransmitIntensity(inout Path path){
-    
     //need to make sure the reflectivity has been properly updated in path
-    path.acc.intensity*=(1.-path.dat.reflect)*(1.-path.frontMat.vol.opacity);
+    path.acc.intensity*=(1.-path.dat.reflect)*(1.-path.mat.vol.opacity);
 }
 
 

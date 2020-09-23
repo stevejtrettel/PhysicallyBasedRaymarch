@@ -108,18 +108,13 @@ vec3 getPixelColor(Vector rayDir){
     
     //-----do the original raymarch
     raymarch(rayDir,stdRes);//start outside
-    
-    
-    
-    
-    
-    
-    
+ 
     updatePath(path,sampletv);//create local data at site
+    //path.mat=path.frontMat;
     
     //now we are on the surface.  lets beamSplit!
-    //totalColor=getReflect(path);
-    totalColor+=beamSplit(path);
+    totalColor=getReflect(path);
+    //totalColor+=beamSplit(path);
 
     return totalColor;
     

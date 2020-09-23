@@ -44,11 +44,10 @@ void doRefract(inout Path path){
     //now we are at the back wall
     updatePath(path,sampletv);
     //frontMat=outside, backMat=inside
-    path.mat=path.backMat;
     
     //check if we have to continue totally reflecting internally
     path.keepGoing=needTIR(path);
-    dist+=doTIR(path);
+    dist+=doTIR(path);//do the actual internal reflections
     
     //at the end here, update the distance traveled, and the accumulated color;
     updateAccColor(path, dist);
@@ -76,21 +75,23 @@ void doRefract(inout Path path){
 vec3 getReflect(inout Path path){
     //start with path at a location you just arrived at, and HAVE NOT PICKED UP ANY COLOR YET.
     
-    //set the material you care about to be the one in front of you
-    path.mat=path.frontMat;
-    
     int numRefl=0;
     float dist=0.;
     vec3 totalColor=vec3(0.);
+    
+    //set the material you care about to be the one in front of you
+    path.mat=path.frontMat;
+    totalColor+=getSurfaceColor(path,true);//get the color of the surface
+    updateReflectIntensity(path);
+    //then continue;
+
 
     //we keep going if the material in front of us is not transparent
-    path.keepGoing=(path.mat.vol.opacity==1.);
+    path.keepGoing=(path.keepGoing&&path.mat.vol.opacity==1.);
     
-     while(path.keepGoing&&numRefl<3){
+     while(path.keepGoing&&numRefl<10){
          
-         //otherwise, we add the color from this surface
-        totalColor+=getSurfaceColor(path,true);
-        updateReflectIntensity(path);
+
         
         //then we reflect off of it, and continue on our way
         nudge(path.dat.reflectedRay);//move the ray a little
@@ -101,21 +102,25 @@ vec3 getReflect(inout Path path){
         path.mat=path.frontMat;//we care about what's in front of us
         
         //make keep going true if you hit an opaque object, and its not the sky
-        path.keepGoing=(path.keepGoing&&path.mat.vol.opacity==1.);
+        path.keepGoing=(path.keepGoing&&path.mat.vol.opacity==1.&&path.acc.intensity>0.05);
         numRefl+=1;
+         
+                  //otherwise, we add the color from this surface
+        totalColor+=getSurfaceColor(path,true);
+        updateReflectIntensity(path);
     }
 
     
     //update distance traveled along path
     //update color absorbed
     //what to do about intensity? (Nothing because taken care of by color multiplier?)
-    path.acc.dist+=dist;
+    //path.acc.dist+=dist;
     
     //need to think about how this should work!
+    //path.mat=air;
     //updateAccColor(path, dist);
+    //path.acc.color*totalColor;//and then make this work accordingly
     
-    //and then make this work accordingly
-   // path.acc.color*totalColor;
     return totalColor;
     
 }

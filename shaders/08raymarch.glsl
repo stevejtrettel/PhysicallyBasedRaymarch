@@ -17,7 +17,6 @@
 
 
 void raymarch(Vector tv, marchRes res){
-    hitWhich=0;
     distToViewer=0.;
     float marchStep = 0.;
     float depth=0.;
@@ -26,17 +25,16 @@ void raymarch(Vector tv, marchRes res){
 
         for (int i = 0; i < res.marchSteps; i++){
             
-                float localDist = side*sceneSDF(tv.pos);
-            
+                float localDist = sceneSDF(tv.pos);
+
                 if (localDist < res.threshhold){
                     sampletv =tv;
                     distToViewer=depth;
                     break;
                 }
-                marchStep = localDist;
+                marchStep = 0.95*localDist;
                depth += marchStep;
             if(depth>res.maxDist){
-                hitWhich=0;
                 sampletv=tv;
                 distToViewer=res.maxDist;
                 break;

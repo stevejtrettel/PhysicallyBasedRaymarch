@@ -137,7 +137,9 @@ vec3 getSurfaceColor(inout Path path, bool marchShadow){
     //path.mat is the material we are coloring
     
     if(path.mat.bkgnd){//hit the background
-        return (path.acc.intensity)*(path.mat.surf.color);//weight by amount of surviving light and get out
+        path.keepGoing=false;
+        return (path.acc.intensity)*(path.mat.surf.color);
+        //weight by amount of surviving light and get out
     }
     
     vec3 amb;//ambient lighting
@@ -153,7 +155,7 @@ vec3 getSurfaceColor(inout Path path, bool marchShadow){
 
     //what to do about reflectivity?!?! will it have been correctly updated here? (maybe should use path.dat.reflect)
     //the opacity we need to be using here is the opacity of the material we are ABOUT TO ENTER, NOT THE MATERIAL WE AER CURRENTLY INSIDE OF. 
-    totalColor*=path.acc.intensity*(1.-path.mat.surf.reflect)*path.mat.vol.opacity;
+    totalColor*=path.acc.intensity*(1.-path.dat.reflect) *path.mat.vol.opacity;
     
     return totalColor;
  
