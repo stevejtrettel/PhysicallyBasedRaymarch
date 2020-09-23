@@ -51,21 +51,27 @@ return color;
 
 
 //====update the material given a position and what you hit.
-void updateNewMaterial(inout Material mat, Vector sampletv, int hitWhich){
+void updateMaterial(inout Material mat, Vector sampletv){
     
+    //set hitWhich using our current location, to be the material directly in front of us in the direction of raymarching.
+    setHitWhich(sampletv);
+    
+    //now, set all of the material properties in terms of this result.
      switch(hitWhich){
              
         case 0://sky
+            mat.bkgnd=true;
             mat.surf.color=SRGBToLinear(rectTex(sampletv));
-            mat.surf.lightThis=0;
+            mat.vol.opacity=1.;
             break;
         
              
          case 3://glass
+            mat.bkgnd=false;
+             
             mat.surf.color=vec3(0.2);
             mat.surf.reflect=0.05;
             mat.surf.phong.shiny=15.;
-            mat.surf.lightThis=1;
              
             mat.vol.refract=1.55;
             mat.vol.opacity=1.;
@@ -76,10 +82,11 @@ void updateNewMaterial(inout Material mat, Vector sampletv, int hitWhich){
 
              
         case 4://mirror
+            mat.bkgnd=false;
+             
             mat.surf.color=vec3(0.2);
             mat.surf.reflect=0.8;
             mat.surf.phong.shiny=15.;
-            mat.surf.lightThis=1;
              
             mat.vol.refract=1.25;
             mat.vol.opacity=1.;
@@ -127,15 +134,15 @@ Vector getSurfaceNormal(Vector tv){
 
 
 //calculate the reflectivity of a surface, with fresnel reflection
-float getFresnel(Path path, Material behindMat, Material frontMat){
+float getFresnel(Path path){
     
     //n1=index of refraction you are currently inside of
     //n2=index of refraction you are entering
-    float n1=behindMat.vol.refract;
-    float n2=frontMat.vol.refract;
+    float n1=path.backMat.vol.refract;
+    float n2=path.frontMat.vol.refract;
     
     //what is the bigger reflectivity between the two surfaces at the interface?
-    float refl=max(behindMat.surf.reflect, frontMat.surf.reflect);
+    float refl=max(path.backMat.surf.reflect, path.frontMat.surf.reflect);
     
         // Schlick aproximation
         float r0 = (n1-n2) / (n1+n2);
@@ -164,11 +171,16 @@ float getFresnel(Path path, Material behindMat, Material frontMat){
 
 
 //decide if we are totally internally reflecting
-bool needTIR(Path path,Material currentMat, Material outside){
+bool needTIR(Path path){
     
-        float cosX = -dot(path.dat.normal.dir,path.dat.incident.dir);
-        float n = currentMat.vol.refract/outside.vol.refract;
-        float sinT2 = n*n*(1.0-cosX*cosX);
+    //path.mat or path.reflMat are the side we are on
+    //path.transMat is the other side
+    float n1=path.backMat.vol.refract;
+    float n2=path.frontMat.vol.refract;
+    
+    float cosX = -dot(path.dat.normal.dir,path.dat.incident.dir);
+    float n = n1/n2;
+    float sinT2 = n*n*(1.0-cosX*cosX);
     
             if (abs(sinT2) > 1.0 ){
                 return true;
@@ -202,10 +214,53 @@ bool needTIR(Path path,Material currentMat, Material outside){
 //----------------------------------------------------------------------------------------------------------------------
 
 
-//====new function to update the local data: reflection refraction etc
-void updateLocalData(inout Path path, Vector tv, Material behindMat, Material frontMat){
 
+//
+////====new function to update the local data: reflection refraction etc AND THE MATERIALS
+//void updateLocalData(inout Path path, Material behindMat, Material frontMat, Vector tv){
+//
+//
+//    //update all of our local tangent vector data based on this location.
+//    path.dat.incident=tv;
+//    path.dat.toViewer=turnAround(tv);
+//    path.dat.pos=tv.pos;
+//    
+//    Vector normal=getSurfaceNormal(tv);
+//    float side=-sign(tangDot(tv,normal));
+//    
+//    //make inward pointing normal if we are on the inside
+//    if(side==-1.){normal=turnAround(normal);}
+//    path.dat.normal=normal;
+//    path.dat.side=side;
+//    
+//    //this is enough to set the reflected ray direction
+//    path.dat.reflectedRay=reflectOff(tv,normal);
+//    
+//
+//    //set refracted ray using the old and new material;
+//    path.dat.refractedRay=refractThrough(tv,normal,behindMat.vol.refract,frontMat.vol.refract);
+//    
+//    //update the reflectivity float in the local data: this tells us how much needs to be reflected at this given point!
+//    path.dat.reflect=getFresnel(path,behindMat, frontMat);
+//    
+//}
+
+
+//====new function to update the local data: reflection refraction etc AND THE MATERIALS
+void updatePath(inout Path path, Vector tv){
     
+    //path.mat is just a memory of where we were before.
+    path.backMat=path.mat;//this is the material we just raytraced through
+    
+    //this sets the front material.
+    updateMaterial(path.frontMat, tv);
+    
+    
+    if(path.frontMat.bkgnd){//hit the sky
+    path.keepGoing=false;
+    }//should probably put a stop here to prevent it from doing these other calculations.
+    
+    //update all of our local tangent vector data based on this location.
     path.dat.incident=tv;
     path.dat.toViewer=turnAround(tv);
     path.dat.pos=tv.pos;
@@ -215,16 +270,18 @@ void updateLocalData(inout Path path, Vector tv, Material behindMat, Material fr
     
     //make inward pointing normal if we are on the inside
     if(side==-1.){normal=turnAround(normal);}
-    
-    path.dat.reflectedRay=reflectOff(tv,normal);
-
-    path.dat.refractedRay=refractThrough(tv,normal,behindMat.vol.refract,frontMat.vol.refract);
-    
     path.dat.normal=normal;
     path.dat.side=side;
     
+    //this is enough to set the reflected ray direction
+    path.dat.reflectedRay=reflectOff(tv,normal);
+    
+
+    //set refracted ray using the old and new material;
+    path.dat.refractedRay=refractThrough(tv,normal,path.backMat.vol.refract,path.frontMat.vol.refract);
+    
     //update the reflectivity float in the local data: this tells us how much needs to be reflected at this given point!
-    path.dat.reflect=getFresnel(path,behindMat, frontMat);
+    path.dat.reflect=getFresnel(path);
     
 }
 
@@ -232,8 +289,8 @@ void updateLocalData(inout Path path, Vector tv, Material behindMat, Material fr
 
 
 //======new version==========
-void updateAccColor(inout Path path, Material inside,float dist){
-    path.acc.color *= exp(-inside.vol.absorb*dist);
+void updateAccColor(inout Path path, float dist){
+    path.acc.color *= exp(-path.mat.vol.absorb*dist);
 }
 
 
@@ -248,10 +305,10 @@ void updateReflectIntensity(inout Path path){
 }
 
 
-void updateTransmitIntensity(inout Path path, Material entering){
+void updateTransmitIntensity(inout Path path){
     
     //need to make sure the reflectivity has been properly updated in path
-    path.acc.intensity*=(1.-path.dat.reflect)*(1.-entering.vol.opacity);
+    path.acc.intensity*=(1.-path.dat.reflect)*(1.-path.frontMat.vol.opacity);
 }
 
 

@@ -3,11 +3,13 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 
-float doTIR(inout Path path, inout Material currentMat, Material outside){
+float doTIR(inout Path path){
     float dist=0.;
-    bool keepGoing=true;
     int numReflect=-1;
     Vector marchDir;
+    
+    //path.mat is the material we are inside of (glass)
+    //path.transmat is whatever is outside of it
     
     while(path.keepGoing&&numReflect<10){
     marchDir=path.dat.reflectedRay;
@@ -15,10 +17,12 @@ float doTIR(inout Path path, inout Material currentMat, Material outside){
     raymarch(marchDir,-1.,stdRes);
     dist+=distToViewer;
     
-    updateLocalData(path,sampletv,currentMat, outside);//do not change materials, just update the path data.
+    updatePath(path,sampletv);
+    //now set the material we are inside of back to the reflecting one
+    path.mat=path.backMat;
         
     //if we are totally internally reflecting; keep going
-    path.keepGoing=needTIR(path,currentMat,outside);
+    path.keepGoing=needTIR(path);
     numReflect+=1;
     }
     
@@ -28,24 +32,26 @@ float doTIR(inout Path path, inout Material currentMat, Material outside){
 
 
 //starting at the outside of a transparent surface, refract into it, bounce around via TIR if required, and stop when you reach the backside, with nonunity reflectivity.
-void doRefract(inout Path path, inout Material currentMat, Material outside){
+void doRefract(inout Path path){
     float dist=0.;
 
     //refract through surface, and march to the next intersection point
     Vector marchDir=path.dat.refractedRay;
     nudge(marchDir);
     raymarch(marchDir,-1.,stdRes);//we are inside an object.
-    
     dist+=distToViewer;//dist traveled inside ball
+    //now we are at the back wall: front material=outside, back=objMat
     //material has not changed: so do not update material
-    updateLocalData(path,sampletv,currentMat,outside);
+    updatePath(path,sampletv);
+    //set the material we are tracing in to the interior volume
+    path.mat=path.backMat;
     
     //check if we have to continue totalfly reflecting internally
-    path.keepGoing=needTIR(path,currentMat,outside);
-    dist+=doTIR(path,currentMat,outside);
+    path.keepGoing=needTIR(path);
+    dist+=doTIR(path);
     
     //at the end here, update the distance traveled, and the accumulated color;
-    updateAccColor(path,currentMat, dist);
+    updateAccColor(path, dist);
     path.acc.dist+=dist;
     //how do we deal with the change in intensity correctly here?
     
@@ -67,29 +73,29 @@ void doRefract(inout Path path, inout Material currentMat, Material outside){
 
 
 
-vec3 getReflect(inout Path path, inout Material mat, Material outside){
+vec3 getReflect(inout Path path){
     //start with path at a location you just arrived at, and HAVE NOT PICKED UP ANY COLOR YET.
     //first determine if the surface is reflective:
     int numRefl=0;
     float dist=0.;
     vec3 totalColor=vec3(0.);
 
-    path.keepGoing=(mat.vol.opacity==1.);
+    //we keep going if the material in front of us is not transparent
+    path.keepGoing=(path.frontMat.vol.opacity==1.);
     
-     while(path.keepGoing&&numRefl<10){//we do absolutely NOTHING if the surface is transparent!
-    
+     while(path.keepGoing&&numRefl<10){
+         
          //otherwise, we add the color from this surface
-        totalColor+=getSurfaceColor(path,mat,true);
+        totalColor+=getSurfaceColor(path,true);
         updateReflectIntensity(path);
         
         //then we reflect off of it, and continue on our way
         nudge(path.dat.reflectedRay);//move the ray a little
         raymarch(path.dat.reflectedRay,1.,reflRes);//do the reflection 
-        updateNewMaterial(mat,sampletv, hitWhich);//set material to what was just impacted
-        updateLocalData(path,sampletv,outside,mat);//update the local data accordingly
+       //updateNewMaterial(mat,sampletv, hitWhich);//set material to what was just impacted
         
         //make keep going true if you hit an opaque object, and its not the sky
-        path.keepGoing=(mat.vol.opacity==1.&&hitWhich!=0);
+        path.keepGoing=(path.keepGoing&&path.frontMat.vol.opacity==1.);
         numRefl+=1;
     }
 
@@ -98,7 +104,7 @@ vec3 getReflect(inout Path path, inout Material mat, Material outside){
     //update color absorbed
     //what to do about intensity? (Nothing because taken care of by color multiplier?)
     path.acc.dist+=dist;
-    updateAccColor(path, outside, dist);
+    updateAccColor(path, dist);
     
    // path.acc.color*totalColor;
     return totalColor;

@@ -77,7 +77,7 @@ float shadowmarch(in Vector toLight, float distToLight,float k)
     
     for (int i = 0; i < 40; i++){
         
-            float localDist =sceneObjs(localtv.pos);
+            float localDist =sceneObjs(localtv.pos);//exclude lights
                   marchStep = 0.9*localDist;//make this distance your next march step
             depth += marchStep;//add this to the total distance traced so far
         

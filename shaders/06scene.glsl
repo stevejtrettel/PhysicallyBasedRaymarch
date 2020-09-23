@@ -8,7 +8,6 @@ float lightSDF(Point p,Light light){
     if(distance<EPSILON){
         hitWhich=1;
         colorOfLight3=light.color;
-        return distance;
     }
     return distance;
 }
@@ -23,16 +22,12 @@ float planeDistance(Point p){
 
 
 float glassDistance(Point p){
+    
     float distance=
          sphere(p,createPoint(-0.5,0.5,-1.),1.);
     
-   //    distance=min(distance,  sphere(p,createPoint(3.5,1.5,-1.),1.5));
-    
     distance=min(distance, cube(p,createPoint(5.,-4.,0.5),1.));
-    
-   //    distance=min(distance, cube(p,createPoint(2.,-3.,0.5),0.6));
 
-    
     return distance;
 }
 
@@ -53,7 +48,7 @@ float mirrorDistance(Point p){
 // Scene Components
 //----------------------------------------------------------------------------------------------------------------------
 
-
+//hitWhich =1 here
 float sceneLights(Point p){
     float distance=MAX_DIST;
     float lightDist;
@@ -68,41 +63,20 @@ float sceneLights(Point p){
     return distance;
 }
 
+
+
 float sceneObjs(Point p){
+    
     float distance = MAX_DIST;
     
-        //plane
-//    distance=planeDistance(p);
-//    if(distance<EPSILON){
-//        hitWhich=2;
-//        return distance;
-//    }
-//    
-
+    //    distance=min(distance,planeDistance(p));
+    
     distance=min(distance, glassDistance(p));
-    if(distance<EPSILON){
-        hitWhich=3;
-        return distance;
-    }
     
     distance=min(distance, mirrorDistance(p));
-    if(distance<EPSILON){
-        hitWhich=4;
-        return distance;
-    }
-
     
-      return distance;
-   
+    return distance;
 }
-
-
-
-
-
-
-
-
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -112,7 +86,8 @@ float sceneObjs(Point p){
 
 float sceneSDF(Point p){
     
-    //return min(sceneLights(p),sceneObjs(p));
+   // return min(sceneLights(p),sceneObjs(p));
+    
     return sceneObjs(p);
 }
 
@@ -125,27 +100,31 @@ float sceneSDF(Point p){
 //----------------------------------------------------------------------------------------------------------------------
 
 
-void setInWhich(Point p){
+
+void setHitWhich(Vector tv){//side is +-1
+    
+    //when the raymarch stops, you are infintesimally before the new object
+    //need to move forward to be inside of it
+    nudge(tv);
     
 //    if(planeDistance(p)<0.){
 //        inWhich=2;
 //        return;
 //    }
-    //else
-        if(glassDistance(p)<0.){
-        inWhich=3;
+    //glass surfaces
+        if(glassDistance(tv.pos)<0.){
+        hitWhich=3;
         return;
     }
     
-        //else
-        else if(mirrorDistance(p)<0.){
-        inWhich=4;
+        //mirrored surfaces
+        else if(mirrorDistance(tv.pos)<0.){
+        hitWhich=4;
         return;
     }
-    //don't bother with the lights:
+    //nothing
     else{
-        inWhich=0;
+        hitWhich=0;
     }
     
 }
-

@@ -23,7 +23,7 @@ vec3 phong(Vector toLight, vec3 lightColor, Path path, vec3 color, float shiny){
 }
 
 
-vec3 pointLight(Light light, Path path,Material mat,bool marchShadow){
+vec3 pointLight(Light light, Path path, bool marchShadow){
     
     vec3 ph;
     float sh=1.;
@@ -34,7 +34,7 @@ vec3 pointLight(Light light, Path path,Material mat,bool marchShadow){
     tangDirection(path.dat.pos,light.pos,toLight,distToLight);
     fromLight=toLight;//doesnt matter here cuz isotropic
     
-    ph=phong(toLight,light.color,path,mat.surf.color,mat.surf.phong.shiny);
+    ph=phong(toLight,light.color,path,path.frontMat.surf.color,path.frontMat.surf.phong.shiny);
     
     if(marchShadow&&hitWhich!=1){//not the light scene
         sh=shadowmarch(toLight,distToLight,50.);
@@ -52,7 +52,7 @@ vec3 pointLight(Light light, Path path,Material mat,bool marchShadow){
 
 
 
-vec3 dirLight(Light light,Path path, Material mat,bool marchShadow){
+vec3 dirLight(Light light,Path path,bool marchShadow){
     
     vec3 ph;
     float sh=1.;
@@ -61,7 +61,7 @@ vec3 dirLight(Light light,Path path, Material mat,bool marchShadow){
     
     //NEED TO DEAL WITH THE SHINYNESS IF WE GO THIS WAY
     //float shiny = max(surface.phong.shine/5.,2.);
-    ph=phong(toSky,light.color,path, mat.surf.color,3.);
+    ph=phong(toSky,light.color,path, path.frontMat.surf.color,3.);
     
     if(marchShadow&&hitWhich!=1){//not the light scene
         sh=shadowmarch(toSky,20.,2.);
@@ -75,8 +75,8 @@ vec3 dirLight(Light light,Path path, Material mat,bool marchShadow){
 
 
 
-vec3 ambientLight(vec4 lightColor,Material mat){
-    return lightColor.w*lightColor.rgb*mat.surf.color;
+vec3 ambientLight(vec4 lightColor,Path path){
+    return lightColor.w*lightColor.rgb*path.frontMat.surf.color;
 }
 
 
@@ -95,25 +95,25 @@ vec3 ambientLight(vec4 lightColor,Material mat){
 
 
 
-vec3 ambLights(Path path, Material mat, bool marchShadow){
+vec3 ambLights(Path path, bool marchShadow){
     
     vec3 color=vec3(0.);
     
-    color+=ambientLight(vec4(1.,1.,1.,0.4),mat);
+    color+=ambientLight(vec4(1.,1.,1.,0.4),path);
     
-    color+=dirLight(dirLight1,path, mat,marchShadow);
+    color+=dirLight(dirLight1,path, marchShadow);
 
     return color;
 }
 
 
 
-vec3 sceneLights(Path path, Material mat,bool marchShadow){
+vec3 sceneLights(Path path, bool marchShadow){
     
     vec3 color=vec3(0.);
 
-    color+=pointLight(pointLight1,path, mat,marchShadow);
-    color+=pointLight(pointLight2,path,mat,marchShadow);
+    color+=pointLight(pointLight1,path,marchShadow);
+    color+=pointLight(pointLight2,path,marchShadow);
 
     return color;
 }
@@ -133,12 +133,11 @@ vec3 sceneLights(Path path, Material mat,bool marchShadow){
 //----------------------------------------------------------------------------------------------------------------------
 
 
-vec3 getSurfaceColor(inout Path path, Material mat, bool marchShadow){
-    //mat is the matmerial we are about to enter.
+vec3 getSurfaceColor(inout Path path, bool marchShadow){
+    //path.frontMat is the matmerial we are about to enter.
     
-    if(mat.surf.lightThis==0){//hit the background
-        path.keepGoing=false;
-        return path.acc.intensity*mat.surf.color;//weight by amount of surviving light and get out
+    if(path.frontMat.bkgnd){//hit the background
+        return (path.acc.intensity)*(path.frontMat.surf.color);//weight by amount of surviving light and get out
     }
     
     vec3 amb;//ambient lighting
@@ -146,15 +145,15 @@ vec3 getSurfaceColor(inout Path path, Material mat, bool marchShadow){
     vec3 totalColor;
     
     //else
-    amb=ambLights(path, mat,marchShadow);
-    scn=sceneLights(path, mat, marchShadow);//add lights
+    amb=ambLights(path, marchShadow);
+    scn=sceneLights(path, marchShadow);//add lights
     
     totalColor=amb+scn;
     
 
     //what to do about reflectivity?!?! will it have been correctly updated here? (maybe should use path.dat.reflect)
     //the opacity we need to be using here is the opacity of the material we are ABOUT TO ENTER, NOT THE MATERIAL WE AER CURRENTLY INSIDE OF. 
-    totalColor*=path.acc.intensity*(1.-mat.surf.reflect)*mat.vol.opacity;
+    totalColor*=path.acc.intensity*(1.-path.frontMat.surf.reflect)*path.frontMat.vol.opacity;
     
     return totalColor;
  

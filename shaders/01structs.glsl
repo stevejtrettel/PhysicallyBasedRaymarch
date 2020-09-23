@@ -274,7 +274,7 @@ struct marchRes{
 
 marchRes stdRes=marchRes(40.,300,0.0001);
 
-marchRes reflRes=marchRes(5.,100,0.0001);
+marchRes reflRes=marchRes(20.,100,0.0001);
 
 
 
@@ -300,10 +300,9 @@ struct Surface{
     vec3 color;
     Phong phong;
     float reflect;
-    int lightThis;
 };
 
-const Surface noSurface=Surface(vec3(0.),noPhong,0.,0);
+const Surface noSurface=Surface(vec3(0.),noPhong,0.);
 
 struct Volume{
     float refract;
@@ -312,7 +311,7 @@ struct Volume{
     vec3 emit;
 };
 
-const Volume air=Volume(1.,0.,vec3(0.),vec3(0.));
+const Volume transparentVolume=Volume(1.,0.,vec3(0.),vec3(0.));
 
 
 //materials have surface properties,
@@ -320,9 +319,10 @@ const Volume air=Volume(1.,0.,vec3(0.),vec3(0.));
 struct Material{
     Surface surf;
     Volume vol;
+    bool bkgnd;//if this is something in the background, or an actual object
 };
 
-Material airMaterial=Material(noSurface,air);
+Material air=Material(noSurface,transparentVolume,false);
 
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Surface Data
@@ -344,8 +344,6 @@ void resetAcc(inout Accumulate acc){
     
 
 //Local geometric data at a point on the surface. 
-
-//=======OLD=====
 struct localData{
     
     Vector incident;
@@ -367,12 +365,19 @@ struct localData{
 struct Path{
     localData dat;
     Accumulate acc;
+    
+    Material mat;//the material we are currently inside of
+    //auxillary materials to help 
+    Material backMat;
+    Material frontMat;
+    
     bool keepGoing;//do we kill this ray?
 };
 
 
 void initializePath(inout Path path){
     //set the initial data
+    path.mat=air;
     resetAcc(path.acc);
     path.keepGoing=true;
 }
