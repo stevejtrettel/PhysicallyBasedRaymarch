@@ -69,14 +69,18 @@ vec3 beamSplit(inout Path path){
     totalColor+= transPath.acc.color*getReflect(transPath);
     }
     
-    //NOW: update the original data by the larger of the remaining intensities:
+    
+    
+    
+    
+   // NOW: update the original data by the larger of the remaining intensities:
 //    if(reflPath.acc.intensity>transPath.acc.intensity){
 //        path=reflPath;
 //    }
 //    else{
 //        path=transPath; 
 //    }
-   
+   path=transPath;
     
     
     
@@ -117,7 +121,7 @@ vec3 beamSplit(inout Path path){
 
 
 vec3 getPixelColor(Vector rayDir){
-    
+    int numSplit=0;
     vec3 totalColor=vec3(0.);
     
     Path path;
@@ -125,14 +129,15 @@ vec3 getPixelColor(Vector rayDir){
     
     //-----do the original raymarch
     raymarch(rayDir,1.,stdRes);//start outside
- 
     updatePath(path,sampletv);//create local data at site
     //path.mat=path.frontMat;
     
     //now we are on the surface.  lets beamSplit!
-    //totalColor=getReflect(path);
+     while(path.keepGoing&&path.acc.intensity>0.05&&numSplit<5){
+         
     totalColor+=beamSplit(path);
-
+    numSplit+=1;
+     }
     return totalColor;
     
 }
