@@ -73,7 +73,7 @@ float sceneObjs(Point p){
     
     distance=min(distance, glassDistance(p));
     
-    distance=min(distance, mirrorDistance(p));
+    //distance=min(distance, mirrorDistance(p));
     
     return distance;
 }
@@ -101,12 +101,9 @@ float sceneSDF(Point p){
 
 
 
-void setHitWhich(Vector tv,float ep){//side is +-1
-    
+void setHitWhich(Vector tv,float ep){
     
     hitWhich=0;
-    //when the raymarch stops, you are infintesimally before the new object
-    //need to move forward to be inside of it
     tv=flow(tv,ep);
     
 //    if(planeDistance(p)<0.){
@@ -114,19 +111,15 @@ void setHitWhich(Vector tv,float ep){//side is +-1
 //        return;
 //    }
     //glass surfaces
-        if(glassDistance(tv.pos)<0.){
+    if(glassDistance(tv.pos)<0.){
         hitWhich=3;
         return;
     }
     
         //mirrored surfaces
-        else if(mirrorDistance(tv.pos)<0.){
-        hitWhich=4;
-        return;
-    }
-    //nothing
-//    else{
-//        hitWhich=0;
+//    else if(mirrorDistance(tv.pos)<0.){
+//        hitWhich=4;
+//        return;
 //    }
-//    
+  
 }

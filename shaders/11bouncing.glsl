@@ -14,7 +14,7 @@ float doTIR(inout Path path){
     while(path.keepGoing&&numReflect<10){
     marchDir=path.dat.reflectedRay;
     nudge(marchDir);
-    raymarch(marchDir,reflRes);
+    raymarch(marchDir,-1.,reflRes);
     dist+=distToViewer;
     
     updatePath(path,sampletv);
@@ -38,7 +38,7 @@ void doRefract(inout Path path){
     //refract through surface, and march to the next intersection point
     Vector marchDir=path.dat.refractedRay;
     nudge(marchDir);
-    raymarch(marchDir,stdRes);//we are inside an object.
+    raymarch(marchDir,-1.,stdRes);//we are inside an object.
     dist+=distToViewer;//dist traveled inside ball
     
     //now we are at the back wall
@@ -95,7 +95,7 @@ vec3 getReflect(inout Path path){
         
         //then we reflect off of it, and continue on our way
         nudge(path.dat.reflectedRay);//move the ray a little
-        raymarch(path.dat.reflectedRay,reflRes);//do the reflection 
+        raymarch(path.dat.reflectedRay,1.,reflRes);//do the reflection 
        
         //update the material to the new location
         updatePath(path,sampletv);

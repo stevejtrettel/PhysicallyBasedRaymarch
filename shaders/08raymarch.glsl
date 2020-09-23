@@ -47,6 +47,48 @@ void raymarch(Vector tv, marchRes res){
 
 
 
+// raymarch algorithm
+// each step is the march is made from the previously achieved position (useful later for Sol).
+// done with general vectors
+
+
+//sets the side of the surface youy are CURRENTLY on 
+//1=on the outside of an object
+//-1=on the inside of an object
+
+
+void raymarch(Vector rayDir,float side, marchRes res){
+    hitWhich=0;
+    distToViewer=0.;
+    float marchStep = 0.;
+    float depth=0.;
+    Vector tv = rayDir;
+    
+    //totalFixIsom = identity;
+
+        for (int i = 0; i < res.marchSteps; i++){
+            
+                float localDist = sceneSDF(tv.pos);
+            //this could be negative; side sets this.
+                if (side*localDist < res.threshhold){
+                    sampletv =tv;
+                    distToViewer=side*depth;
+                    //numSteps=float(i);
+                    break;
+                }
+                marchStep = side*localDist;
+               depth += marchStep;
+            if(depth>res.maxDist){
+                hitWhich=0;
+                sampletv=tv;
+                distToViewer=res.maxDist;
+                break;
+            }
+            tv = flow(tv, marchStep);
+        }
+}
+
+
 
 
 

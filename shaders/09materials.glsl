@@ -71,10 +71,10 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
              
             mat.surf.color=vec3(0.05);
             mat.surf.phong.shiny=15.;
-            mat.surf.reflect=0.0;
+            mat.surf.reflect=0.05;
             
             mat.vol.refract=1.55;
-            mat.vol.opacity=0.0;
+            mat.vol.opacity=0.05;
             mat.vol.absorb=vec3(0.3,0.05,0.2);
             mat.vol.emit=vec3(0.);
 
@@ -262,7 +262,7 @@ void updatePath(inout Path path, Vector tv){
 
 //======new version==========
 void updateAccColor(inout Path path, float dist){
-    path.acc.color *= exp(-path.mat.vol.absorb*dist);
+    path.acc.color *= exp(path.mat.vol.absorb*dist);
 }
 
 

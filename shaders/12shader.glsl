@@ -14,32 +14,46 @@ vec3 beamSplit(inout Path path){
     totalColor+=getSurfaceColor(path,true);
     if(!path.keepGoing){return totalColor;}//stop if you are at the sky
     
+    
+    
+    
+    
     //now, copy the initial data in two, so we can split 
     Path reflPath=path;
     reflPath.mat=path.backMat;
+    reflPath.keepGoing=reflPath.dat.reflect>0.;
+    updateReflectIntensity(reflPath);
     
     Path transPath=path;
     transPath.mat=path.frontMat;
+    transPath.keepGoing=transPath.mat.vol.opacity<1.;
+    updateTransmitIntensity(path);
+    
+    
+    
+    
+    
     
     //from here on, don't use the original inputs until we set something equal to them back at the end.
     
+    if(reflPath.keepGoing){
     //step 1: do the first reflection
     nudge(reflPath.dat.reflectedRay);//move the ray a little
-    raymarch(reflPath.dat.reflectedRay,stdRes);//do the reflection 
+    raymarch(reflPath.dat.reflectedRay,1.,stdRes);//do the reflection 
     updatePath(reflPath,sampletv);//update the local data accordingly
     
     //now, run the reflection iterator: it will accumulate colors and stop upon impacting a transparent surface;
     totalColor+=getReflect(reflPath);
     
     //when this stops; reflPath has either run out of steam, or impacted a transparent surface.
+    }
     
     
     
     
     
     
-    
-    
+    if(transPath.keepGoing){
     //step 2: do the refraction:
     doRefract(transPath);
     //now we are at the exit location to the material.  
@@ -49,11 +63,11 @@ vec3 beamSplit(inout Path path){
     
     //so instead, we just focus on following the refracted ray.
     nudge(transPath.dat.refractedRay);//move the ray a little
-    raymarch(transPath.dat.refractedRay,stdRes);//going outside the material
+    raymarch(transPath.dat.refractedRay,1.,stdRes);//going outside the material
     updatePath(transPath,sampletv);//update the local data accordingly
-    
     //now, run the reflection iterator: it will accumulate colors and stop upon impacting a transparent surface;
-    totalColor+=getReflect(transPath);
+    totalColor+= transPath.acc.color*getReflect(transPath);
+    }
     
     //NOW: update the original data by the larger of the remaining intensities:
 //    if(reflPath.acc.intensity>transPath.acc.intensity){
@@ -62,6 +76,9 @@ vec3 beamSplit(inout Path path){
 //    else{
 //        path=transPath; 
 //    }
+   
+    
+    
     
     return totalColor;
 }
@@ -107,14 +124,14 @@ vec3 getPixelColor(Vector rayDir){
     initializePath(path);//set the intensity to 1, accumulated color to 0, distance traveled to 0., set keepGoing=true, path.mat=air
     
     //-----do the original raymarch
-    raymarch(rayDir,stdRes);//start outside
+    raymarch(rayDir,1.,stdRes);//start outside
  
     updatePath(path,sampletv);//create local data at site
     //path.mat=path.frontMat;
     
     //now we are on the surface.  lets beamSplit!
-    totalColor=getReflect(path);
-    //totalColor+=beamSplit(path);
+    //totalColor=getReflect(path);
+    totalColor+=beamSplit(path);
 
     return totalColor;
     
