@@ -87,27 +87,45 @@ vec3 getRefract(inout Path path){
     doTIR(path);//do the actual internal reflections
     
     //now we are positioned at the back wall of the surface, and the internal reflectivity is no longer 1
+    //save this position; this is where we start the next march
     
-    //split the light: refract thru surface, pick up color
-//    Path refractPath=path;
-//    marchDir=path.dat.refractedRay;
-//    stepForward(marchDir,refractPath,1.,stdRes);
-//    refractPath.mat=refractPath.frontMat;
-//    //get the color of the surface here:
-//    totalColor+=(1.-path.dat.reflect)*getSurfaceColor(refractPath,false);
-//   
-//    //totalColor+=path.dat.reflect*vec3(1.,0.,0.);
-//    //now want to instead reflect again on the inside to pick up the other bit of color:
-//    Path reflectPath=path;
-//    doInternalReflect(reflectPath,0.8);
-//    //now, get refracted color AND color the rest with "sky color"
-//    marchDir=reflectPath.dat.refractedRay;
-//    stepForward(marchDir,reflectPath,1.,stdRes);
-//    reflectPath.mat=reflectPath.frontMat;
-//    totalColor+=path.dat.reflect*(1.-reflectPath.dat.reflect)*getSurfaceColor(reflectPath,false);
-//    totalColor+=path.dat.reflect*(1.-reflectPath.dat.reflect)*vec3(1.,0.,0.);
-//    
-//    
+    //update the path intensity, taking out the reflective comp
+    //path.backmat is the glass we are inside of
+    updateTransmitIntensity(path,path.backMat);
+    
+//reflect again on the inside to pick up the other bit of color:
+  Path reflectPath=path;
+    //update the intensity for what is available for reflection still
+    updateReflectIntensity(reflectPath);
+    
+    //step forward one step along the reflection
+ stepForward(reflectPath.dat.reflectedRay,reflectPath,-1.,reflRes);
+    
+    //copy this material: new spot inside surface
+    Path ref2Path=reflectPath;
+    //update the amt of light which reflects inside
+    updateReflectIntensity(ref2Path);
+    
+    
+    //update the amount that can still transmit out
+    updateTransmitIntensity(reflectPath,reflectPath.backMat);
+    //now, refract through the surface
+     
+    stepForward(reflectPath.dat.refractedRay,reflectPath,1.,reflRes);
+    //now get the color
+    totalColor+=getSurfaceColor(reflectPath,false);
+    
+    
+    //reflect the second path once more
+  stepForward(ref2Path.dat.reflectedRay,ref2Path,-1.,reflRes);
+    
+    updateTransmitIntensity(ref2Path,ref2Path.backMat);
+    
+     stepForward(ref2Path.dat.refractedRay,ref2Path,1.,reflRes);
+    //now get the color
+    totalColor+=getSurfaceColor(ref2Path,false);
+    
+
     
     return totalColor;
     
@@ -152,17 +170,15 @@ vec3 getReflect(inout Path path,Vector initialDir){
         stepForward(path.dat.reflectedRay,path,1.,reflRes);
         
         //keep going if (1) not sky, and (2)object is opaque and (3)there's sufficient intensity to bother.
-        keepGoing=(path.keepGoing&&path.mat.vol.opacity==1.);
-                   //&&path.acc.intensity>0.05)
+        keepGoing=path.keepGoing&&(path.hitSky||path.mat.vol.opacity==1.);
+        
         numRefl+=1;
     }
     
-    //reset path.keepGoing to quit if we did all 10 steps, or if the intensity is very low.
-   // path.keepGoing=path.keepGoing&&(numRefl<MAX_REFL)&&(path.acc.intensity>0.05);
+    //right now, once we hit
     
-//    if(!path.keepGoing){//if we hit the sky on our last pass through
-//        totalColor+=getSurfaceColor(path,false);//sky
-//    }
+    //reset path.keepGoing to quit if we did all 10 steps, or if the intensity is very low.
+    path.keepGoing=path.keepGoing&&(numRefl<MAX_REFL)&&(path.acc.intensity>0.05);
 
 
     return totalColor;

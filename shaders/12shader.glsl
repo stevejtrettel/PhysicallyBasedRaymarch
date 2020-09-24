@@ -50,15 +50,13 @@ vec3 beamSplit(inout Path path){
     //do the refraction through this transparent object, stop at the back side
     totalColor+=getRefract(transPath);
         
-    //we should split off two rays here, to do reflection and refraction at the back boundary.  NOT DOING YET
-   
     
     //march outwards in refracted direction, then iteratively reflect if need be.
     Vector refractDir=transPath.dat.refractedRay;
     totalColor+=getReflect(transPath,refractDir);
     
     //update the keep going command
-    transPath.keepGoing=transPath.keepGoing&&(transPath.acc.intensity>0.05);
+   // transPath.keepGoing=transPath.keepGoing&&(transPath.acc.intensity>0.05);
     
     }
     
@@ -66,6 +64,7 @@ vec3 beamSplit(inout Path path){
    // NOW: update the original data by the larger of the remaining intensities:
     if(reflPath.acc.intensity>transPath.acc.intensity){
         path=reflPath;
+        //totalColor=reflPath.acc.intensity*vec3(1.,0.,0.);
     }
     else{
         path=transPath; 
@@ -77,7 +76,6 @@ vec3 beamSplit(inout Path path){
         path.keepGoing=false;
     }
     
-    //path.keepGoing=false;
 
     return totalColor;
     
@@ -102,7 +100,7 @@ vec3 getPixelColor(Vector rayDir){
 
     //now we are on the surface.  lets beamSplit!   
     
-   while(path.keepGoing&&numSplit<5){
+ while(path.keepGoing&&numSplit<5){
     totalColor+=beamSplit(path);
        numSplit+=1;
   }

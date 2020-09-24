@@ -53,7 +53,7 @@ return texture(tex,vec2(x,y)).rgb;
 void setSkyMaterial(inout Material mat, Vector tv){
             mat=air;
             mat.bkgnd=true;
-            mat.vol.opacity=1.;
+            mat.vol.opacity=0.;
             mat.surf.color=SRGBToLinear(skyTex(sampletv));
             mat.vol.absorb=vec3(0.);
 }
