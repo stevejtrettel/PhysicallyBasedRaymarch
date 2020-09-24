@@ -63,6 +63,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
             mat=air;
             mat.bkgnd=true;
             mat.surf.color=SRGBToLinear(rectTex(sampletv));
+            mat.vol.absorb=vec3(0.);
             break;
         
              
@@ -71,7 +72,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
              
             mat.surf.color=vec3(0.05);
             mat.surf.phong.shiny=15.;
-            mat.surf.reflect=0.05;
+            mat.surf.reflect=0.02;
             
             mat.vol.refract=1.55;
             mat.vol.opacity=0.05;
@@ -85,7 +86,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
             mat.bkgnd=false;
              
             mat.surf.color=vec3(0.03,0.05,0.2);
-            mat.surf.reflect=0.95;
+            mat.surf.reflect=0.5;
             mat.surf.phong.shiny=15.;
              
              
@@ -158,22 +159,6 @@ bool needTIR(Path path){
 
 
 
-//void setInFrontVolume(inout Volume vol,Vector sampletv){
-//    
-//    //tv starts at the surface you just reached, facing forward.
-//    Vector tv=sampletv;
-//    nudge(tv);//move forward a little bit
-//    Point p=tv.pos;
-//    setInWhich(p);
-//    
-//    setVolume(vol,inWhich);
-//    
-//}
-//
-//
-
-
-
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -204,6 +189,7 @@ void updateReflect(inout Path path){
             // Total internal reflection
             if (sinT2 > 1.0){
                path.dat.reflect= 1.;
+                return;
             }
             cosX = sqrt(1.0-sinT2);
         }
@@ -215,6 +201,35 @@ void updateReflect(inout Path path){
         path.dat.reflect= (refl + (1.-refl)*ret);
     
 }
+
+
+
+
+
+
+
+
+//======new version==========
+void updateAccColor(inout Path path, Material mat, float dist){
+    path.acc.color *= exp(-mat.vol.absorb*dist);
+}
+
+
+//update the light intensity of a local data, depending on if we are continuing on for reflection or transmission
+void updateReflectIntensity(inout Path path){
+    //need to make sure the reflectivity has been properly updated in path
+    path.acc.intensity*=path.dat.reflect;
+}
+
+
+void updateTransmitIntensity(inout Path path){
+    //need to make sure the reflectivity has been properly updated in path
+    path.acc.intensity*=(1.-path.dat.reflect)*(1.-path.mat.vol.opacity);
+}
+
+
+
+
 
 
 
@@ -257,25 +272,5 @@ void updatePath(inout Path path, Vector tv){
     
 }
 
-
-
-
-//======new version==========
-void updateAccColor(inout Path path, float dist){
-    path.acc.color *= exp(path.mat.vol.absorb*dist);
-}
-
-
-//update the light intensity of a local data, depending on if we are continuing on for reflection or transmission
-void updateReflectIntensity(inout Path path){
-    //need to make sure the reflectivity has been properly updated in path
-    path.acc.intensity*=path.dat.reflect;
-}
-
-
-void updateTransmitIntensity(inout Path path){
-    //need to make sure the reflectivity has been properly updated in path
-    path.acc.intensity*=(1.-path.dat.reflect)*(1.-path.mat.vol.opacity);
-}
 
 

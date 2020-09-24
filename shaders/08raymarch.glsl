@@ -16,36 +16,6 @@
 //-1=on the inside of an object
 
 
-void raymarch(Vector tv, marchRes res){
-    distToViewer=0.;
-    float marchStep = 0.;
-    float depth=0.;
-    
-    float side=sign(sceneSDF(tv.pos));
-
-        for (int i = 0; i < res.marchSteps; i++){
-            
-                float localDist = sceneSDF(tv.pos);
-
-                if (localDist < res.threshhold){
-                    sampletv =tv;
-                    distToViewer=depth;
-                    break;
-                }
-                marchStep = 0.95*localDist;
-               depth += marchStep;
-            if(depth>res.maxDist){
-                sampletv=tv;
-                distToViewer=res.maxDist;
-                break;
-            }
-            tv = flow(tv, marchStep);
-        }
-}
-
-
-
-
 
 // raymarch algorithm
 // each step is the march is made from the previously achieved position (useful later for Sol).
@@ -57,29 +27,24 @@ void raymarch(Vector tv, marchRes res){
 //-1=on the inside of an object
 
 
-void raymarch(Vector rayDir,float side, marchRes res){
-    hitWhich=0;
+void raymarch(Vector tv,float side, marchRes res){
+
     distToViewer=0.;
     float marchStep = 0.;
     float depth=0.;
-    Vector tv = rayDir;
-    
-    //totalFixIsom = identity;
 
         for (int i = 0; i < res.marchSteps; i++){
             
-                float localDist = sceneSDF(tv.pos);
+                float localDist = side*sceneSDF(tv.pos);
             //this could be negative; side sets this.
-                if (side*localDist < res.threshhold){
+                if (localDist < res.threshhold){
                     sampletv =tv;
-                    distToViewer=side*depth;
-                    //numSteps=float(i);
+                    distToViewer=depth;
                     break;
                 }
-                marchStep = side*localDist;
+                marchStep =localDist;
                depth += marchStep;
             if(depth>res.maxDist){
-                hitWhich=0;
                 sampletv=tv;
                 distToViewer=res.maxDist;
                 break;
