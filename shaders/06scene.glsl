@@ -118,7 +118,7 @@ void setHitWhich(Vector tv,float ep){
     
         //mirrored surfaces
     else if(mirrorDistance(tv.pos)<0.){
-        hitWhich=4;
+        hitWhich=3;
         return;
     }
   

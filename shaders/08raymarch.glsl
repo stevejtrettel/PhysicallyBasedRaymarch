@@ -39,6 +39,7 @@ void raymarch(Vector tv,float side, marchRes res){
             //this could be negative; side sets this.
                 if (localDist < res.threshhold){
                     sampletv =tv;
+                    isSky=false;
                     distToViewer=depth;
                     break;
                 }
@@ -46,6 +47,7 @@ void raymarch(Vector tv,float side, marchRes res){
                depth += marchStep;
             if(depth>res.maxDist){
                 sampletv=tv;
+                isSky=true;
                 distToViewer=res.maxDist;
                 break;
             }

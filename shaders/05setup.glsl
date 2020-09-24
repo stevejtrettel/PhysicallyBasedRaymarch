@@ -39,8 +39,12 @@ const float fov = 90.0;
 
 int inWhich=0;
 int hitWhich = 0;
+
+//set by raymarch
 Vector sampletv;
 float distToViewer;
+bool isSky=false;
+
 
 float side;
 //remember which side of the object youre on when the raymarch ends

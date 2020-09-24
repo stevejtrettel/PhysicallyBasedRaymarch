@@ -52,7 +52,7 @@ return color;
 
 //====update the material given a position and what you hit.
 void updateMaterial(inout Material mat, Vector sampletv,float ep){
-    
+
     //set hitWhich using our current location, to be the material directly in front of us in the direction of raymarching.
     setHitWhich(sampletv,ep);
     
@@ -235,10 +235,17 @@ void updateTransmitIntensity(inout Path path,Material mat){
 
 
 //====new function to update the local data: reflection refraction etc AND THE MATERIALS
-void updatePath(inout Path path, Vector tv){
+void updatePath(inout Path path, Vector tv,bool isSky){
     
-    updateMaterial(path.backMat, tv,-0.01);
-    updateMaterial(path.frontMat, tv,0.01);
+    if(isSky){
+        path.keepGoing=false;
+        updateMaterial(path.backMat,tv,-0.01);
+        path.frontMat=path.backMat;
+        return;
+    }
+    
+    updateMaterial(path.backMat,tv,-0.01);
+    updateMaterial(path.frontMat,tv,0.01);
     
 //    if(path.frontMat.bkgnd){//hit the sky
 //    path.keepGoing=false;

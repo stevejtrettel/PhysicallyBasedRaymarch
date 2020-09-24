@@ -1,11 +1,10 @@
 
 
 void stepForward(Vector direction, inout Path path,float side,marchRes res){
-    
     //so instead, we just focus on following the refracted ray.
     nudge(direction);//move the ray a little
     raymarch(direction,side,res);//going outside the material
-    updatePath(path,sampletv);//update the local data accordingly
+    updatePath(path,sampletv,isSky);//update the local data accordingly
     
     //update the distance travelled:
     path.acc.dist+=distToViewer;
@@ -69,12 +68,13 @@ void doRefract(inout Path path){
     //path.keepGoing=needTIR(path);
     doTIR(path);//do the actual internal reflections
     
-    //should be set up for beamsplit now
+    //nothing here has changed intensity, so don't update path.keepGoing
 }
 
 
 
 vec3 getRefract(inout Path path){
+    
     Vector marchDir;
     vec3 totalColor;
     //refract through surface, and march to the next intersection point
@@ -104,7 +104,7 @@ vec3 getRefract(inout Path path){
 //    totalColor+=path.dat.reflect*(1.-reflectPath.dat.reflect)*vec3(1.,0.,0.);
 //    
 //    
-
+    
     return totalColor;
     
     //the pathData here is unchanged, still at the exit point;
@@ -165,17 +165,9 @@ vec3 getReflect(inout Path path){
         updateReflectIntensity(path);
     }
 
-    
-    //update distance traveled along path
-    //update color absorbed
-    //what to do about intensity? (Nothing because taken care of by color multiplier?)
-    //path.acc.dist+=dist;
-    
-    //need to think about how this should work!
-    //path.mat=air;
-    //updateAccColor(path, dist);
-    //path.acc.color*totalColor;//and then make this work accordingly
-    
+    //reset path.keepGoing since we used it here
+    path.keepGoing=(path.acc.intensity>0.05);
+
     return totalColor;
     
 }
