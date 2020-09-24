@@ -136,8 +136,7 @@ vec3 sceneLights(Path path, bool marchShadow){
 vec3 getSurfaceColor(inout Path path, bool marchShadow){
     //path.mat is the material we are coloring
     
-    if(path.mat.bkgnd){//hit the background
-        path.keepGoing=false;
+    if(!path.keepGoing){//hit the background
         return (path.acc.color)*(path.acc.intensity)*(path.mat.surf.color);
         //weight by amount of surviving light and get out
     }

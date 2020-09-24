@@ -139,28 +139,21 @@ vec3 getReflect(inout Path path){
     //updateReflectIntensity(path);
     //then continue;
 
-
     //we keep going if the material in front of us is not transparent
-    path.keepGoing=(path.keepGoing&&path.mat.vol.opacity==1.);
+     bool keepGoing=(path.keepGoing&&path.mat.vol.opacity==1.);
     
-     while(path.keepGoing&&numRefl<10){
+     while(keepGoing&&numRefl<10){
          
-
-        //then we reflect off of it, and continue on our way
-//        nudge(path.dat.reflectedRay);//move the ray a little
-//        raymarch(path.dat.reflectedRay,1.,reflRes);//do the reflection 
-//        //update the material to the new location
-//        updatePath(path,sampletv);
          
-//      //doing what was above in short hand   
+         
         stepForward(path.dat.reflectedRay,path,1.,reflRes);
         path.mat=path.frontMat;//we care about what's in front of us
-        
+         
         //make keep going true if you hit an opaque object, and its not the sky
-        path.keepGoing=(path.keepGoing&&path.mat.vol.opacity==1.&&path.acc.intensity>0.05);
+        keepGoing=(path.keepGoing&&path.mat.vol.opacity==1.&&path.acc.intensity>0.05);
         numRefl+=1;
          
-                  //otherwise, we add the color from this surface
+        //add the color from this surface
         totalColor+=getSurfaceColor(path,true);
         updateReflectIntensity(path);
     }

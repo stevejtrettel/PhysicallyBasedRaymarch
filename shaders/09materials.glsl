@@ -23,7 +23,20 @@ float phi=acos(v.z);
 return vec2(theta,phi);
 }
 
-vec3 rectTex(Vector tv){
+
+
+
+
+
+//
+vec3 cubeTexture(Vector tv){
+    // vec3 color = vec3(0.5,0.5,0.5);
+    vec3 color = texture(earthCubeTex, tv.dir.yzx).rgb;
+return color;
+}
+
+
+vec3 skyTex(Vector tv){
 
 vec2 angles=toSphCoords(tv.dir);
 float x=(angles.x+3.1415)/(2.*3.1415);
@@ -33,21 +46,16 @@ return texture(tex,vec2(x,y)).rgb;
 
 }
 
-
-
-
-
-vec3 skyTexture(Vector tv){
-
-    // vec3 color = vec3(0.5,0.5,0.5);
-    vec3 color = texture(earthCubeTex, tv.dir.yzx).rgb;
-return color;
-}
-
-
 //----------------------------------------------------------------------------------------------------------------------
 // DECIDING BASE COLOR OF HIT OBJECTS, AND MATERIAL PROPERTIES
 //----------------------------------------------------------------------------------------------------------------------
+
+void setSkyMaterial(inout Material mat, Vector tv){
+            mat=air;
+            mat.bkgnd=true;
+            mat.surf.color=SRGBToLinear(skyTex(sampletv));
+            mat.vol.absorb=vec3(0.);
+}
 
 
 //====update the material given a position and what you hit.
@@ -60,11 +68,8 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
      switch(hitWhich){
              
         case 0://sky
-            mat=air;
-            mat.bkgnd=true;
-            mat.surf.color=SRGBToLinear(rectTex(sampletv));
-            mat.vol.absorb=vec3(0.);
-            break;
+            setSkyMaterial(mat, sampletv);
+             break;
         
              
          case 3://glass
@@ -239,8 +244,8 @@ void updatePath(inout Path path, Vector tv,bool isSky){
     
     if(isSky){
         path.keepGoing=false;
-        updateMaterial(path.backMat,tv,-0.01);
-        path.frontMat=path.backMat;
+        setSkyMaterial(path.frontMat,tv);
+        setSkyMaterial(path.backMat,tv);
         return;
     }
     
