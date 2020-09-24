@@ -73,7 +73,7 @@ float sceneObjs(Point p){
     
     distance=min(distance, glassDistance(p));
     
-    distance=min(distance, mirrorDistance(p));
+   // distance=min(distance, mirrorDistance(p));
     
     return distance;
 }

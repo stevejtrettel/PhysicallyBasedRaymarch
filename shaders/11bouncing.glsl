@@ -45,7 +45,7 @@ void doInternalReflect(inout Path path,float thresh){
     int numReflect=-1;
     Vector marchDir;
     
-    while(path.dat.reflect==thresh&&numReflect<10){
+    while(path.dat.reflect<thresh&&numReflect<10){
         
     marchDir=path.dat.reflectedRay;
     stepForward(marchDir,path,-1.,reflRes);  
@@ -125,7 +125,7 @@ vec3 getRefract(inout Path path){
 
 vec3 getReflect(inout Path path){
     //start with path at a location you just arrived at, and HAVE NOT PICKED UP ANY COLOR YET.
-    
+    int MAX_REFL=10;
     int numRefl=0;
     float dist=0.;
     vec3 totalColor=vec3(0.);
@@ -142,9 +142,10 @@ vec3 getReflect(inout Path path){
     //we keep going if the material in front of us is not transparent
      bool keepGoing=(path.keepGoing&&path.mat.vol.opacity==1.);
     
-     while(keepGoing&&numRefl<10){
+     while(keepGoing&&numRefl<MAX_REFL){
          
-         
+        totalColor+=getSurfaceColor(path,true);
+        updateReflectIntensity(path);
          
         stepForward(path.dat.reflectedRay,path,1.,reflRes);
         path.mat=path.frontMat;//we care about what's in front of us
@@ -154,12 +155,11 @@ vec3 getReflect(inout Path path){
         numRefl+=1;
          
         //add the color from this surface
-        totalColor+=getSurfaceColor(path,true);
-        updateReflectIntensity(path);
+
     }
 
-    //reset path.keepGoing since we used it here
-    path.keepGoing=(path.acc.intensity>0.05);
+    //reset path.keepGoing to quit if we did all 10 steps, or if the intensity is very low.
+    path.keepGoing=(numRefl<MAX_REFL)&&(path.acc.intensity>0.05);
 
     return totalColor;
     

@@ -59,7 +59,7 @@ vec3 beamSplit(inout Path path){
     if(transPath.keepGoing){
     
     //do the refraction through this transparent object, stop at the back side
-    totalColor+=getRefract(transPath);
+    doRefract(transPath);
         
     //we should split off two rays here, to do reflection and refraction at the back boundary.
     updateTransmitIntensity(transPath, transPath.frontMat);
@@ -102,12 +102,10 @@ vec3 beamSplit(inout Path path){
     else{
         path=transPath; 
     }
-  
-    //reset keepGoing:
-    //need to ensure we stop if we hit the sky already
-    if(hitWhich==0){
-        path.keepGoing=false;
-    }
+
+    
+    //this is the WRONG WAY TO DO THIS: how do we know when isSky was set?!
+    if(isSky){path.keepGoing=false;}
     
     return totalColor;
     
@@ -157,15 +155,9 @@ vec3 getPixelColor(Vector rayDir){
     stepForward(rayDir,path,1.,stdRes);
 
     //now we are on the surface.  lets beamSplit!   
+    
     totalColor+=beamSplit(path);
 
-    if(path.keepGoing){
-    totalColor+=beamSplit(path);
-        
-          if(path.keepGoing){
-    totalColor+=beamSplit(path);}
-    }
-    
 
     return totalColor;
     

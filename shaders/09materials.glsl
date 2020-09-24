@@ -143,27 +143,6 @@ Vector getSurfaceNormal(Vector tv){
 
 
 
-//decide if we are totally internally reflecting
-bool needTIR(Path path){
-    
-    //path.mat or path.reflMat are the side we are on
-    //path.transMat is the other side
-    float n1=path.backMat.vol.refract;
-    float n2=path.frontMat.vol.refract;
-    
-    float cosX = -dot(path.dat.normal.dir,path.dat.incident.dir);
-    float n = n1/n2;
-    float sinT2 = n*n*(1.0-cosX*cosX);
-    
-            if (abs(sinT2) > 1.0 ){
-                return true;
-            }
-    else{return false;}
-}
-
-
-
-
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -252,10 +231,7 @@ void updatePath(inout Path path, Vector tv,bool isSky){
     updateMaterial(path.backMat,tv,-0.01);
     updateMaterial(path.frontMat,tv,0.01);
     
-//    if(path.frontMat.bkgnd){//hit the sky
-//    path.keepGoing=false;
-//    return;
-//    }
+
     
     //update all of our local tangent vector data based on this location.
     path.dat.incident=tv;
@@ -277,6 +253,7 @@ void updatePath(inout Path path, Vector tv,bool isSky){
     //set refracted ray using the old and new material;
     float currentR=path.backMat.vol.refract;
     float otherSideR=path.frontMat.vol.refract;
+    
     path.dat.refractedRay=refractThrough(tv,normal,currentR,otherSideR);
     
     //update the reflectivity float in the local data: this tells us how much needs to be reflected at this given point!
