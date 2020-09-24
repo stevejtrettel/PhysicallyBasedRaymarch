@@ -78,7 +78,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
              
             mat.surf.color=vec3(0.05);
             mat.surf.phong.shiny=15.;
-            mat.surf.reflect=0.02;
+            mat.surf.reflect=0.08;
             
             mat.vol.refract=1.55;
             mat.vol.opacity=0.05;

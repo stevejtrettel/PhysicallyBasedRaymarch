@@ -71,7 +71,14 @@ vec3 beamSplit(inout Path path){
         path=transPath; 
     }
 
+    //this SHOULD ALREADY BE SET; BUT MAYBE NOT?
+    if(path.hitSky){
+       totalColor+= getSurfaceColor(path,false);
+        path.keepGoing=false;
+    }
     
+    //path.keepGoing=false;
+
     return totalColor;
     
 }
@@ -95,14 +102,15 @@ vec3 getPixelColor(Vector rayDir){
 
     //now we are on the surface.  lets beamSplit!   
     
+   while(path.keepGoing&&numSplit<5){
     totalColor+=beamSplit(path);
-//    if(path.keepGoing){
-//        totalColor+=beamSplit2(path);
-//        if(path.keepGoing){
-//        totalColor+=beamSplit2(path);
-//        }
-//    }
+       numSplit+=1;
+  }
 
+//        if(path.keepGoing){
+//        totalColor=vec3(1.,0.,0.);
+//    }
+    
     return totalColor;
     
 }

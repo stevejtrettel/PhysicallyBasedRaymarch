@@ -27,6 +27,7 @@ float glassDistance(Point p){
          sphere(p,createPoint(-0.5,0.5,-1.),1.);
     
     distance=min(distance, cube(p,createPoint(5.,-4.,0.5),1.));
+    distance=min(distance, cube(p,createPoint(8.,-4.,0.5),1.));
 
     return distance;
 }
