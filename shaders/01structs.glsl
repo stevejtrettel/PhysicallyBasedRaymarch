@@ -366,14 +366,14 @@ struct Path{
     localData dat;
     Accumulate acc;
     
-    Material mat;//the material we are currently inside of
-    //this is the "memory" between marches
+    Material mat;//the material we want to send to graphics
     
     //auxillary materials to help with computations before marches
     Material backMat;
     Material frontMat;
     
     bool keepGoing;//do we kill this ray?
+    bool hitSky;//did we hit the sky?
 };
 
 
@@ -382,6 +382,7 @@ void initializePath(inout Path path){
     path.mat=air;
     resetAcc(path.acc);
     path.keepGoing=true;
+    path.hitSky=false;
 }
 
 

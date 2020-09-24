@@ -134,16 +134,19 @@ vec3 sceneLights(Path path, bool marchShadow){
 
 
 vec3 getSurfaceColor(inout Path path, bool marchShadow){
-    //path.mat is the material we are coloring
-    
-    if(!path.keepGoing){//hit the background
-        return (path.acc.color)*(path.acc.intensity)*(path.mat.surf.color);
+    vec3 totalColor;
+
+   if(path.keepGoing){//return nothing if we are not to keep going
+        
+    if(path.hitSky){//hit the background
+        //kill the ray
+        path.keepGoing=false;
         //weight by amount of surviving light and get out
+        return (path.acc.color)*(path.acc.intensity)*(path.mat.surf.color);
     }
     
     vec3 amb;//ambient lighting
     vec3 scn;//lights in scene
-    vec3 totalColor;
     
     //else
     amb=ambLights(path, marchShadow);
@@ -156,8 +159,9 @@ vec3 getSurfaceColor(inout Path path, bool marchShadow){
     
     totalColor*=path.acc.color;//correct for absorbtion
     totalColor*=intensityFactor;//correct for intensity
+    }
+    
     
     return totalColor;
- 
 }
 

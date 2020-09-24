@@ -53,6 +53,7 @@ return texture(tex,vec2(x,y)).rgb;
 void setSkyMaterial(inout Material mat, Vector tv){
             mat=air;
             mat.bkgnd=true;
+            mat.vol.opacity=1.;
             mat.surf.color=SRGBToLinear(skyTex(sampletv));
             mat.vol.absorb=vec3(0.);
 }
@@ -157,7 +158,7 @@ void updateReflect(inout localData dat, Material back, Material front){
     //n1=index of refraction you are currently inside of
     //n2=index of refraction you are entering
     float n1=back.vol.refract;
-    float n2=back.vol.refract;
+    float n2=front.vol.refract;
     
     //what is the bigger reflectivity between the two surfaces at the interface?
     float refl=max(back.surf.reflect, front.surf.reflect);
@@ -216,9 +217,9 @@ void updateTransmitIntensity(inout Path path,Material mat){
 
 
 void updateLocalData(inout localData dat, Vector tv, Material back,Material front){
-    //update local data depending on the locaiton; front and back material, 
+    //update local data depending on the location tv;
+    //update the refraction direction also using material in front and behind
       
-    //update all of our local tangent vector data based on this location.
     dat.incident=tv;
     dat.toViewer=turnAround(tv);
     dat.pos=tv.pos;
@@ -250,16 +251,18 @@ void updateLocalData(inout localData dat, Vector tv, Material back,Material fron
 //====new function to update the local data: reflection refraction etc AND THE MATERIALS
 void updatePath(inout Path path, Vector tv,bool isSky){
     
-    if(isSky){
-        path.keepGoing=false;
+    if(isSky){//if we hit the sky; kill the path
+        path.hitSky=true;
         setSkyMaterial(path.frontMat,tv);
         setSkyMaterial(path.backMat,tv);
         return;
     }
     
+    //otherwise, sample the material in front and behind
     updateMaterial(path.backMat,tv,-0.01);
     updateMaterial(path.frontMat,tv,0.01);
     
+    //update the direction vectors, and reflectivity
     updateLocalData(path.dat,tv,path.backMat,path.frontMat);
     
 }
