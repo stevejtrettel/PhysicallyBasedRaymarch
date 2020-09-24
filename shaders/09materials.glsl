@@ -152,27 +152,27 @@ Vector getSurfaceNormal(Vector tv){
 
 
 //calculate the reflectivity of a surface, with fresnel reflection
-void updateReflect(inout Path path){
+void updateReflect(inout localData dat, Material back, Material front){
     
     //n1=index of refraction you are currently inside of
     //n2=index of refraction you are entering
-    float n1=path.backMat.vol.refract;
-    float n2=path.frontMat.vol.refract;
+    float n1=back.vol.refract;
+    float n2=back.vol.refract;
     
     //what is the bigger reflectivity between the two surfaces at the interface?
-    float refl=max(path.backMat.surf.reflect, path.frontMat.surf.reflect);
+    float refl=max(back.surf.reflect, front.surf.reflect);
 
         // Schlick aproximation
         float r0 = (n1-n2) / (n1+n2);
         r0 *= r0;
-        float cosX = -dot(path.dat.normal.dir,path.dat.incident.dir);
+        float cosX = -dot(dat.normal.dir,dat.incident.dir);
         if (n1 > n2)
         {
             float n = n1/n2;
             float sinT2 = n*n*(1.0-cosX*cosX);
             // Total internal reflection
             if (sinT2 > 1.0){
-               path.dat.reflect= 1.;
+               dat.reflect= 1.;
                 return;
             }
             cosX = sqrt(1.0-sinT2);
@@ -182,7 +182,7 @@ void updateReflect(inout Path path){
 
         // adjust reflect multiplier for object reflectivity
         //
-        path.dat.reflect= (refl + (1.-refl)*ret);
+        dat.reflect= (refl + (1.-refl)*ret);
     
 }
 
@@ -215,6 +215,35 @@ void updateTransmitIntensity(inout Path path,Material mat){
 
 
 
+void updateLocalData(inout localData dat, Vector tv, Material back,Material front){
+    //update local data depending on the locaiton; front and back material, 
+      
+    //update all of our local tangent vector data based on this location.
+    dat.incident=tv;
+    dat.toViewer=turnAround(tv);
+    dat.pos=tv.pos;
+    
+    Vector normal=getSurfaceNormal(tv);
+    float side=-sign(tangDot(tv,normal));
+    
+    //make inward pointing normal if we are on the inside
+    if(side==-1.){normal=turnAround(normal);}
+    dat.normal=normal;
+    dat.side=side;
+    
+    //this is enough to set the reflected ray direction
+    dat.reflectedRay=reflectOff(tv,normal);
+    
+
+    //set refracted ray using the old and new material;
+    dat.refractedRay=refractThrough(tv,normal,back.vol.refract,front.vol.refract);
+    
+    //update the reflectivity float in the local data: this tells us how much needs to be reflected at this given point!
+    updateReflect(dat, back, front);
+
+}
+
+
 
 
 
@@ -231,35 +260,6 @@ void updatePath(inout Path path, Vector tv,bool isSky){
     updateMaterial(path.backMat,tv,-0.01);
     updateMaterial(path.frontMat,tv,0.01);
     
-
-    
-    //update all of our local tangent vector data based on this location.
-    path.dat.incident=tv;
-    path.dat.toViewer=turnAround(tv);
-    path.dat.pos=tv.pos;
-    
-    Vector normal=getSurfaceNormal(tv);
-    float side=-sign(tangDot(tv,normal));
-    
-    //make inward pointing normal if we are on the inside
-    if(side==-1.){normal=turnAround(normal);}
-    path.dat.normal=normal;
-    path.dat.side=side;
-    
-    //this is enough to set the reflected ray direction
-    path.dat.reflectedRay=reflectOff(tv,normal);
-    
-
-    //set refracted ray using the old and new material;
-    float currentR=path.backMat.vol.refract;
-    float otherSideR=path.frontMat.vol.refract;
-    
-    path.dat.refractedRay=refractThrough(tv,normal,currentR,otherSideR);
-    
-    //update the reflectivity float in the local data: this tells us how much needs to be reflected at this given point!
-    updateReflect(path);
+    updateLocalData(path.dat,tv,path.backMat,path.frontMat);
     
 }
-
-
-
