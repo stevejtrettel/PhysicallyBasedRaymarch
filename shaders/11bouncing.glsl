@@ -133,7 +133,10 @@ vec3 getReflect(inout Path path){
     //set the material you care about to be the one in front of you
     path.mat=path.frontMat;
     totalColor+=getSurfaceColor(path,true);//get the color of the surface
-    updateReflectIntensity(path);
+    
+    
+    //THIS LINE WAS CAUSING THE MAIN PROBLEM
+    //updateReflectIntensity(path);
     //then continue;
 
 

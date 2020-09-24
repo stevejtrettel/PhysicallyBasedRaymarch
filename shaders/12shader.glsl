@@ -28,7 +28,7 @@ vec3 beamSplit(inout Path path){
     Path transPath=path;
     transPath.mat=path.frontMat;
     transPath.keepGoing=transPath.mat.vol.opacity<1.;
-    updateTransmitIntensity(path);
+    updateTransmitIntensity(transPath,transPath.frontMat);
     
     
     
@@ -60,8 +60,8 @@ vec3 beamSplit(inout Path path){
     //step 2: do the refraction:
     totalColor+=getRefract(transPath);
     //doRefract(transPath);
-    //now we are at the exit location to the material.  
-    
+    //now we are at the exit location to the material. 
+    //updateTransmitIntensity(transPath,transPath.backMat);
     //Path glassRefl=transPath;
     
     //Here we need to follow two rays!  The refraction through the surface and the further internal reflection
@@ -74,11 +74,9 @@ vec3 beamSplit(inout Path path){
     Vector refractDir=transPath.dat.refractedRay;
     stepForward(refractDir,transPath,1.,stdRes);
     //transPath.mat=transPath.backMat;//set the material to the glass behind us
-    updateTransmitIntensity(transPath);
     //now, run the reflection iterator: it will accumulate colors and stop upon impacting a transparent surface;
-//totalColor+=transPath.acc.color*getReflect(transPath); 
-        //totalColor+=transPath.acc.color;
-            totalColor+=getReflect(transPath);
+        
+    totalColor+=getReflect(transPath);
         
     
         
@@ -97,17 +95,23 @@ vec3 beamSplit(inout Path path){
     
     
    // NOW: update the original data by the larger of the remaining intensities:
-//    if(reflPath.acc.intensity>transPath.acc.intensity){
-//        path=reflPath;
-//    }
-//    else{
-//        path=transPath; 
-//    }
-   path=transPath;
+    if(reflPath.acc.intensity>transPath.acc.intensity){
+        path=reflPath;
+    }
+    else{
+        path=transPath; 
+    }
+  
+    
+    //path.acc.intensity=1.;
+    
+   if(hitWhich==0){
+       path.keepGoing=false;}
+    else{path.keepGoing=true;}
     //path=reflPath;
     
-    
     return totalColor;
+    
 }
 
 //start at the point of the surface given by data.
@@ -158,7 +162,12 @@ vec3 getPixelColor(Vector rayDir){
 //    
     //now we are on the surface.  lets beamSplit!   
     totalColor+=beamSplit(path);
-  
+
+    if(path.keepGoing){
+         totalColor+=beamSplit(path); 
+    }
+    
+    
     return totalColor;
     
 }

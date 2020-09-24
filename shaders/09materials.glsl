@@ -86,7 +86,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
             mat.bkgnd=false;
              
             mat.surf.color=vec3(0.03,0.05,0.2);
-            mat.surf.reflect=0.5;
+            mat.surf.reflect=0.95;
             mat.surf.phong.shiny=15.;
              
              
@@ -222,9 +222,9 @@ void updateReflectIntensity(inout Path path){
 }
 
 
-void updateTransmitIntensity(inout Path path){
+void updateTransmitIntensity(inout Path path,Material mat){
     //need to make sure the reflectivity has been properly updated in path
-    path.acc.intensity*=(1.-path.dat.reflect)*(1.-path.mat.vol.opacity);
+    path.acc.intensity*=(1.-path.dat.reflect)*(1.-mat.vol.opacity);
 }
 
 
