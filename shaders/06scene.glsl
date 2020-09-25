@@ -74,7 +74,7 @@ float sceneObjs(Point p){
     
     distance=min(distance, glassDistance(p));
     
-    distance=min(distance, mirrorDistance(p));
+   // distance=min(distance, mirrorDistance(p));
     
     return distance;
 }
@@ -119,7 +119,7 @@ void setHitWhich(Vector tv,float ep){
     
         //mirrored surfaces
     else if(mirrorDistance(tv.pos)<0.){
-        hitWhich=3;
+        hitWhich=4;
         return;
     }
   
