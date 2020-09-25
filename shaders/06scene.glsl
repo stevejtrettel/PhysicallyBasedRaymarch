@@ -24,16 +24,19 @@ float planeDistance(Point p){
 float glassDistance(Point p){
     
     float distance=
-         sphere(p,createPoint(-0.5,0.5,-1.),1.);
+         sphere(p,createPoint(0.,3.,2.),0.3);
     
-    distance=min(distance, sdRoundBox(p, createPoint(-5.,3.,2.),vec3(1.,1.,1.), 0.1 ));
 
-       distance=min(distance, sdTorus(p,createPoint(3.,3.,1.),vec2(1.,0.5)));
+
+       distance=min(distance, sdTorus(p,createPoint(0.,3.,2.),vec2(1.,0.5)));
     
-      distance=min(distance,
-                  sdRoundedCylinder(p,createPoint(7.,7.,7.),1.,1.,0.5));
+       distance=min(distance, sdRoundBox(p, createPoint(-5.,3.,2.),vec3(1.,1.,1.), 0.1 ));
+//    
     
-    distance=min(distance, sdOctahedron(p,createPoint(-5.,-5.,1.),1.)-0.1);
+//      distance=min(distance,
+//                  sdRoundedCylinder(p,createPoint(7.,7.,7.),1.,1.,0.5));
+//    
+//  distance=min(distance, trueOctahedron(p,createPoint(-5.,-5.,1.),1.)-0.05);
 
     return distance;
 }

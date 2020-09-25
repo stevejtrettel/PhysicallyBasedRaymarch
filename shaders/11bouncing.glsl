@@ -31,7 +31,7 @@ void doTIR(inout Path path){
     int numReflect=-1;
     Vector marchDir;
     
-    while(path.dat.reflect==1.&&numReflect<10){
+    while(path.dat.reflect==1.&&numReflect<20){
         
     marchDir=path.dat.reflectedRay;
     stepForward(marchDir,path,-1.,reflRes);  
@@ -43,21 +43,21 @@ void doTIR(inout Path path){
 }
 
 
-//bounce around via internal reflections until the reflectivity is below some threshhold:
-void doInternalReflect(inout Path path,float thresh){
-    
-    int numReflect=-1;
-    Vector marchDir;
-    
-    while(path.dat.reflect>thresh&&numReflect<10){
-        
-    marchDir=path.dat.reflectedRay;
-    stepForward(marchDir,path,-1.,reflRes);  
-    //stepping forward resets path reflectivity, taking Fresnel into account
-    numReflect+=1;
-    }
-
-}
+////bounce around via internal reflections until the reflectivity is below some threshhold:
+//void doInternalReflect(inout Path path,float thresh){
+//    
+//    int numReflect=-1;
+//    Vector marchDir;
+//    
+//    while(path.dat.reflect>thresh&&numReflect<10){
+//        
+//    marchDir=path.dat.reflectedRay;
+//    stepForward(marchDir,path,-1.,reflRes);  
+//    //stepping forward resets path reflectivity, taking Fresnel into account
+//    numReflect+=1;
+//    }
+//
+//}
 
 
 vec3 getInternalReflect(Path path){
@@ -68,7 +68,7 @@ vec3 getInternalReflect(Path path){
     
     bool keepGoing=true;
     
-    while(keepGoing&&numRefl<5){
+    while(keepGoing&&numRefl<10){
     //step forward one step along the reflection
     stepForward(path.dat.reflectedRay,path,-1.,reflRes);
     
@@ -96,19 +96,19 @@ vec3 getInternalReflect(Path path){
 }
 
 
-//starting at the outside of a transparent surface, refract into it, bounce around via TIR if required, and stop when you reach the backside, with nonunity reflectivity.
-void doRefract(inout Path path){
-    
-    //refract through surface, and march to the next intersection point
-    Vector marchDir=path.dat.refractedRay; 
-    stepForward(marchDir,path,-1.,stdRes);
-    
-    //check if we have to continue totally reflecting internally
-    //path.keepGoing=needTIR(path);
-    doTIR(path);//do the actual internal reflections
-    
-    //nothing here has changed intensity, so don't update path.keepGoing
-}
+////starting at the outside of a transparent surface, refract into it, bounce around via TIR if required, and stop when you reach the backside, with nonunity reflectivity.
+//void doRefract(inout Path path){
+//    
+//    //refract through surface, and march to the next intersection point
+//    Vector marchDir=path.dat.refractedRay; 
+//    stepForward(marchDir,path,-1.,stdRes);
+//    
+//    //check if we have to continue totally reflecting internally
+//    //path.keepGoing=needTIR(path);
+//    doTIR(path);//do the actual internal reflections
+//    
+//    //nothing here has changed intensity, so don't update path.keepGoing
+//}
 
 
 
@@ -136,36 +136,6 @@ vec3 getRefract(inout Path path){
     updateReflectIntensity(reflectPath);
     //get color from continuing the internal bounce and sampling whats outside.
     totalColor+=getInternalReflect(reflectPath);
-    
-//    
-//    //step forward one step along the reflection
-// stepForward(reflectPath.dat.reflectedRay,reflectPath,-1.,reflRes);
-//    
-//    //copy this material: new spot inside surface
-//    Path ref2Path=reflectPath;
-//    //update the amt of light which reflects inside
-//    updateReflectIntensity(ref2Path);
-//    
-//    
-//    //update the amount that can still transmit out
-//    updateTransmitIntensity(reflectPath,reflectPath.backMat);
-//    //now, refract through the surface
-//     
-//    stepForward(reflectPath.dat.refractedRay,reflectPath,1.,reflRes);
-//    //now get the color
-//    totalColor+=getSurfaceColor(reflectPath,false);
-//    
-//    
-//    //reflect the second path once more
-//  stepForward(ref2Path.dat.reflectedRay,ref2Path,-1.,reflRes);
-//    
-//    updateTransmitIntensity(ref2Path,ref2Path.backMat);
-//    
-//     stepForward(ref2Path.dat.refractedRay,ref2Path,1.,reflRes);
-//    //now get the color
-//    totalColor+=getSurfaceColor(ref2Path,false);
-//    
-
     
     return totalColor;
     

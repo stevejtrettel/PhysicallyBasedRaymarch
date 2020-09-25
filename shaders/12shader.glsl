@@ -72,7 +72,6 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
    // NOW: update the original data by the larger of the remaining intensities:
     if(reflPath.acc.intensity>transPath.acc.intensity){
         path=reflPath;
-        //totalColor=reflPath.acc.intensity*vec3(1.,0.,0.);
     }
     else{
         path=transPath; 
@@ -136,7 +135,7 @@ vec3 getPixelColor(Vector rayDir){
     totalColor+=beamSplit(transmittedRay,rP,tP);
         numIterate+=1;
     }
-    
+//    
     
     return totalColor;
     
