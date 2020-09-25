@@ -7,7 +7,7 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
     
     vec3 totalColor=vec3(0.);
     Vector reflectDir;
-    Vector refractDir;
+    Vector transmitDir;
 
     //pick up color from path
     //return final data of dominant ray
@@ -57,8 +57,8 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
         
 
     //march outwards in refracted direction, then iteratively reflect if need be.
-    refractDir=transPath.dat.refractedRay;
-    totalColor+=getReflect(transPath,refractDir);
+    transmitDir=transPath.dat.refractedRay;
+    totalColor+=getReflect(transPath,transmitDir);
     
     //update the keep going command
    transPath.keepGoing=transPath.keepGoing&&(transPath.acc.intensity>0.01);

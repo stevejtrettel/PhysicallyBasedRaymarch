@@ -60,6 +60,38 @@ void doInternalReflect(inout Path path,float thresh){
 }
 
 
+vec3 getInternalReflect(Path path){
+    vec3 totalColor;
+    //take a path, which starts inside a piece of glass where there is reflectivity but not total; and iteratively bounce around, shooting out the portions of rays which exit, and picking up color
+    Path savePath;
+    int numRefl=0;
+    
+    while(path.keepGoing&&numRefl<3){
+    //step forward one step along the reflection
+    stepForward(path.dat.reflectedRay,path,-1.,reflRes);
+    
+    //copy this material: new spot inside surface
+    //set the intensity to only what remains internally reflected
+    savePath=path;
+    updateReflectIntensity(savePath);
+    
+    //update the amount that can still transmit out
+    updateTransmitIntensity(path,path.backMat);
+    stepForward(path.dat.refractedRay,path,1.,reflRes);
+    //now get the color
+    totalColor+=getSurfaceColor(path,false);
+    
+     //now we are done with "path"!
+    //can re-use it and run again/
+    path=savePath;
+    numRefl+=1;
+   
+}
+
+    return totalColor;
+    
+}
+
 
 //starting at the outside of a transparent surface, refract into it, bounce around via TIR if required, and stop when you reach the backside, with nonunity reflectivity.
 void doRefract(inout Path path){
@@ -89,42 +121,48 @@ vec3 getRefract(inout Path path){
     //now we are positioned at the back wall of the surface, and the internal reflectivity is no longer 1
     //save this position; this is where we start the next march
     
+
+    //copy path for internal reflection:
+    Path reflectPath=path;
+    
     //update the path intensity, taking out the reflective comp
     //path.backmat is the glass we are inside of
     updateTransmitIntensity(path,path.backMat);
     
-//reflect again on the inside to pick up the other bit of color:
-  Path reflectPath=path;
     //update the intensity for what is available for reflection still
     updateReflectIntensity(reflectPath);
     
-    //step forward one step along the reflection
- stepForward(reflectPath.dat.reflectedRay,reflectPath,-1.,reflRes);
     
-    //copy this material: new spot inside surface
-    Path ref2Path=reflectPath;
-    //update the amt of light which reflects inside
-    updateReflectIntensity(ref2Path);
+    totalColor+=getInternalReflect(reflectPath);
     
-    
-    //update the amount that can still transmit out
-    updateTransmitIntensity(reflectPath,reflectPath.backMat);
-    //now, refract through the surface
-     
-    stepForward(reflectPath.dat.refractedRay,reflectPath,1.,reflRes);
-    //now get the color
-    totalColor+=getSurfaceColor(reflectPath,false);
-    
-    
-    //reflect the second path once more
-  stepForward(ref2Path.dat.reflectedRay,ref2Path,-1.,reflRes);
-    
-    updateTransmitIntensity(ref2Path,ref2Path.backMat);
-    
-     stepForward(ref2Path.dat.refractedRay,ref2Path,1.,reflRes);
-    //now get the color
-    totalColor+=getSurfaceColor(ref2Path,false);
-    
+//    
+//    //step forward one step along the reflection
+// stepForward(reflectPath.dat.reflectedRay,reflectPath,-1.,reflRes);
+//    
+//    //copy this material: new spot inside surface
+//    Path ref2Path=reflectPath;
+//    //update the amt of light which reflects inside
+//    updateReflectIntensity(ref2Path);
+//    
+//    
+//    //update the amount that can still transmit out
+//    updateTransmitIntensity(reflectPath,reflectPath.backMat);
+//    //now, refract through the surface
+//     
+//    stepForward(reflectPath.dat.refractedRay,reflectPath,1.,reflRes);
+//    //now get the color
+//    totalColor+=getSurfaceColor(reflectPath,false);
+//    
+//    
+//    //reflect the second path once more
+//  stepForward(ref2Path.dat.reflectedRay,ref2Path,-1.,reflRes);
+//    
+//    updateTransmitIntensity(ref2Path,ref2Path.backMat);
+//    
+//     stepForward(ref2Path.dat.refractedRay,ref2Path,1.,reflRes);
+//    //now get the color
+//    totalColor+=getSurfaceColor(ref2Path,false);
+//    
 
     
     return totalColor;
