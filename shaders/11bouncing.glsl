@@ -66,7 +66,9 @@ vec3 getInternalReflect(Path path){
     Path savePath;
     int numRefl=0;
     
-    while(path.keepGoing&&numRefl<3){
+    bool keepGoing=true;
+    
+    while(keepGoing&&numRefl<5){
     //step forward one step along the reflection
     stepForward(path.dat.reflectedRay,path,-1.,reflRes);
     
@@ -85,6 +87,7 @@ vec3 getInternalReflect(Path path){
     //can re-use it and run again/
     path=savePath;
     numRefl+=1;
+    keepGoing=(path.dat.reflect>0.)&&(path.acc.intensity>0.01);
    
 }
 
@@ -131,8 +134,7 @@ vec3 getRefract(inout Path path){
     
     //update the intensity for what is available for reflection still
     updateReflectIntensity(reflectPath);
-    
-    
+    //get color from continuing the internal bounce and sampling whats outside.
     totalColor+=getInternalReflect(reflectPath);
     
 //    

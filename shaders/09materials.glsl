@@ -82,7 +82,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
             
             mat.vol.refract=1.55;
             mat.vol.opacity=0.05;
-            mat.vol.absorb=0.5*vec3(0.3,0.05,0.2);
+            mat.vol.absorb=vec3(0.3,0.05,0.2);
             mat.vol.emit=vec3(0.);
 
             break;

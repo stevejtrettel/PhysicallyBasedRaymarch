@@ -57,6 +57,66 @@ float slabZ(Point p,float offset, float width){
 }
 
 
+float vertCyl(Point p, Point center, float radius){
+    return length(p.coords.xy-center.coords.xy)-radius;
+
+}
+float sphere(Point p, Point center, float radius){
+    return exactDist(p,center)-radius;
+}
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// from  IQ: 
+//https://iquilezles.org/www/articles/distfunctions/distfunctions.htm
+//----------------------------------------------------------------------------------------------------------------------
+float dot2( in vec2 v ) { return dot(v,v); }
+float dot2( in vec3 v ) { return dot(v,v); }
+float ndot( in vec2 a, in vec2 b ) { return a.x*b.x - a.y*b.y; }
+
+
+float sdBox( Point pt, Point cent,vec3 b )
+    {
+    vec3 p=pt.coords.xyz-cent.coords.xyz;
+    
+    vec3 q = abs(p) - b;
+    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+    }
+
+
+
+float sdRoundBox( Point pt, Point cent,vec3 b, float r )
+    {
+        vec3 p=pt.coords.xyz-cent.coords.xyz;
+        vec3 q = abs(p) - b;
+        return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - r;
+    }
+
+
+float sdTorus( Point pt, Point cent, vec2 t )
+{
+    vec3 p=pt.coords.xyz-cent.coords.xyz;
+  vec2 q = vec2(length(p.xz)-t.x,p.y);
+  return length(q)-t.y;
+}
+
+
+float sdRoundedCylinder( Point pt, Point cent,float ra, float rb, float h )
+{vec3 p=pt.coords.xyz-cent.coords.xyz;
+  vec2 d = vec2( length(p.xz)-2.0*ra+rb, abs(p.y) - h );
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rb;
+}
+
+
+float sdOctahedron( Point pt, Point cent,float s)
+{ vec3 p=pt.coords.xyz-cent.coords.xyz;
+  p = abs(p);
+  return (p.x+p.y+p.z-s)*0.57735027+0.01;
+}
+
+
 
 
 float block(Point p, Point center, float x, float y, float z){
@@ -74,10 +134,4 @@ float cube(Point p, Point center, float s){
 }
 
 
-float vertCyl(Point p, Point center, float radius){
-    return length(p.coords.xy-center.coords.xy)-radius;
 
-}
-float sphere(Point p, Point center, float radius){
-    return exactDist(p,center)-radius;
-}
