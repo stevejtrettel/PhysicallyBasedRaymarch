@@ -6,13 +6,15 @@ void stepForward(Vector direction, inout Path path,float side,marchRes res){
         
     nudge(direction);//move the ray a little
     raymarch(direction,side,res);//march to next object
-    updatePath(path,sampletv,isSky);//update the local data accordingly
+    //raymarch sets the globals distToViewer and isSky
+    
+    updatePath(path,sampletv,distToViewer,isSky);//update the local data accordingly
     
     //update the distance travelled:
-    path.acc.dist+=distToViewer;
+    //path.acc.dist+=distToViewer;
     //path.backMat=material we just marched through
     //use this to update the accumulated color
-    updateAccColor(path, path.backMat,distToViewer);
+    //updateAccColor(path, path.backMat,distToViewer);
     }
 }
 
@@ -67,13 +69,13 @@ vec3 getInternalReflect(Path path){
     totalColor+=getSurfaceColor(transmitPath,transmitPath.frontMat,false);
     
     numRefl+=1;
-    keepGoing=(path.dat.reflect>0.)&&(path.acc.intensity>0.01);
+    keepGoing=(path.dat.reflect>0.)&&(path.intensity>0.01);
    
 }
 
     //picked up color from some number of bounces, but also some light "escapes" as we cut the bouncing short.  Brighten the color to make up for that:
 
-return (1.+path.acc.intensity)*totalColor;
+return (1.+path.intensity)*totalColor;
     
 }
 
@@ -93,7 +95,7 @@ vec3 getRefract(inout Path path){
     //save this position; this is where we start the next march
     
     //if there's sufficient light intensity to warrant it; keep going:
-    if(path.acc.intensity>0.1){
+    if(path.intensity>0.1){
     //copy path for internal reflection:
     Path reflectPath=path;
     
@@ -141,7 +143,7 @@ vec3 getReflect(inout Path path,Vector initialDir){
     
     //we keep going if the material in front of us is not transparent
     //or if it is the sky, cuz we need to add the sky color
-     bool keepGoing=path.keepGoing&&(path.hitSky||path.frontMat.vol.opacity==1.);
+     bool keepGoing=path.keepGoing&&(path.dat.hitSky||path.frontMat.vol.opacity==1.);
     
      while(keepGoing&&numRefl<MAX_REFL){
         
@@ -153,7 +155,7 @@ vec3 getReflect(inout Path path,Vector initialDir){
         stepForward(path.dat.reflectedRay,path,1.,reflRes);
         
         //keep going if (1) not sky, and (2)object is opaque and (3)there's sufficient intensity to bother.
-        keepGoing=path.keepGoing&&(!path.hitSky)&&path.frontMat.vol.opacity==1.&&(path.acc.intensity>0.01);
+        keepGoing=path.keepGoing&&(!path.dat.hitSky)&&path.frontMat.vol.opacity==1.&&(path.intensity>0.01);
         
         numRefl+=1;
     }
@@ -161,7 +163,7 @@ vec3 getReflect(inout Path path,Vector initialDir){
     //right now, once we hit
     
     //reset path.keepGoing to quit if we did all 10 steps, or if the intensity is very low.
-    path.keepGoing=path.keepGoing&&(numRefl<MAX_REFL)&&(path.acc.intensity>0.05);
+    path.keepGoing=path.keepGoing&&(numRefl<MAX_REFL)&&(path.intensity>0.05);
 
 
     return totalColor;

@@ -159,27 +159,23 @@ void updateReflect(inout localData dat, Material back, Material front){
 
 
 
-//======new version==========
-void updateAccColor(inout Path path, Material mat, float dist){
-    path.acc.color *= exp(-mat.vol.absorb*dist);
-}
+////======new version==========
+//void updateAccColor(inout Path path, Material mat, float dist){
+//    path.acc.color *= exp(-mat.vol.absorb*dist);
+//}
 
 
 //update the light intensity of a local data, depending on if we are continuing on for reflection or transmission
 void updateReflectIntensity(inout Path path){
     //need to make sure the reflectivity has been properly updated in path
-    path.acc.intensity*=path.dat.reflect;
+    path.intensity*=path.dat.reflect;
 }
 
 
 void updateTransmitIntensity(inout Path path,Material mat){
     //need to make sure the reflectivity has been properly updated in path
-    path.acc.intensity*=(1.-path.dat.reflect)*(1.-mat.vol.opacity);
+    path.intensity*=(1.-path.dat.reflect)*(1.-mat.vol.opacity);
 }
-
-
-
-
 
 
 
@@ -211,13 +207,13 @@ Path copyForReflect(Path path, Material mat){
 
 
 //takes in path, and copies it, adjusting the intensity of both reflectPath and transPath by the reflectivity / opacity of the material path.frontMat in front at the time.
-void splitPath(Path path, Material mat, inout Path reflPath, inout Path transPath){
-     
-    transPath=copyForTransmit(path, mat);
-    reflPath=copyForReflect(path,mat); 
-    
-}
-
+//void splitPath(Path path, Material mat, inout Path reflPath, inout Path transPath){
+//     
+//    transPath=copyForTransmit(path, mat);
+//    reflPath=copyForReflect(path,mat); 
+//    
+//}
+//
 
 
 
@@ -258,10 +254,12 @@ void updateLocalData(inout localData dat, Vector tv, Material back,Material fron
 
 
 //====new function to update the local data: reflection refraction etc AND THE MATERIALS
-void updatePath(inout Path path, Vector tv,bool isSky){
+//tv is current location;
+//dist is the distance traveled to reach here;
+void updatePath(inout Path path, Vector tv,float dist,bool isSky){
     
     if(isSky){//if we hit the sky; kill the path
-        path.hitSky=true;
+        path.dat.hitSky=true;
         setSkyMaterial(path.frontMat,tv);
         setSkyMaterial(path.backMat,tv);
         return;
@@ -273,5 +271,9 @@ void updatePath(inout Path path, Vector tv,bool isSky){
     
     //update the direction vectors, and reflectivity
     updateLocalData(path.dat,tv,path.backMat,path.frontMat);
+    
+    //update the accumulation parameters:
+    path.dist+=dist;
+    path.color *= exp(-path.backMat.vol.absorb*dist);
     
 }

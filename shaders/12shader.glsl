@@ -32,7 +32,7 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
     totalColor+=getReflect(reflPath,reflectDir);
     
     //update the keep going command; kill if too dim
-    reflPath.keepGoing=reflPath.keepGoing&&(reflPath.acc.intensity>0.01);
+    reflPath.keepGoing=reflPath.keepGoing&&(reflPath.intensity>0.01);
         
     //when this stops; reflPath has either run out of steam, or impacted a transparent surface.
     }
@@ -48,7 +48,7 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
     totalColor+=getReflect(transPath,transmitDir);
     
     //update the keep going command
-   transPath.keepGoing=transPath.keepGoing&&(transPath.acc.intensity>0.01);
+   transPath.keepGoing=transPath.keepGoing&&(transPath.intensity>0.01);
     
     }
     
@@ -57,7 +57,7 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
     
     
    // NOW: update the original data by the larger of the remaining intensities:
-    if(reflPath.acc.intensity>transPath.acc.intensity){
+    if(reflPath.intensity>transPath.intensity){
         path=reflPath;
     }
     else{

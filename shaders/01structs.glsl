@@ -326,18 +326,18 @@ Material air=Material(noSurface,transparentVolume);
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Surface Data
 //----------------------------------------------------------------------------------------------------------------------
-
-struct Accumulate{//stuff that accumulates along a path
-    vec3 color;//color absorbtion from beers law;
-    float intensity;//total intensity left on the ray
-    float dist; //total distance traveled from the viewer;
-};
-
-void resetAcc(inout Accumulate acc){
-    acc.color=vec3(1.);
-    acc.intensity=1.;
-    acc.dist=0.;
-}
+//
+//struct Accumulate{//stuff that accumulates along a path
+//    vec3 color;//color absorbtion from beers law;
+//    float intensity;//total intensity left on the ray
+//    float dist; //total distance traveled from the viewer;
+//};
+//
+//void resetAcc(inout Accumulate acc){
+//    acc.color=vec3(1.);
+//    acc.intensity=1.;
+//    acc.dist=0.;
+//}
 
 
     
@@ -353,6 +353,7 @@ struct localData{
     Vector refractedRay;
     float side;//inside or outside an object
     float reflect;//reflectivity of the surface we are currently at.
+    bool hitSky;
     
 };
 
@@ -363,24 +364,28 @@ struct localData{
 //instead of just tracking the tangent vector, we can keep one of these objects in tow;
 struct Path{
     localData dat;
-    Accumulate acc;
     
     //materials at our current location
     Material backMat;
     Material frontMat;
     
+    float intensity;
+    float dist;
+    vec3 color;
+    
     bool keepGoing;//do we kill this ray?
-    bool hitSky;//did we hit the sky?
 };
 
 
 void initializePath(inout Path path){
+    path.dat.hitSky=false;
     //set the initial data
     path.frontMat=air;
     path.backMat=air;
-    resetAcc(path.acc);
+    path.intensity=1.;
+    path.dist=0.;
+    path.color=vec3(1.);
     path.keepGoing=true;
-    path.hitSky=false;
 }
 
 
