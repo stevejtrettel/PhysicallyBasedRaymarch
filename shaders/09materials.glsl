@@ -52,7 +52,6 @@ return texture(tex,vec2(x,y)).rgb;
 
 void setSkyMaterial(inout Material mat, Vector tv){
             mat=air;
-            mat.bkgnd=true;
             mat.vol.opacity=0.;
             mat.surf.color=SRGBToLinear(skyTex(sampletv));
             mat.vol.absorb=vec3(0.);
@@ -74,8 +73,6 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
         
              
          case 3://glass
-            mat.bkgnd=false;
-             
             mat.surf.color=vec3(0.05);
             mat.surf.phong.shiny=15.;
             mat.surf.reflect=0.08;
@@ -89,8 +86,6 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
 
              
         case 4://mirror
-            mat.bkgnd=false;
-             
             mat.surf.color=vec3(0.03,0.05,0.2);
             mat.surf.reflect=0.95;
             mat.surf.phong.shiny=15.;

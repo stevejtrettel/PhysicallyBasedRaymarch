@@ -319,10 +319,9 @@ const Volume transparentVolume=Volume(1.,0.,vec3(0.),vec3(0.));
 struct Material{
     Surface surf;
     Volume vol;
-    bool bkgnd;//if this is something in the background, or an actual object
 };
 
-Material air=Material(noSurface,transparentVolume,false);
+Material air=Material(noSurface,transparentVolume);
 
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Surface Data
