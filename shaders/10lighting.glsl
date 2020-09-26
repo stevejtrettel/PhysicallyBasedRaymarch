@@ -142,7 +142,7 @@ vec3 getSurfaceColor(inout Path path,Material mat, bool marchShadow){
         //kill the ray
         path.keepGoing=false;
         //weight by amount of surviving light and get out
-        return (path.color)*(path.intensity)*(mat.surf.color);
+        return (path.lightColor)*(path.accColor)*(path.intensity)*(mat.surf.color);
     }
     
     vec3 amb;//ambient lighting
@@ -157,8 +157,9 @@ vec3 getSurfaceColor(inout Path path,Material mat, bool marchShadow){
 
     float intensityFactor= path.intensity*(1.-path.dat.reflect) *mat.vol.opacity;
     
-    totalColor*=path.color;//correct for absorbtion
+    totalColor*=path.accColor;//correct for absorbtion
     totalColor*=intensityFactor;//correct for intensity
+    totalColor*=path.lightColor;//correct for color of light beam;
     }
     
     

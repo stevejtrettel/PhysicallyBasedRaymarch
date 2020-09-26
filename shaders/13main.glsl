@@ -96,7 +96,7 @@ void main(){
     
     
 //do the first raymarch and get the color
-    vec3 pixelColor=getPixelColor(rayDir);
+    vec3 pixelColor=getPixelColorDispersion(rayDir);
     
     float exposure=1.25;
     pixelColor*=exposure;
