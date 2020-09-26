@@ -188,8 +188,8 @@ void setVariables(){
        
        
        
-       pointLight1=createPointLight(createPoint(1.,1.,1.),vec3(1.,1.,1.),1.,0.2);
-    pointLight2=createPointLight(createPoint(-1.,-1.,0.),vec3(1.,1.,1.),1.,0.2);
+       pointLight1=createPointLight(createPoint(3.,1.,1.),vec3(1.,1.,1.),1.,0.5);
+    pointLight2=createPointLight(createPoint(-2.,2.,2.),vec3(1.,1.,1.),1.,0.5);
     
     dirLight1=createDirLight(vec3(0.,0.,1.),skyColor.rgb,skyColor.w);
 

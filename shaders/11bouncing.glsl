@@ -4,9 +4,8 @@ void stepForward(Vector direction, inout Path path,float side,marchRes res){
     
     if(path.keepGoing){//if we arent supposed to keep going, do nothing
         
-    //so instead, we just focus on following the refracted ray.
     nudge(direction);//move the ray a little
-    raymarch(direction,side,res);//going outside the material
+    raymarch(direction,side,res);//march to next object
     updatePath(path,sampletv,isSky);//update the local data accordingly
     
     //update the distance travelled:
@@ -27,8 +26,8 @@ void stepForward(Vector direction, inout Path path,float side,marchRes res){
 
 
 void doTIR(inout Path path){
-    //float dist=0.;
-    int numReflect=-1;
+
+    int numReflect=0;
     Vector marchDir;
     
     while(path.dat.reflect==1.&&numReflect<20){
@@ -40,75 +39,44 @@ void doTIR(inout Path path){
     numReflect+=1;
     }
 
+    //when this stops: still inside material, at point where there is some transmission and some reflectance.
 }
 
-
-////bounce around via internal reflections until the reflectivity is below some threshhold:
-//void doInternalReflect(inout Path path,float thresh){
-//    
-//    int numReflect=-1;
-//    Vector marchDir;
-//    
-//    while(path.dat.reflect>thresh&&numReflect<10){
-//        
-//    marchDir=path.dat.reflectedRay;
-//    stepForward(marchDir,path,-1.,reflRes);  
-//    //stepping forward resets path reflectivity, taking Fresnel into account
-//    numReflect+=1;
-//    }
-//
-//}
 
 
 vec3 getInternalReflect(Path path){
     vec3 totalColor;
     //take a path, which starts inside a piece of glass where there is reflectivity but not total; and iteratively bounce around, shooting out the portions of rays which exit, and picking up color
-    Path savePath;
+    Path transmitPath;
     int numRefl=0;
     
     bool keepGoing=true;
+    vec3 testColor=vec3(0.);
     
+
     while(keepGoing&&numRefl<10){
     //step forward one step along the reflection
     stepForward(path.dat.reflectedRay,path,-1.,reflRes);
     
-    //copy this material: new spot inside surface
-    //set the intensity to only what remains internally reflected
-    savePath=path;
-    updateReflectIntensity(savePath);
-    
-    //update the amount that can still transmit out
-    updateTransmitIntensity(path,path.backMat);
-    stepForward(path.dat.refractedRay,path,1.,reflRes);
+    transmitPath=copyForTransmit(path,path.backMat);
+    //decrease remaining intensity by what is left for reflection.
+    updateReflectIntensity(path);
+
+    stepForward(transmitPath.dat.refractedRay,transmitPath,1.,reflRes);
     //now get the color
-    totalColor+=getSurfaceColor(path,false);
+    totalColor+=getSurfaceColor(transmitPath,false);
     
-     //now we are done with "path"!
-    //can re-use it and run again/
-    path=savePath;
     numRefl+=1;
     keepGoing=(path.dat.reflect>0.)&&(path.acc.intensity>0.01);
    
 }
 
-    return totalColor;
+    //picked up color from some number of bounces, but also some light "escapes" as we cut the bouncing short.  Brighten the color to make up for that:
+
+return (1.+path.acc.intensity)*totalColor;
     
 }
 
-
-////starting at the outside of a transparent surface, refract into it, bounce around via TIR if required, and stop when you reach the backside, with nonunity reflectivity.
-//void doRefract(inout Path path){
-//    
-//    //refract through surface, and march to the next intersection point
-//    Vector marchDir=path.dat.refractedRay; 
-//    stepForward(marchDir,path,-1.,stdRes);
-//    
-//    //check if we have to continue totally reflecting internally
-//    //path.keepGoing=needTIR(path);
-//    doTIR(path);//do the actual internal reflections
-//    
-//    //nothing here has changed intensity, so don't update path.keepGoing
-//}
 
 
 
@@ -124,9 +92,14 @@ vec3 getRefract(inout Path path){
     //now we are positioned at the back wall of the surface, and the internal reflectivity is no longer 1
     //save this position; this is where we start the next march
     
-
+    //if there's sufficient light intensity to warrant it; keep going:
+    if(path.acc.intensity>0.1){
     //copy path for internal reflection:
     Path reflectPath=path;
+    
+    //get the color of the back surface from Phong?
+    path.mat=path.backMat;
+    totalColor+=getSurfaceColor(path,false);
     
     //update the path intensity, taking out the reflective comp
     //path.backmat is the glass we are inside of
@@ -136,10 +109,12 @@ vec3 getRefract(inout Path path){
     updateReflectIntensity(reflectPath);
     //get color from continuing the internal bounce and sampling whats outside.
     totalColor+=getInternalReflect(reflectPath);
+    }
     
+    //if the orig intensity wasn't very strong: the internal color collection doesn't run, so this adds nothing
     return totalColor;
     
-    //the pathData here is unchanged, still at the exit point;
+    //the pathData is still at the first exit point from total internal refraction
 }
 
 

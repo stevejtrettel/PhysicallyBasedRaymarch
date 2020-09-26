@@ -80,7 +80,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
             mat.surf.phong.shiny=15.;
             mat.surf.reflect=0.08;
             
-            mat.vol.refract=1.55;
+            mat.vol.refract=1.33;
             mat.vol.opacity=0.05;
             mat.vol.absorb=vec3(0.3,0.05,0.2);
             mat.vol.emit=vec3(0.);
@@ -106,36 +106,6 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
         
     }
     
-}
-
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// Getting Normals, Reflectivities, etc.
-//----------------------------------------------------------------------------------------------------------------------
-
-Vector getSurfaceNormal(Point p){
-    float ep=5.*EPSILON;
-    vec3 bx = vec3(1.,0.,0.);
-    vec3 by = vec3(0.,1.,0.);
-    vec3 bz  = vec3(0.,0.,1.);
-    
-    float dx=sceneSDF(shiftPoint(p,bx,ep))-sceneSDF(shiftPoint(p,bx,-ep));
-    float dy=sceneSDF(shiftPoint(p,by,ep))-sceneSDF(shiftPoint(p,by,-ep));
-    float dz=sceneSDF(shiftPoint(p,bz,ep))-sceneSDF(shiftPoint(p,bz,-ep));
-    
-    vec3 n=dx*bx+dy*by+dz*bz;
-    
-    Vector normal=Vector(p,n);
-
-    return tangNormalize(normal);
-
-    
-}
-
-Vector getSurfaceNormal(Vector tv){
-    Point p=tv.pos;
-    return getSurfaceNormal(p);
 }
 
 
@@ -211,6 +181,50 @@ void updateTransmitIntensity(inout Path path,Material mat){
     //need to make sure the reflectivity has been properly updated in path
     path.acc.intensity*=(1.-path.dat.reflect)*(1.-mat.vol.opacity);
 }
+
+
+
+
+
+
+
+
+
+
+//copy a path for transmission through a surface,
+Path copyForTransmit(Path path, Material mat){
+     //make the transmission data
+    Path transPath=path;
+    //make this true only if the is somewhat transparent
+    transPath.keepGoing=transPath.keepGoing&&(mat.vol.opacity<1.);
+    //update the intensity of the light which gets transmitted
+    updateTransmitIntensity(transPath,mat);
+    return transPath;
+}
+
+//copy a path for reflection through a surface
+Path copyForReflect(Path path, Material mat){
+        //make the reflection data
+    Path reflPath=path;
+    //reset keepGoing to tell us if reflectivity>0
+    reflPath.keepGoing=reflPath.keepGoing&&(reflPath.dat.reflect>0.);
+    //keep only the amount of intensity which gets reflected.
+    updateReflectIntensity(reflPath);
+    
+    return reflPath;
+}
+
+
+//takes in path, and copies it, adjusting the intensity of both reflectPath and transPath by the reflectivity / opacity of the material path.frontMat in front at the time.
+void splitPath(Path path, Material mat, inout Path reflPath, inout Path transPath){
+     
+    transPath=copyForTransmit(path, mat);
+    reflPath=copyForReflect(path,mat); 
+    
+}
+
+
+
 
 
 

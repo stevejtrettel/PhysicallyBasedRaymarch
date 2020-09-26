@@ -111,3 +111,53 @@ float shadowmarch(in Vector toLight, float distToLight,float k)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Getting Normals, Reflectivities, etc.
+//----------------------------------------------------------------------------------------------------------------------
+
+Vector getSurfaceNormal(Point p){
+    float ep=5.*EPSILON;
+    vec3 bx = vec3(1.,0.,0.);
+    vec3 by = vec3(0.,1.,0.);
+    vec3 bz  = vec3(0.,0.,1.);
+    
+    float dx=sceneSDF(shiftPoint(p,bx,ep))-sceneSDF(shiftPoint(p,bx,-ep));
+    float dy=sceneSDF(shiftPoint(p,by,ep))-sceneSDF(shiftPoint(p,by,-ep));
+    float dz=sceneSDF(shiftPoint(p,bz,ep))-sceneSDF(shiftPoint(p,bz,-ep));
+    
+    vec3 n=dx*bx+dy*by+dz*bz;
+    
+    Vector normal=Vector(p,n);
+
+    return tangNormalize(normal);
+
+    
+}
+
+Vector getSurfaceNormal(Vector tv){
+    Point p=tv.pos;
+    return getSurfaceNormal(p);
+}
+
+
+
+
+
+
+
+
+

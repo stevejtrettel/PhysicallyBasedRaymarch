@@ -1,6 +1,5 @@
 
 
-
 //start from the location stored in path: split along reflective and transmitted components, add up resulting colors.
 //return both the final locations of transmitted and reflected rays, and set path to be the one with the most light left.
 vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
@@ -8,7 +7,8 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
     vec3 totalColor=vec3(0.);
     Vector reflectDir;
     Vector transmitDir;
-
+    
+    
     //pick up color from path
     //return final data of dominant ray
     
@@ -19,21 +19,10 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
     
     
     
-    //now, copy the initial data in two, so we can split 
-    reflPath=path;
-    //reset keepGoing to tell us if reflectivity>0
-    reflPath.keepGoing=(reflPath.dat.reflect>0.);
-    //keep only the amount of intensity which gets reflected.
-    updateReflectIntensity(reflPath);
-    
-    
-    
-    transPath=path;
-    transPath.mat=path.frontMat;
-    //make this true only if the material lets some light through
-    transPath.keepGoing=(transPath.mat.vol.opacity<1.);
-    //update the intensity of the light which gets transmitted
-    updateTransmitIntensity(transPath,transPath.frontMat);
+    //make a copy of path to transmit, and to reflect:
+    //we began in the air, and hit a surface, so the relevant material is path.frontMat
+    reflPath=copyForReflect(path,path.frontMat);
+    transPath=copyForTransmit(path,path.frontMat);
     
     
     
@@ -52,10 +41,9 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
 
     
     if(transPath.keepGoing){
-    //do the refraction through this transparent object, stop at the back side
+    //do the refraction through this transparent object, stop at the back side; pick up internal colors along the way
     totalColor+=getRefract(transPath);
-        
-
+    
     //march outwards in refracted direction, then iteratively reflect if need be.
     transmitDir=transPath.dat.refractedRay;
     totalColor+=getReflect(transPath,transmitDir);
@@ -112,8 +100,8 @@ vec3 getPixelColor(Vector rayDir){
     
     //====shorter compile time
     //====follow only the brightest initial ray
-//    while(path.keepGoing&&numIterate<5){    totalColor+=beamSplit(path,reflectedRay,transmittedRay);       numIterate+=1;
-//  }
+    while(path.keepGoing&&numIterate<5){    totalColor+=beamSplit(path,reflectedRay,transmittedRay);       numIterate+=1;
+  }
 //    
     
     
@@ -123,18 +111,18 @@ vec3 getPixelColor(Vector rayDir){
 //    
 //    
     //now we are on the surface.  lets beamSplit! 
-    totalColor+=beamSplit(path,reflectedRay,transmittedRay);
-    
-    //now, follow each of these separately
-    while(reflectedRay.keepGoing&&numIterate<3){
-    totalColor+=beamSplit(reflectedRay,rP,tP);
-        numIterate+=1;
-    }
-    
-    while(transmittedRay.keepGoing&&numIterate<3){
-    totalColor+=beamSplit(transmittedRay,rP,tP);
-        numIterate+=1;
-    }
+//    totalColor+=beamSplit(path,reflectedRay,transmittedRay);
+//    
+//    //now, follow each of these separately
+//    while(reflectedRay.keepGoing&&numIterate<3){
+//    totalColor+=beamSplit(reflectedRay,rP,tP);
+//        numIterate+=1;
+//    }
+//    
+//    while(transmittedRay.keepGoing&&numIterate<3){
+//    totalColor+=beamSplit(transmittedRay,rP,tP);
+//        numIterate+=1;
+//    }
 //    
     
     return totalColor;
