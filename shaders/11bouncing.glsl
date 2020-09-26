@@ -64,7 +64,7 @@ vec3 getInternalReflect(Path path){
 
     stepForward(transmitPath.dat.refractedRay,transmitPath,1.,reflRes);
     //now get the color
-    totalColor+=getSurfaceColor(transmitPath,false);
+    totalColor+=getSurfaceColor(transmitPath,transmitPath.frontMat,false);
     
     numRefl+=1;
     keepGoing=(path.dat.reflect>0.)&&(path.acc.intensity>0.01);
@@ -98,8 +98,7 @@ vec3 getRefract(inout Path path){
     Path reflectPath=path;
     
     //get the color of the back surface from Phong?
-    path.mat=path.backMat;
-    totalColor+=getSurfaceColor(path,false);
+    totalColor+=getSurfaceColor(path,path.backMat,false);
     
     //update the path intensity, taking out the reflective comp
     //path.backmat is the glass we are inside of
@@ -142,20 +141,19 @@ vec3 getReflect(inout Path path,Vector initialDir){
     
     //we keep going if the material in front of us is not transparent
     //or if it is the sky, cuz we need to add the sky color
-     bool keepGoing=path.keepGoing&&(path.hitSky||path.mat.vol.opacity==1.);
+     bool keepGoing=path.keepGoing&&(path.hitSky||path.frontMat.vol.opacity==1.);
     
      while(keepGoing&&numRefl<MAX_REFL){
         
         //pick up the color
-        path.mat=path.frontMat;
-        totalColor+=getSurfaceColor(path,true);
+        totalColor+=getSurfaceColor(path,path.frontMat,true);
         updateReflectIntensity(path);
          
          //reflect off the surface
         stepForward(path.dat.reflectedRay,path,1.,reflRes);
         
         //keep going if (1) not sky, and (2)object is opaque and (3)there's sufficient intensity to bother.
-        keepGoing=path.keepGoing&&(path.hitSky||path.mat.vol.opacity==1.);
+        keepGoing=path.keepGoing&&(!path.hitSky)&&path.frontMat.vol.opacity==1.&&(path.acc.intensity>0.01);
         
         numRefl+=1;
     }

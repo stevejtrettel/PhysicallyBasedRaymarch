@@ -24,13 +24,13 @@ float planeDistance(Point p){
 float glassDistance(Point p){
     
     float distance=
-         sphere(p,createPoint(-2.,2.,0.),1.5);
+         sphere(p,createPoint(-5.,3.,0.),1.5);
     
 
 
-       distance=min(distance, sdTorus(p,createPoint(0.,3.,2.),vec2(1.,0.5)));
+       distance=min(distance, sdTorus(p,createPoint(0.,2.,0.),vec2(1.5,0.8)));
     
-//       distance=min(distance, sdRoundBox(p, createPoint(-5.,3.,2.),vec3(1.,1.,1.), 0.1 ));
+     distance=min(distance, sdRoundBox(p, createPoint(5.,3.,0.),vec3(1.,1.,1.), 0.1 ));
 ////    
     
 //      distance=min(distance,
@@ -126,7 +126,7 @@ void setHitWhich(Vector tv,float ep){
         return;
     }
     
-        //mirrored surfaces
+      //  mirrored surfaces
 //    else if(mirrorDistance(tv.pos)<0.){
 //        hitWhich=4;
 //        return;

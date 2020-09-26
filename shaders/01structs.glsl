@@ -366,9 +366,7 @@ struct Path{
     localData dat;
     Accumulate acc;
     
-    Material mat;//the material we want to send to graphics
-    
-    //auxillary materials to help with computations before marches
+    //materials at our current location
     Material backMat;
     Material frontMat;
     
@@ -379,7 +377,8 @@ struct Path{
 
 void initializePath(inout Path path){
     //set the initial data
-    path.mat=air;
+    path.frontMat=air;
+    path.backMat=air;
     resetAcc(path.acc);
     path.keepGoing=true;
     path.hitSky=false;

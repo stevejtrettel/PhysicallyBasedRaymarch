@@ -12,9 +12,8 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
     //pick up color from path
     //return final data of dominant ray
     
-    //picking up color from path.mat
-    path.mat=path.frontMat;//only if we started outside!
-    totalColor+=getSurfaceColor(path,true);
+    //picking up color 
+    totalColor+=getSurfaceColor(path,path.frontMat,true);
     if(!path.keepGoing){return totalColor;}//stop if you are at the sky
     
     
