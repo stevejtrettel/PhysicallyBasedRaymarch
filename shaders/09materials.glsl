@@ -276,8 +276,8 @@ void updatePath(inout Path path, Vector tv,float dist,bool isSky){
     }
     
     //otherwise, sample the material in front and behind
-    updateMaterial(path.backMat,tv,-0.05);
-    updateMaterial(path.frontMat,tv,0.05);
+    updateMaterial(path.backMat,tv,-0.1);
+    updateMaterial(path.frontMat,tv,0.1);
     
     //update the direction vectors, and reflectivity
     updateLocalData(path.dat,tv,path.backMat,path.frontMat);

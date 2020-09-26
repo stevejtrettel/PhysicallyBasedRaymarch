@@ -103,12 +103,20 @@ float sdTorus( Point pt, Point cent, vec2 t )
 }
 
 
-float cyl( Point pt, Point cent, float r,  float h, float s)
+float roundedCyl( Point pt, Point cent, float r,  float h, float s)
 {vec3 p=pt.coords.xyz-cent.coords.xyz;
-  vec2 d = vec2( length(p.xy)-2.0*r+s, abs(p.z) - h );
+  vec2 d = vec2( length(p.xy)-2.*r+s, abs(p.z) - h );
   return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - s;
 }
 
+
+
+float exactCyl( Point pt, Point cent, float r, float h )
+{
+vec3 p=pt.coords.xyz-cent.coords.xyz;
+  vec2 d = abs(vec2(length(p.xy),p.z)) - vec2(r,h);
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
+}
 
 float sdOctahedron( Point pt, Point cent,float s)
 { vec3 p=pt.coords.xyz-cent.coords.xyz;
@@ -144,23 +152,31 @@ vec3 p=abs(pt.coords.xyz-cent.coords.xyz);
 
 
 
+//======= COMPOUND SDFS
 
 
+float cocktailGlass(Point pt, Point cent, float rad, float height,float base){
+    //base is the z-coordinate of the base of the cocktail glass
+    
+    Point c1=translatePoint(vec3(0.,0.,-0.5),cent);
+    Point c2=translatePoint(vec3(0.,0.,1.2),cent);
+    Point c3=translatePoint(vec3(0.,0.,-2.65),cent);
+    
+    
+    
+    //exterior of glass
+    float dist=roundedCyl(pt,c1,rad,height,0.2);
+    
+    //delete interior of glass
+    dist=smax(dist,-roundedCyl(pt,c2,0.8*rad,height,0.),0.1);
+    
+    //delete ball undereneath glass
+    dist=smax(dist,-sphere(pt,c3,0.4*rad),0.3);
 
+    return dist;
 
-float block(Point p, Point center, float x, float y, float z){
-
-//make the slab
-float distance;
-distance=slabX(p,center.coords.x,x);
-distance=smax(distance,slabY(p,center.coords.y,y),0.1);    
-distance=smax(distance,slabZ(p,center.coords.z,z),0.1);      
-return distance;
+    
+    
+    
+    
 }
-
-float cube(Point p, Point center, float s){
-    return block(p,center,s,s,s);
-}
-
-
-

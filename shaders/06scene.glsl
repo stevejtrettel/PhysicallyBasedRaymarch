@@ -21,42 +21,72 @@ float planeDistance(Point p){
 }
 
 
-float glassDistance(Point p){
+
+float glassDistance(Point p,Point cent){
+    Point c1=translatePoint(vec3(0.,0.,-0.5),cent);
+     Point c2=translatePoint(vec3(0.,0.,1.2),cent);
+     Point c3=translatePoint(vec3(0.,0.,-2.65),cent);
+    
+    
     
     //exterior of glass
-float dist=cyl(p,createPoint(0.,5.,-0.5),1.3,2.5,0.2);
+    float dist=roundedCyl(p,c1,1.3,2.5,0.2);
     
     //delete interior of glass
-    dist=smax(dist,-cyl(p,createPoint(0.,5.,1.2),1.15,2.5,0.2),0.5);
+    dist=smax(dist,-roundedCyl(p,c2,1.15,2.5,0.),0.1);
     
     //delete ball undereneath glass
-    dist=smax(dist,-sphere(p,createPoint(0.,5.,-2.65),0.75),0.3);
-    
-    
-    
+    dist=smax(dist,-sphere(p,c3,0.75),0.3);
+
     return dist;
 }
 
 
 
-float mirrorDistance(Point p){
+float tableDistance(Point p,Point cent){
+//shift down
+Point q=translatePoint(vec3(0.,0.,-3.7),cent);
     
-float distance=cyl(p,createPoint(0.,5.,-3.7),3.5,0.25,0.2);
+float distance=roundedCyl(p,q,3.5,0.25,0.2);
     return distance;
 }
 
 
 
-float iceDistance(Point p){
-    float distance=sdRoundBox( p, createPoint(0.,5.,0.),vec3(1.), 0.1 );
+float iceDistance(Point p,Point cent){
+    //shift down
+    Point q=translatePoint(vec3(0.,0.,-0.2),cent);
+    
+    float distance=sdRoundBox(p, q,vec3(1.), 0.1 )+0.1*sin(1.*p.coords.x+1.5*p.coords.y-2.*p.coords.z)*sin(.5*p.coords.x+1.*p.coords.y-.5*p.coords.z)*sin(3.*p.coords.x)*sin(2.*p.coords.y);
     return distance;
 }
 
 
-float liquidDistance(Point p){
-    float distance=max(cyl(p,createPoint(0.,5.,-0.495),1.15,1.,0.0),-iceDistance(p));
+float liquidDistance(Point p,Point cent){
+    
+    
+    //shift down
+    Point q=translatePoint(vec3(0.,0.,-0.475),cent);
+    
+    float distance=roundedCyl(p,q,1.1495,0.8,0.0);
     return distance;
 }
+
+
+
+
+float cocktailDistance(Point p,Point cent){
+    
+//float ice=iceDistance(p,cent);
+float liquid=liquidDistance(p,cent);
+float glass=glassDistance(p,cent);
+float dist;
+
+    return min(liquid,glass);
+}
+
+
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -82,19 +112,10 @@ float sceneLights(Point p){
 
 float sceneObjs(Point p){
     
-    float distance = MAX_DIST;
+    Point tableCent=createPoint(0.,5.,0.);
+    Point cocktail1Cent=createPoint(1.,4.,0.);
     
-    //    distance=min(distance,planeDistance(p));
-    
-    distance=min(distance, glassDistance(p));
-    
-   distance=min(distance, mirrorDistance(p));
-    
-    distance=min(distance, liquidDistance(p));
-    
-        distance=min(distance, iceDistance(p));
-    
-    return distance;
+    return min(cocktailDistance(p,cocktail1Cent),tableDistance(p,tableCent));
 }
 
 
@@ -115,12 +136,16 @@ float sceneSDF(Point p){
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Setting InWhich
+// Setting hitWhich
 //----------------------------------------------------------------------------------------------------------------------
 
 
 
 void setHitWhich(Vector tv,float ep){
+    
+    Point tableCent=createPoint(0.,5.,0.);
+    Point cocktail1Cent=createPoint(1.,4.,0.);
+    Point cocktail2Cent=createPoint(-1.,6.,0.);;
     
     hitWhich=0;
     tv=flow(tv,ep);
@@ -129,35 +154,26 @@ void setHitWhich(Vector tv,float ep){
 //        inWhich=2;
 //        return;
 //    }
-    //glass surfaces
-    if(glassDistance(tv.pos)<0.){
-        hitWhich=3;
-        return;
-    }
+
     
         //mirrored surfaces
-    else if(mirrorDistance(tv.pos)<0.){
+   if(tableDistance(tv.pos,tableCent)<0.){
         hitWhich=4;
         return;
     }
     
-                    //ice cube
-    else if(iceDistance(tv.pos)<0.){
-        hitWhich=6;
-        return;
-    }
-    
-    
-            //liquid
-    else if(liquidDistance(tv.pos)<0.){
+            //liquids
+    else if(liquidDistance(tv.pos,cocktail1Cent)<0.){
         hitWhich=5;
         return;
     }
     
-    
-
-    
-    
+    //glass surfaces
+    else if(glassDistance(tv.pos,cocktail1Cent)<0.){
+        hitWhich=3;
+        return;
+    }
+ 
     
   
 }

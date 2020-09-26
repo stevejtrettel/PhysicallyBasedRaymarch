@@ -181,6 +181,19 @@ Vector translate(Isometry isom, Vector v) {
 }
 
 
+
+///FOR EUCLIDEAN SPACE: Can store basic isometries as vec3, just the translation vector; overload of the above:
+Point translatePoint(vec3 trans, Point p){
+    vec3 q=p.coords.xyz+trans;
+    return Point(vec4(q,0.));
+}
+
+
+
+
+
+
+
 // apply a local rotation of the direction
 Vector rotateByFacing(mat4 mat, Vector v){
     // notice that the facing is an element of SO(3) which refers to the basis (e_x, e_y, e_w).
