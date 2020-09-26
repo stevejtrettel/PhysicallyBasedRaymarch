@@ -107,7 +107,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
              
              
             mat.vol.opacity=0.;
-            mat.vol.refract=1.5;
+            mat.vol.refract=1.31;
             mat.vol.absorb=4.*vec3(0.05,0.2,0.15);
             mat.vol.emit=vec3(0.);
 
@@ -119,9 +119,9 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
             mat.surf.phong.shiny=15.;
              
              
-            mat.vol.opacity=0.1;
-            mat.vol.refract=1.5;
-            mat.vol.absorb=vec3(0.05);
+            mat.vol.opacity=0.4;
+            mat.vol.refract=1.33;
+            mat.vol.absorb=vec3(0.,-0.01,-0.05);
             mat.vol.emit=vec3(0.);
 
             break;           
