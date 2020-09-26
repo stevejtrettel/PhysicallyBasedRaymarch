@@ -108,12 +108,23 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
              
             mat.vol.opacity=0.;
             mat.vol.refract=1.5;
-            mat.vol.absorb=2.*vec3(0.05,0.2,0.15);
+            mat.vol.absorb=4.*vec3(0.05,0.2,0.15);
             mat.vol.emit=vec3(0.);
 
             break;
              
+        case 6://ice
+            mat.surf.color=vec3(0.5);
+            mat.surf.reflect=0.1;
+            mat.surf.phong.shiny=15.;
              
+             
+            mat.vol.opacity=0.1;
+            mat.vol.refract=1.5;
+            mat.vol.absorb=vec3(0.05);
+            mat.vol.emit=vec3(0.);
+
+            break;           
 
     }
     
@@ -265,8 +276,8 @@ void updatePath(inout Path path, Vector tv,float dist,bool isSky){
     }
     
     //otherwise, sample the material in front and behind
-    updateMaterial(path.backMat,tv,-0.01);
-    updateMaterial(path.frontMat,tv,0.01);
+    updateMaterial(path.backMat,tv,-0.05);
+    updateMaterial(path.frontMat,tv,0.05);
     
     //update the direction vectors, and reflectivity
     updateLocalData(path.dat,tv,path.backMat,path.frontMat);

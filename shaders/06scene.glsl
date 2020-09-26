@@ -46,8 +46,15 @@ float distance=cyl(p,createPoint(0.,5.,-3.7),3.5,0.25,0.2);
 }
 
 
+
+float iceDistance(Point p){
+    float distance=sdRoundBox( p, createPoint(0.,5.,0.),vec3(1.), 0.1 );
+    return distance;
+}
+
+
 float liquidDistance(Point p){
-    float distance=cyl(p,createPoint(0.,5.,-0.25),1.15,1.,0.0);
+    float distance=max(cyl(p,createPoint(0.,5.,-0.495),1.15,1.,0.0),-iceDistance(p));
     return distance;
 }
 
@@ -84,6 +91,8 @@ float sceneObjs(Point p){
    distance=min(distance, mirrorDistance(p));
     
     distance=min(distance, liquidDistance(p));
+    
+        distance=min(distance, iceDistance(p));
     
     return distance;
 }
@@ -132,11 +141,23 @@ void setHitWhich(Vector tv,float ep){
         return;
     }
     
+                    //ice cube
+    else if(iceDistance(tv.pos)<0.){
+        hitWhich=6;
+        return;
+    }
+    
     
             //liquid
     else if(liquidDistance(tv.pos)<0.){
         hitWhich=5;
         return;
     }
+    
+    
+
+    
+    
+    
   
 }
