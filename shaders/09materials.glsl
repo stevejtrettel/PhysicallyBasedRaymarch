@@ -86,8 +86,8 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
 
              
         case 4://mirror
-            mat.surf.color=vec3(0.03,0.05,0.2);
-            mat.surf.reflect=0.95;
+            mat.surf.color=vec3(0.01);
+            mat.surf.reflect=0.1;
             mat.surf.phong.shiny=15.;
              
              
@@ -97,8 +97,24 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
             mat.vol.emit=vec3(0.);
 
             break;
+             
+             
+             
+        case 5://cocktail
+            mat.surf.color=vec3(0.2);
+            mat.surf.reflect=0.05;
+            mat.surf.phong.shiny=15.;
+             
+             
+            mat.vol.opacity=0.;
+            mat.vol.refract=1.5;
+            mat.vol.absorb=2.*vec3(0.05,0.2,0.15);
+            mat.vol.emit=vec3(0.);
 
-        
+            break;
+             
+             
+
     }
     
 }

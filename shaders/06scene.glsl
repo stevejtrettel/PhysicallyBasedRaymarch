@@ -24,13 +24,13 @@ float planeDistance(Point p){
 float glassDistance(Point p){
     
     //exterior of glass
-float dist=cyl(p,createPoint(0.,3.,-0.5),1.3,2.5,0.2);
+float dist=cyl(p,createPoint(0.,5.,-0.5),1.3,2.5,0.2);
     
     //delete interior of glass
-    dist=smax(dist,-cyl(p,createPoint(0.,3.,1.2),1.15,2.5,0.2),0.5);
+    dist=smax(dist,-cyl(p,createPoint(0.,5.,1.2),1.15,2.5,0.2),0.5);
     
     //delete ball undereneath glass
-    dist=smax(dist,-sphere(p,createPoint(0.,3.,-2.65),0.75),0.3);
+    dist=smax(dist,-sphere(p,createPoint(0.,5.,-2.65),0.75),0.3);
     
     
     
@@ -41,7 +41,13 @@ float dist=cyl(p,createPoint(0.,3.,-0.5),1.3,2.5,0.2);
 
 float mirrorDistance(Point p){
     
-float distance=1000.;
+float distance=cyl(p,createPoint(0.,5.,-3.7),3.5,0.25,0.2);
+    return distance;
+}
+
+
+float liquidDistance(Point p){
+    float distance=cyl(p,createPoint(0.,5.,-0.25),1.15,1.,0.0);
     return distance;
 }
 
@@ -75,7 +81,9 @@ float sceneObjs(Point p){
     
     distance=min(distance, glassDistance(p));
     
-   // distance=min(distance, mirrorDistance(p));
+   distance=min(distance, mirrorDistance(p));
+    
+    distance=min(distance, liquidDistance(p));
     
     return distance;
 }
@@ -118,10 +126,17 @@ void setHitWhich(Vector tv,float ep){
         return;
     }
     
-      //  mirrored surfaces
-//    else if(mirrorDistance(tv.pos)<0.){
-//        hitWhich=4;
-//        return;
-//    }
+        //mirrored surfaces
+    else if(mirrorDistance(tv.pos)<0.){
+        hitWhich=4;
+        return;
+    }
+    
+    
+            //liquid
+    else if(liquidDistance(tv.pos)<0.){
+        hitWhich=5;
+        return;
+    }
   
 }
