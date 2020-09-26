@@ -56,7 +56,7 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
     
     
     
-   // NOW: update the original data by the larger of the remaining intensities:
+    //NOW: update the original data by the larger of the remaining intensities:
     if(reflPath.intensity>transPath.intensity){
         path=reflPath;
     }

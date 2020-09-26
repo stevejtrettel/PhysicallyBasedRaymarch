@@ -10,11 +10,7 @@ void stepForward(Vector direction, inout Path path,float side,marchRes res){
     
     updatePath(path,sampletv,distToViewer,isSky);//update the local data accordingly
     
-    //update the distance travelled:
-    //path.acc.dist+=distToViewer;
-    //path.backMat=material we just marched through
-    //use this to update the accumulated color
-    //updateAccColor(path, path.backMat,distToViewer);
+    //this sets the material in front and behind, as well as updating the distance traveled total, and the accumulated color
     }
 }
 
@@ -92,8 +88,7 @@ vec3 getRefract(inout Path path){
     doTIR(path);//do the actual internal reflections
     
     //now we are positioned at the back wall of the surface, and the internal reflectivity is no longer 1
-    //save this position; this is where we start the next march
-    
+
     //if there's sufficient light intensity to warrant it; keep going:
     if(path.intensity>0.1){
     //copy path for internal reflection:
@@ -163,7 +158,7 @@ vec3 getReflect(inout Path path,Vector initialDir){
     //right now, once we hit
     
     //reset path.keepGoing to quit if we did all 10 steps, or if the intensity is very low.
-    path.keepGoing=path.keepGoing&&(numRefl<MAX_REFL)&&(path.intensity>0.05);
+    path.keepGoing=path.keepGoing&&(numRefl<MAX_REFL)&&(path.intensity>0.05)&&(!path.dat.hitSky);
 
 
     return totalColor;

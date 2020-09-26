@@ -158,13 +158,6 @@ void updateReflect(inout localData dat, Material back, Material front){
 
 
 
-
-////======new version==========
-//void updateAccColor(inout Path path, Material mat, float dist){
-//    path.acc.color *= exp(-mat.vol.absorb*dist);
-//}
-
-
 //update the light intensity of a local data, depending on if we are continuing on for reflection or transmission
 void updateReflectIntensity(inout Path path){
     //need to make sure the reflectivity has been properly updated in path
@@ -204,16 +197,6 @@ Path copyForReflect(Path path, Material mat){
     
     return reflPath;
 }
-
-
-//takes in path, and copies it, adjusting the intensity of both reflectPath and transPath by the reflectivity / opacity of the material path.frontMat in front at the time.
-//void splitPath(Path path, Material mat, inout Path reflPath, inout Path transPath){
-//     
-//    transPath=copyForTransmit(path, mat);
-//    reflPath=copyForReflect(path,mat); 
-//    
-//}
-//
 
 
 

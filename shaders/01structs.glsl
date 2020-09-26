@@ -326,20 +326,6 @@ Material air=Material(noSurface,transparentVolume);
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Surface Data
 //----------------------------------------------------------------------------------------------------------------------
-//
-//struct Accumulate{//stuff that accumulates along a path
-//    vec3 color;//color absorbtion from beers law;
-//    float intensity;//total intensity left on the ray
-//    float dist; //total distance traveled from the viewer;
-//};
-//
-//void resetAcc(inout Accumulate acc){
-//    acc.color=vec3(1.);
-//    acc.intensity=1.;
-//    acc.dist=0.;
-//}
-
-
     
 
 //Local geometric data at a point on the surface. 
