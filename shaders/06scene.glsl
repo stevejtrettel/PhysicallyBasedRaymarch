@@ -23,30 +23,25 @@ float planeDistance(Point p){
 
 float glassDistance(Point p){
     
-    float distance=
-         sphere(p,createPoint(-5.,3.,0.),1.5);
+    //exterior of glass
+float dist=cyl(p,createPoint(0.,3.,-0.5),1.3,2.5,0.2);
     
-
-
-       //distance=min(distance, sdTorus(p,createPoint(0.,2.,0.),vec2(1.5,0.8)));
+    //delete interior of glass
+    dist=smax(dist,-cyl(p,createPoint(0.,3.,1.2),1.15,2.5,0.2),0.5);
     
-     distance=min(distance, sdRoundBox(p, createPoint(5.,3.,0.),vec3(1.,1.,1.), 0.1 ));
-    // distance=min(distance,
-//                  sdRoundedCylinder(p,createPoint(7.,7.,7.),1.,1.,0.5));  
-//  distance=min(distance, trueOctahedron(p,createPoint(-5.,-5.,1.),1.)-0.05);
-
-    return distance;
+    //delete ball undereneath glass
+    dist=smax(dist,-sphere(p,createPoint(0.,3.,-2.65),0.75),0.3);
+    
+    
+    
+    return dist;
 }
 
 
 
 float mirrorDistance(Point p){
     
-     float distance= sphere(p,createPoint(3.5,1.5,-1.),1.5);
-     distance=min(distance, cube(p,createPoint(2.,-3.,0.5),0.6));
-    distance=min(distance, block(p,createPoint(-2.,3.,-3.5),6.,0.5,6.));
-    distance=min(distance, 
-    block(p,createPoint(-2.,-7.,-3.5),6.,0.5,6.));
+float distance=1000.;
     return distance;
 }
 

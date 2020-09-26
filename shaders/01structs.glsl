@@ -6,17 +6,6 @@ out vec4 out_FragColor;
 // STRUCT Point
 //----------------------------------------------------------------------------------------------------------------------
 
-/*
-
-    Data type for points in the space X
-    A point x in X is represented by a pair (proj,fiber) where
-    - proj is the projection of x to SL(2,R) seen as a vec4 (in the basis E)
-    - fiber is the fiber coordinates (!)
-
-    The goal of this choice is to perform as many computations in SL(2,R) rather than in X.
-    Hopefully this will reduce numerical errors (no need to go back and forth between SL2 and X).
-
-*/
 
 struct Point {
     vec4 coords;// the point in R4

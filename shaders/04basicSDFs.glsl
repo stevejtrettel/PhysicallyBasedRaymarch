@@ -103,10 +103,10 @@ float sdTorus( Point pt, Point cent, vec2 t )
 }
 
 
-float sdRoundedCylinder( Point pt, Point cent,float ra, float rb, float h )
+float cyl( Point pt, Point cent, float r,  float h, float s)
 {vec3 p=pt.coords.xyz-cent.coords.xyz;
-  vec2 d = vec2( length(p.xz)-2.0*ra+rb, abs(p.y) - h );
-  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rb;
+  vec2 d = vec2( length(p.xy)-2.0*r+s, abs(p.z) - h );
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - s;
 }
 
 
