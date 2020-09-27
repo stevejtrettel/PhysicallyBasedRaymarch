@@ -96,7 +96,7 @@ function initObjects() {
 // Set up shader
 //----------------------------------------------------------------------------------------------------------------------
 
-var texture = new TextureLoader().load('images/sunset_fairway.jpg');
+var texture = new TextureLoader().load('images/glass_passage.jpg');
 
 
 /**
@@ -131,7 +131,7 @@ function setupMaterial(fShader) {
                     ])
             },
 
-            
+
             tex: { //earth texture to global object
                 type: "t",
                 value: texture
