@@ -42,6 +42,15 @@ float glassDistance(Point p,Point cent){
 }
 
 
+//<<<<<<< HEAD
+//=======
+//       distance=min(distance, sdTorus(p,createPoint(0.,2.,0.),vec2(1.5,0.8)));
+//    
+//     distance=min(distance, sdRoundBox(p, createPoint(5.,3.,0.),vec3(1.,1.,1.), 0.1 ));
+//    // distance=min(distance,
+////                  sdRoundedCylinder(p,createPoint(7.,7.,7.),1.,1.,0.5));  
+////  distance=min(distance, trueOctahedron(p,createPoint(-5.,-5.,1.),1.)-0.05);
+//>>>>>>> glass
 
 float tableDistance(Point p,Point cent){
 //shift down

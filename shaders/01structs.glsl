@@ -308,12 +308,13 @@ const Surface noSurface=Surface(vec3(0.),noPhong,0.);
 
 struct Volume{
     float refract;
+    vec3 disperse;
     float opacity;
     vec3 absorb;
     vec3 emit;
 };
 
-const Volume transparentVolume=Volume(1.,0.,vec3(0.),vec3(0.));
+const Volume transparentVolume=Volume(1.,vec3(1.),0.,vec3(0.),vec3(0.));
 
 
 //materials have surface properties,
@@ -359,7 +360,8 @@ struct Path{
     
     float intensity;
     float dist;
-    vec3 color;
+    vec3 accColor;
+    vec3 lightColor;
     
     bool keepGoing;//do we kill this ray?
 };
@@ -372,7 +374,8 @@ void initializePath(inout Path path){
     path.backMat=air;
     path.intensity=1.;
     path.dist=0.;
-    path.color=vec3(1.);
+    path.accColor=vec3(1.);
+    path.lightColor=vec3(1.);
     path.keepGoing=true;
 }
 

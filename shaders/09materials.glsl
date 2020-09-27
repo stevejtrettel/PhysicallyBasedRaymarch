@@ -57,6 +57,37 @@ void setSkyMaterial(inout Material mat, Vector tv){
             mat.vol.absorb=vec3(0.);
 }
 
+Material setGlass(){
+    Material mat;
+    
+            mat.surf.color=vec3(0.05);
+            mat.surf.phong.shiny=15.;
+            mat.surf.reflect=0.08;
+            
+            mat.vol.refract=1.53;
+            mat.vol.disperse=vec3(1.51,1.52,1.53);
+            mat.vol.opacity=0.05;
+            mat.vol.absorb=vec3(0.3,0.05,0.2);
+            mat.vol.emit=vec3(0.);
+    return mat;
+    
+}
+
+Material setDiamond(){
+        Material mat;
+            mat.surf.color=vec3(0.05);
+            mat.surf.phong.shiny=15.;
+            mat.surf.reflect=0.08;
+            
+            mat.vol.refract=1.53;
+            mat.vol.disperse=vec3(2.4,2.42,2.46);
+            mat.vol.opacity=0.05;
+            mat.vol.absorb=vec3(0.3,0.05,0.2);
+            mat.vol.emit=vec3(0.);
+    return mat;
+    
+}
+
 
 //====update the material given a position and what you hit.
 void updateMaterial(inout Material mat, Vector sampletv,float ep){
@@ -73,15 +104,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
         
              
          case 3://glass
-            mat.surf.color=vec3(0.05);
-            mat.surf.phong.shiny=15.;
-            mat.surf.reflect=0.08;
-            
-            mat.vol.refract=1.55;
-            mat.vol.opacity=0.05;
-            mat.vol.absorb=0.5*vec3(0.3,0.05,0.2);
-            mat.vol.emit=vec3(0.);
-
+            mat=setDiamond();
             break;
 
              
@@ -93,12 +116,13 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
              
             mat.vol.opacity=1.;
             mat.vol.refract=1.25;
+            mat.vol.disperse=vec3(mat.vol.refract);
             mat.vol.absorb=vec3(0.);
             mat.vol.emit=vec3(0.);
 
             break;
              
-             
+            
              
         case 5://cocktail
             mat.surf.color=vec3(0.2);
@@ -125,6 +149,7 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
             mat.vol.emit=vec3(0.);
 
             break;           
+
 
     }
     
@@ -227,6 +252,105 @@ Path copyForReflect(Path path, Material mat){
 
 
 
+void setDispersionPaths(Path path, inout Path red, inout Path green, inout Path blue){
+    
+    //copy the red direction
+    red=copyForTransmit(path,path.frontMat);
+    //update the light color of this path
+    red.lightColor=vec3(1.,0.,0.);
+    //update the refract direction
+red.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,path.backMat.vol.disperse.r,path.frontMat.vol.disperse.r);
+    
+    
+        //copy the red direction
+    green=copyForTransmit(path,path.frontMat);
+    //update the light color of this path
+    green.lightColor=vec3(0.,1.,0.);
+    //update the refract direction
+green.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,path.backMat.vol.disperse.g,path.frontMat.vol.disperse.g);
+    
+    
+        //copy the red direction
+    blue=copyForTransmit(path,path.frontMat);
+    //update the light color of this path
+    blue.lightColor=vec3(0.,0.,1.);
+    //update the refract direction
+blue.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,path.backMat.vol.disperse.b,path.frontMat.vol.disperse.b);
+    
+}
+
+
+//void setDispersionSix(Path path, inout Path red, inout Path yellow, inout Path green, inout Path cyan,inout Path blue, inout Path magenta){
+//    
+//    float frontRef;
+//    float backRef;
+//    
+//    //copy the red direction
+//    red=copyForTransmit(path,path.frontMat);
+//    //update the light color of this path
+//    red.lightColor=vec3(.5,0.,0.);
+//    backRef=path.backMat.vol.disperse.r;
+//    frontRef=path.frontMat.vol.disperse.r;
+//    //update the refract direction
+//red.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef);
+//    
+//    
+//        //copy for the yellow direction
+//    yellow=copyForTransmit(path,path.frontMat);
+//    //update the light color of this path
+//    yellow.lightColor=vec3(.5,0.5,0.);
+//    backRef=(path.backMat.vol.disperse.r+path.backMat.vol.disperse.g)/2.;
+//    frontRef=(path.frontMat.vol.disperse.r+path.frontMat.vol.disperse.g)/2.;
+//    //update the refract direction
+//yellow.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef);
+//    
+//
+//    
+//    //copy the green direction
+//    green=copyForTransmit(path,path.frontMat);
+//    //update the light color of this path
+//    green.lightColor=vec3(.5,0.,0.);
+//    backRef=path.backMat.vol.disperse.g;
+//    frontRef=path.frontMat.vol.disperse.g;
+//    //update the refract direction
+//green.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef); 
+//    
+//    
+//    //copy for the cyan direction
+//    cyan=copyForTransmit(path,path.frontMat);
+//    //update the light color of this path
+//   cyan.lightColor=vec3(0.,0.5,0.5);
+//    backRef=(path.backMat.vol.disperse.g+path.backMat.vol.disperse.b)/2.;
+//    frontRef=(path.frontMat.vol.disperse.g+path.frontMat.vol.disperse.b)/2.;
+//    //update the refract direction
+//cyan.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef);
+//    
+//    
+//      //copy the blue direction
+//    blue=copyForTransmit(path,path.frontMat);
+//    //update the light color of this path
+//    blue.lightColor=vec3(0.,0.,0.5);
+//    backRef=path.backMat.vol.disperse.b;
+//    frontRef=path.frontMat.vol.disperse.b;
+//    //update the refract direction
+//blue.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef); 
+//    
+//    
+//    
+//        //copy for the magenta direction
+//    magenta=copyForTransmit(path,path.frontMat);
+//    //update the light color of this path
+//   magenta.lightColor=vec3(0.5,0.,0.5);
+//    backRef=path.backMat.vol.disperse.b+2.*(path.backMat.vol.disperse.b-path.backMat.vol.disperse.g);
+//    frontRef=path.frontMat.vol.disperse.b+2.*(path.frontMat.vol.disperse.b-path.frontMat.vol.disperse.g);
+//    //update the refract direction
+//magenta.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef);
+//    
+//    
+//    
+//    
+//}
+
 
 
 
@@ -284,6 +408,6 @@ void updatePath(inout Path path, Vector tv,float dist,bool isSky){
     
     //update the accumulation parameters:
     path.dist+=dist;
-    path.color *= exp(-path.backMat.vol.absorb*dist);
+    path.accColor *= exp(-path.backMat.vol.absorb*dist);
     
 }
