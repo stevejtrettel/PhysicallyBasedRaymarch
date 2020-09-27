@@ -155,7 +155,7 @@ vec3 getSurfaceColor(inout Path path,Material mat, bool marchShadow){
     totalColor=amb+scn;
     
 
-    float intensityFactor= path.intensity*(1.-path.dat.reflect) *mat.vol.opacity;
+    float intensityFactor= path.intensity*(1.-path.dat.reflect) *mat.surf.opacity;
     
     totalColor*=path.accColor;//correct for absorbtion
     totalColor*=intensityFactor;//correct for intensity

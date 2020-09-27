@@ -300,19 +300,21 @@ struct Surface{
     vec3 color;
     Phong phong;
     float reflect;
+    float opacity;
 };
 
-const Surface noSurface=Surface(vec3(0.),noPhong,0.);
+const Surface noSurface=Surface(vec3(0.),noPhong,0.,0.);
 
 struct Volume{
     float refract;
     vec3 disperse;
-    float opacity;
+    float translucent;
     vec3 absorb;
     vec3 emit;
+    float opacity;
 };
 
-const Volume transparentVolume=Volume(1.,vec3(1.),0.,vec3(0.),vec3(0.));
+const Volume transparentVolume=Volume(1.,vec3(1.),0.,vec3(0.),vec3(0.),0.);
 
 
 //materials have surface properties,

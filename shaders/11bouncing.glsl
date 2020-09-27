@@ -118,6 +118,38 @@ vec3 getRefract(inout Path path){
 
 
 
+//----------------------------------------------------------------------------------------------------------------------
+// Refracting through a Translucent Material
+//----------------------------------------------------------------------------------------------------------------------
+
+
+
+//start at a translucent surface; bounce through to backside, 
+//pic up portion of color that would come from internal reflection (material color)
+//end with the exiting ray, with intensity adjusted for transmission
+vec3 getTranslucentRefract(inout Path path){
+    
+    vec3 totalColor;
+    
+    return totalColor;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -138,7 +170,7 @@ vec3 getReflect(inout Path path,Vector initialDir){
     
     //we keep going if the material in front of us is not transparent
     //or if it is the sky, cuz we need to add the sky color
-     bool keepGoing=path.keepGoing&&(path.dat.hitSky||path.frontMat.vol.opacity==1.);
+     bool keepGoing=path.keepGoing&&(path.dat.hitSky||path.frontMat.surf.opacity==1.);
     
      while(keepGoing&&numRefl<MAX_REFL){
         
@@ -150,7 +182,7 @@ vec3 getReflect(inout Path path,Vector initialDir){
         stepForward(path.dat.reflectedRay,path,1.,reflRes);
         
         //keep going if (1) not sky, and (2)object is opaque and (3)there's sufficient intensity to bother.
-        keepGoing=path.keepGoing&&(!path.dat.hitSky)&&path.frontMat.vol.opacity==1.&&(path.intensity>0.01);
+        keepGoing=path.keepGoing&&(!path.dat.hitSky)&&path.frontMat.surf.opacity==1.&&(path.intensity>0.01);
         
         numRefl+=1;
     }
@@ -166,4 +198,24 @@ vec3 getReflect(inout Path path,Vector initialDir){
 }
 
 
+
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Rendering a translucent material
+//----------------------------------------------------------------------------------------------------------------------
+
+vec3 getTranslucent(Path path){
+    
+    
+    
+    return vec3(0.);
+    
+    
+    
+}
 

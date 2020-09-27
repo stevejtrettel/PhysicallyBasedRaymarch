@@ -52,7 +52,7 @@ return texture(tex,vec2(x,y)).rgb;
 
 void setSkyMaterial(inout Material mat, Vector tv){
             mat=air;
-            mat.vol.opacity=0.;
+            //mat.surf.opacity=0.;
             mat.surf.color=SRGBToLinear(skyTex(sampletv));
             mat.vol.absorb=vec3(0.);
 }
@@ -63,10 +63,11 @@ Material setGlass(){
             mat.surf.color=vec3(0.05);
             mat.surf.phong.shiny=15.;
             mat.surf.reflect=0.08;
+            mat.surf.opacity=0.05;
             
             mat.vol.refract=1.53;
             mat.vol.disperse=vec3(1.51,1.52,1.53);
-            mat.vol.opacity=0.05;
+            mat.vol.translucent=0.;
             mat.vol.absorb=vec3(0.3,0.05,0.2);
             mat.vol.emit=vec3(0.);
     return mat;
@@ -78,10 +79,11 @@ Material setDiamond(){
             mat.surf.color=vec3(0.05);
             mat.surf.phong.shiny=15.;
             mat.surf.reflect=0.08;
+            mat.surf.opacity=0.05;
             
             mat.vol.refract=1.53;
             mat.vol.disperse=vec3(2.4,2.42,2.46);
-            mat.vol.opacity=0.05;
+            mat.vol.translucent=0.;
             mat.vol.absorb=vec3(0.3,0.05,0.2);
             mat.vol.emit=vec3(0.);
     return mat;
@@ -112,11 +114,12 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
             mat.surf.color=vec3(0.03,0.05,0.2);
             mat.surf.reflect=0.95;
             mat.surf.phong.shiny=15.;
+            mat.surf.opacity=1.;
              
-             
-            mat.vol.opacity=1.;
+            
             mat.vol.refract=1.25;
             mat.vol.disperse=vec3(mat.vol.refract);
+            mat.vol.translucent=1.;
             mat.vol.absorb=vec3(0.);
             mat.vol.emit=vec3(0.);
 
@@ -196,7 +199,7 @@ void updateReflectIntensity(inout Path path){
 
 void updateTransmitIntensity(inout Path path,Material mat){
     //need to make sure the reflectivity has been properly updated in path
-    path.intensity*=(1.-path.dat.reflect)*(1.-mat.vol.opacity);
+    path.intensity*=(1.-path.dat.reflect)*(1.-mat.surf.opacity);
 }
 
 
@@ -209,7 +212,7 @@ Path copyForTransmit(Path path, Material mat){
      //make the transmission data
     Path transPath=path;
     //make this true only if the is somewhat transparent
-    transPath.keepGoing=transPath.keepGoing&&(mat.vol.opacity<1.);
+    transPath.keepGoing=transPath.keepGoing&&(mat.surf.opacity<1.);
     //update the intensity of the light which gets transmitted
     updateTransmitIntensity(transPath,mat);
     return transPath;
