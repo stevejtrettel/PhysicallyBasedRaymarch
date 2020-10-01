@@ -16,40 +16,6 @@ float lightSDF(Point p,Light light){
 
 
 
-float planeDistance(Point p){
-       return  halfSpaceZ(p,2.);
-}
-
-
-float glassDistance(Point p){
-    
-    float distance=
-         sphere(p,createPoint(-5.,3.,0.),1.5);
-    
-
-
-       distance=min(distance, sdTorus(p,createPoint(0.,2.,0.),vec2(1.5,0.8)));
-    
-     distance=min(distance, sdRoundBox(p, createPoint(5.,3.,0.),vec3(1.,1.,1.), 0.1 ));
-    // distance=min(distance,
-//                  sdRoundedCylinder(p,createPoint(7.,7.,7.),1.,1.,0.5));  
-//  distance=min(distance, trueOctahedron(p,createPoint(-5.,-5.,1.),1.)-0.05);
-
-    return distance;
-}
-
-
-
-float mirrorDistance(Point p){
-    
-     float distance= sphere(p,createPoint(3.5,1.5,-1.),1.5);
-     distance=min(distance, cube(p,createPoint(2.,-3.,0.5),0.6));
-    distance=min(distance, block(p,createPoint(-2.,3.,-3.5),6.,0.5,6.));
-    distance=min(distance, 
-    block(p,createPoint(-2.,-7.,-3.5),6.,0.5,6.));
-    return distance;
-}
-
 
 //----------------------------------------------------------------------------------------------------------------------
 // Scene Components
@@ -76,12 +42,6 @@ float sceneObjs(Point p){
     
     float distance = MAX_DIST;
     
-    //    distance=min(distance,planeDistance(p));
-    
-    distance=min(distance, glassDistance(p));
-    
-   // distance=min(distance, mirrorDistance(p));
-    
     return distance;
 }
 
@@ -92,10 +52,15 @@ float sceneObjs(Point p){
 
 
 float sceneSDF(Point p){
+        return fakeSphere(p,createPoint(0.5,0.5,-1.),.5);
     
-   // return min(sceneLights(p),sceneObjs(p));
     
-    return sceneObjs(p);
+//   float cup= max(fakeSphere(p,createPoint(0.5,0.5,-1.),.5),-fakeSphere(p,createPoint(0.5,0.5,-0.85),0.4));
+//    
+//
+//    
+//   return cup;
+//    
 }
 
 
@@ -113,20 +78,13 @@ void setHitWhich(Vector tv,float ep){
     hitWhich=0;
     tv=flow(tv,ep);
     
-//    if(planeDistance(p)<0.){
-//        inWhich=2;
-//        return;
-//    }
+
     //glass surfaces
-    if(glassDistance(tv.pos)<0.){
+    if(sceneSDF(tv.pos)<0.){
         hitWhich=3;
         return;
     }
     
-      //  mirrored surfaces
-//    else if(mirrorDistance(tv.pos)<0.){
-//        hitWhich=4;
-//        return;
-//    }
+
   
 }

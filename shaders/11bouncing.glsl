@@ -168,6 +168,9 @@ vec3 getReflect(inout Path path,Vector initialDir){
     //march in initial direction from surface
     stepForward(initialDir,path,1.,reflRes);
     
+    origtv=path.dat.reflectedRay;
+         
+         
     //we keep going if the material in front of us is not transparent
     //or if it is the sky, cuz we need to add the sky color
      bool keepGoing=path.keepGoing&&(path.dat.hitSky||path.frontMat.surf.opacity==1.);
@@ -177,6 +180,12 @@ vec3 getReflect(inout Path path,Vector initialDir){
         //pick up the color
         totalColor+=getSurfaceColor(path,path.frontMat,true);
         updateReflectIntensity(path);
+         
+         
+         //set the direction that picks up the backgroound color to be the direction you just reflected in
+
+         
+         
          
          //reflect off the surface
         stepForward(path.dat.reflectedRay,path,1.,reflRes);

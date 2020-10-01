@@ -93,7 +93,7 @@ void main(){
    // setResolution(resol);
     
     Vector rayDir=setRayDir();
-    
+    origtv=rayDir;
     
 //do the first raymarch and get the color
     vec3 pixelColor=getPixelColor(rayDir);

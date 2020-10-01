@@ -14,7 +14,7 @@ Some parameters that can be changed to change the scence
 // "TRUE" CONSTANTS
 //----------------------------------------------------------------------------------------------------------------------
 
-const float PI = 3.1415926538;
+
 const float sqrt3 = 1.7320508075688772;
 const float sqrt2 = 1.4142135623730951;
 
@@ -29,7 +29,7 @@ void setResolution(int UIVar){
 }
 
 const float EPSILON = 0.0001;
-const float fov = 90.0;
+const float fov = 130.0;
 
 
 
@@ -41,6 +41,7 @@ int inWhich=0;
 int hitWhich = 0;
 
 //set by raymarch
+Vector origtv;
 Vector sampletv;
 float distToViewer;
 bool isSky=false;
@@ -173,9 +174,9 @@ Light pointLight1, pointLight2, dirLight1;
 
 void setVariables(){
     
-    currentBoost = Isometry(currentBoostMat);
-    cellBoost = Isometry(cellBoostMat);
-    invCellBoost = Isometry(invCellBoostMat);
+    currentBoost = Isometry(currentBoostMat,true);
+    cellBoost = Isometry(cellBoostMat,true);
+    invCellBoost = Isometry(invCellBoostMat,true);
     
     //nice to have a default phong value to set
     defaultPhong=Phong(10.,vec3(1.),vec3(1.));
@@ -188,8 +189,8 @@ void setVariables(){
        
        
        
-       pointLight1=createPointLight(createPoint(3.,1.,1.),vec3(1.,1.,1.),1.,0.5);
-    pointLight2=createPointLight(createPoint(-2.,2.,2.),vec3(1.,1.,1.),1.,0.5);
+       pointLight1=createPointLight(createPoint(3.,1.,1.),vec3(1.,1.,1.),1.,2.);
+    pointLight2=createPointLight(createPoint(-2.,2.,2.),vec3(1.,1.,1.),1.,2.);
     
     dirLight1=createDirLight(vec3(0.,0.,1.),skyColor.rgb,skyColor.w);
 

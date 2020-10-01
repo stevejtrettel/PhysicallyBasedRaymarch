@@ -5,6 +5,8 @@ out vec4 out_FragColor;
 //----------------------------------------------------------------------------------------------------------------------
 // STRUCT Point
 //----------------------------------------------------------------------------------------------------------------------
+const float PI = 3.1415926538;
+
 
 /*
 
@@ -24,6 +26,24 @@ struct Point {
 
 // origin of the space
 const Point ORIGIN = Point(vec4(0, 0, 0, 1));
+
+
+
+// return the cylinder coordinates (rho, theta, z) of the point in the form (rho^2, theta, z)
+// avoid one square root computation
+vec3 toCylSq(Point p) {
+    return vec3(
+    pow(p.coords.x, 2.) + pow(p.coords.y, 2.),
+    atan(p.coords.y, p.coords.x),
+    p.coords.z
+    );
+}
+
+// return the cylinder coordinates (rho, theta, z) of the point
+vec3 toCyl(Point p) {
+    vec3 aux = toCylSq(p);
+    return vec3(sqrt(aux.x), aux.yz);
+}
 
 
 // unserialize the data received from the shader to create a point
@@ -91,66 +111,76 @@ Vector createVector(Point p, vec3 dp) {
 
 */
 
+
 struct Isometry {
     mat4 mat;// the image of the origin by this isometry.
+    bool nil;// say if the element is known to belong to nil (the normal transitive subgroup)
 };
 
-Isometry identity=Isometry(mat4(1.));
 
 // Method to unserialized isometries passed to the shader
-Isometry unserializeIsom(vec4 data) {
-    //THIS NEEDS TO BE UPDATED ON THE JS SIDE
-    return identity;
+Isometry unserializeIsom(mat4 data) {
+    return Isometry(data, false);
 }
+
+const Isometry identity = Isometry(mat4(1), true);
+const Isometry flip = Isometry(mat4(
+0, 1, 0, 0,
+1, 0, 0, 0,
+0, 0, -1, 0,
+0, 0, 0, 1
+), false);
+
+// return the rotation around the z-axis by an angle alpha
+Isometry rotation(float angle){
+    mat4 mat = mat4(
+    cos(angle), sin(angle), 0, 0,
+    -sin(angle), cos(angle), 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+    );
+    return Isometry(mat, false);
+}
+
+// Return the isometry sending the origin to p
+Isometry makeLeftTranslation(Point p) {
+    // this is in COLUMN MAJOR ORDER so the things that LOOK LIKE ROWS are actually FUCKING COLUMNS!
+    mat4 mat = mat4(
+    1., 0., -p.coords.y / 2., 0.,
+    0., 1., p.coords.x / 2., 0.,
+    0., 0., 1., 0.,
+    p.coords.x, p.coords.y, p.coords.z, 1.);
+    return Isometry(mat, true);
+}
+
+// Return the isometry sending p to the origin
+Isometry makeInvLeftTranslation(Point p) {
+    mat4 mat = mat4(
+    1., 0., p.coords.y / 2., 0.,
+    0., 1., -p.coords.x / 2., 0.,
+    0., 0., 1., 0.,
+    -p.coords.x, -p.coords.y, -p.coords.z, 1.);
+    return Isometry(mat, true);
+}
+
 
 // Product of two isometries (more precisely isom1 * isom2)
 Isometry composeIsometry(Isometry isom1, Isometry isom2) {
-
-    return Isometry(isom1.mat*isom2.mat);
+    return Isometry(isom1.mat * isom2.mat, isom1.nil && isom2.nil);
 }
 
 // Return the inverse of the given isometry
 Isometry getInverse(Isometry isom) {
- 
-    return Isometry(inverse(isom.mat));
+    return Isometry(inverse(isom.mat), isom.nil);
 }
-
-
-Isometry makeLeftTranslation(Point pt) {
-    vec4 p=pt.coords;
-    mat4 matrix =  mat4(
-    1, 0., 0., 0.,
-    0., 1, 0., 0.,
-    0., 0., 1., 0,
-    p.x, p.y, p.z, 1.
-    );
-    return Isometry(matrix);
-}
-
-Isometry makeInvLeftTranslation(Point pt) {
-    vec4 p=pt.coords;
-    mat4 matrix =  mat4(
-    1, 0., 0., 0.,
-    0., 1, 0., 0.,
-    0., 0., 1., 0,
-    - p.x, - p.y, -p.z, 1.
-    );
-    return Isometry(matrix);
-}
-
 
 
 
 
 
 Isometry translateByVector(vec3 dir) {
-    mat4 matrix =  mat4(
-    1, 0., 0., 0.,
-    0., 1, 0., 0.,
-    0., 0., 1., 0,
-    dir.x, dir.y, dir.z, 1.
-    );
-    return Isometry(matrix);
+    //eventually replace wit the isometry which is exponential of dir in Lie algebra
+return makeLeftTranslation(createPoint(dir.x,dir.y,dir.z));
 }
 
 
@@ -160,10 +190,10 @@ Isometry translateByVector(Vector v) {
 
 
 
-Point translate(Isometry A, Point pt) {
-    return Point(A.mat * pt.coords);
+// Translate a point by the given isometry
+Point translate(Isometry isom, Point p) {
+    return Point(isom.mat * p.coords);
 }
-
 
 
 
@@ -185,20 +215,30 @@ Isometry makeInvLeftTranslation(Vector v) {
 // overload to translate a direction
 //SHOULD THIS CHANGE THE DIRECTION?
 Vector translate(Isometry isom, Vector v) {
-    return Vector(
-    translate(isom, v.pos),
-    v.dir
-    );
+    // apply an isometry to the tangent vector (both the point and the direction)
+    if (isom.nil) {
+        return Vector(translate(isom, v.pos), v.dir);
+    }
+    else {
+        Isometry shift = makeLeftTranslation(v.pos);
+        Point target = translate(isom, v.pos);
+        Isometry shiftInv = makeInvLeftTranslation(target);
+        mat4 matDir = shiftInv.mat * isom.mat * shift.mat;
+        vec3 newDir= (matDir * vec4(v.dir,0.)).xyz;
+        return Vector(target,newDir);
+    }
 }
 
 
-// apply a local rotation of the direction
-Vector rotateByFacing(mat4 mat, Vector v){
-    // notice that the facing is an element of SO(3) which refers to the basis (e_x, e_y, e_w).
-    vec4 aux = vec4(v.dir, 0.);
-    aux = mat * aux;
 
-    return Vector(v.pos, aux.xyz);
+
+//possibly replace shift?!
+Point smallShift(Point p, vec3 dp) {
+    // direction at the origin
+    vec4 dirAtOrigin = vec4(dp, 0);
+    Isometry shift = makeLeftTranslation(p);
+    vec4 dirAtP = shift.mat * dirAtOrigin;
+    return Point(p.coords + dirAtP);
 }
 
 
@@ -207,12 +247,10 @@ Vector rotateByFacing(mat4 mat, Vector v){
 
 
 
-
-
-
-
-
-
+Vector rotateByFacing(mat4 facing, Vector tv){
+    vec3 newDir=(facing*vec4(tv.dir,0.)).xyz;
+    return Vector(tv.pos,newDir);
+}
 
 
 
