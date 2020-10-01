@@ -170,10 +170,10 @@ Light pointLight1, pointLight2, dirLight1;
 //----------------------------------------------------------------------------------------------------------------------
 // Re-packaging Isometries and Positions
 //----------------------------------------------------------------------------------------------------------------------
-
+bool firstPass;
 
 void setVariables(){
-    
+    firstPass=true;
     currentBoost = Isometry(currentBoostMat,true);
     cellBoost = Isometry(cellBoostMat,true);
     invCellBoost = Isometry(invCellBoostMat,true);
@@ -189,8 +189,8 @@ void setVariables(){
        
        
        
-       pointLight1=createPointLight(createPoint(3.,1.,1.),vec3(1.,1.,1.),1.,2.);
-    pointLight2=createPointLight(createPoint(-2.,2.,2.),vec3(1.,1.,1.),1.,2.);
+       pointLight1=createPointLight(createPoint(1.,1.,1.),vec3(1.,1.,1.),1.,2.);
+    pointLight2=createPointLight(createPoint(-.5,0.,0.),vec3(1.,1.,1.),1.,2.);
     
     dirLight1=createDirLight(vec3(0.,0.,1.),skyColor.rgb,skyColor.w);
 

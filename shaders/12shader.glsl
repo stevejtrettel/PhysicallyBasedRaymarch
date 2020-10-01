@@ -19,7 +19,7 @@ vec3 beamSplit(inout Path path,inout Path reflPath, inout Path transPath){
     totalColor+=getSurfaceColor(path,path.frontMat,true);
     if(!path.keepGoing){return totalColor;}//stop if you are at the sky
     
-    
+    firstPass=false;
     
     //make a copy of path to transmit, and to reflect:
     //we began in the air, and hit a surface, so the relevant material is path.frontMat

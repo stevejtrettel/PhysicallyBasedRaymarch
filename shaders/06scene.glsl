@@ -52,7 +52,7 @@ float sceneObjs(Point p){
 
 
 float sceneSDF(Point p){
-        return fakeSphere(p,createPoint(0.5,0.5,-1.),.5);
+        return fakeSphere(p,createPoint(0.,0.,-2.),.5);
     
     
 //   float cup= max(fakeSphere(p,createPoint(0.5,0.5,-1.),.5),-fakeSphere(p,createPoint(0.5,0.5,-0.85),0.4));

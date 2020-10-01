@@ -50,11 +50,26 @@ return texture(tex,vec2(x,y)).rgb;
 // DECIDING BASE COLOR OF HIT OBJECTS, AND MATERIAL PROPERTIES
 //----------------------------------------------------------------------------------------------------------------------
 
+//color Pallate choice
+vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
+{
+    return a + b*cos( 6.28318*(c*t+d) );
+}
+
 
 vec3 backgroundDir(Vector tv){
     vec3 d=tv.dir;
+    
+//    vec3 col1 = pal( d.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25) );
+//    
+//    vec3 col2 = pal( d.z, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.0,0.33,0.67) );
+    
+    vec3 col1=vec3(0.8,0.8,0.5);
+        vec3 col2=vec3(0.1,0.2,0.35);
+    
      vec3 col = sin(30.0*d.x)+sin(30.0*d.y)+sin(30.0*d.z)>0.0 ?
-        vec3(0.6,0.8,1.) : vec3(0.8,0.4,0.8);
+          col1:col2;
+        //vec3(0.6,0.8,1.) : vec3(0.8,0.4,0.8);
 	return (1.1+d.z)*col;
 }
 
@@ -63,7 +78,8 @@ vec3 backgroundPos(Vector tv){
     //vec3 d=tv.dir;
     vec3 d=tv.pos.coords.xyz;
      vec3 col = sin(d.x)+sin(d.y)+sin(d.z)>0.0 ?
-        0.6*vec3(0.6,0.8,1.) : vec3(0.8,0.4,0.8);
+         vec3(0.1,0.2,0.35):vec3(0.8,0.8,0.5);
+       // 0.6*vec3(0.6,0.8,1.) : vec3(0.8,0.4,0.8);
 	return 0.5*col;
 }
 
@@ -74,7 +90,7 @@ void setSkyMaterial(inout Material mat, Vector tv){
             //mat.surf.opacity=0.;
             //mat.surf.color=vec3(0.2,0.2,0.5);
             //mat.surf.color=SRGBToLinear(skyTex(origtv));
-            mat.surf.color=backgroundPos(sampletv);
+            mat.surf.color=backgroundDir(sampletv);
             mat.vol.absorb=vec3(0.);
 }
 
@@ -82,14 +98,14 @@ Material setGlass(){
     Material mat;
     
             mat.surf.color=vec3(0.05);
-            mat.surf.phong.shiny=15.;
-            mat.surf.reflect=0.08;
-            mat.surf.opacity=0.05;
+            mat.surf.phong.shiny=30.;
+            mat.surf.reflect=0.02;
+            mat.surf.opacity=0.1;
             
-            mat.vol.refract=1.53;
+            mat.vol.refract=1.1;
             mat.vol.disperse=vec3(1.51,1.52,1.53);
             mat.vol.translucent=0.;
-            mat.vol.absorb=3.*vec3(0.3,0.05,0.2);
+            mat.vol.absorb=1.*vec3(0.3,0.05,0.2);
             mat.vol.emit=vec3(0.);
     return mat;
     
@@ -107,7 +123,7 @@ Material setDarkGlass(){
             mat.vol.refract=1.53;
             mat.vol.disperse=vec3(1.51,1.52,1.53);
             mat.vol.translucent=0.;
-            mat.vol.absorb=vec3(2.,2.,2.);
+            mat.vol.absorb=vec3(8.0, 8.0, 3.0);
             mat.vol.emit=vec3(0.);
     return mat;
     
