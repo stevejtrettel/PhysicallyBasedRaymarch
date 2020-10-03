@@ -42,7 +42,7 @@ vec2 angles=toSphCoords(tv.dir);
 float x=(angles.x+3.1415)/(2.*3.1415);
 float y=1.-angles.y/3.1415;
 
-return texture(tex,vec2(x,y)).rgb;
+return SRGBToLinear(texture(tex,vec2(x,y)).rgb);
 
 }
 
@@ -53,7 +53,7 @@ return texture(tex,vec2(x,y)).rgb;
 void setSkyMaterial(inout Material mat, Vector tv){
             mat=air;
             //mat.surf.opacity=0.;
-            mat.surf.color=SRGBToLinear(skyTex(sampletv));
+            mat.surf.color=skyTex(sampletv);
             mat.vol.absorb=vec3(0.);
 }
 

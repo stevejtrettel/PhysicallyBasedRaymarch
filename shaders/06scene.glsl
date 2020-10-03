@@ -130,3 +130,39 @@ void setHitWhich(Vector tv,float ep){
 //    }
   
 }
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// NON-CONSTANT MEDIA
+//----------------------------------------------------------------------------------------------------------------------
+
+//the index of refraction of a varying medium is determined by a vector field
+vec3 gradN(vec3 p){
+    
+    vec3 cent=vec3(0.,2.,0.);
+    
+    vec3 v=p-cent;
+    vec3 n=normalize(v);
+    float dist=length(v);
+    
+    
+    float mag=1.-smoothstep(0.,1.,dist);
+
+    
+    return -mag*n; 
+}
+
+
+vec3 gradN(Point p){
+    
+    return gradN(p.coords.xyz);
+}
+
+vec3 gradN(Vector tv){
+    return gradN(tv.pos);
+}
+

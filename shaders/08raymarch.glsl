@@ -120,6 +120,44 @@ float shadowmarch(in Vector toLight, float distToLight,float k)
 
 
 
+//----------------------------------------------------------------------------------------------------------------------
+// Marching Through NonConstant Media
+//----------------------------------------------------------------------------------------------------------------------
+
+void refractTrace(Vector tv){
+    //raytrace until you are a certain distance from the original viewer, then stop and set sampletv
+    
+    //set dt
+    float dt=0.01;
+    //set number of steps
+    int numSteps=500;
+    
+    //set initial conditions
+    float x,y,z;//position
+    float u,v,w;//direction
+    
+    vec3 p=tv.pos.coords.xyz;
+    vec3 dir=tv.dir;    
+    
+    //first; maybe just raytrace a fixed number of steps:
+    for(int k=0;k<numSteps;k++){
+        
+        //update the direction based on the position:
+        p+=dt*dir;
+        
+        //update direction
+        dir+=dt*gradN(p);
+    }
+    
+    //after march; build final tangent vector
+Vector finalV;
+    finalV.pos.coords=vec4(p,1.);
+    finalV.dir=dir;
+    
+    sampletv=finalV;
+    distToViewer=float(numSteps)*dt;
+    
+}
 
 
 
