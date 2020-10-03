@@ -149,11 +149,11 @@ vec3 gradN(vec3 p){
     vec3 n=normalize(v);
     float dist=length(v);
     
-    
-    float mag=1.-smoothstep(0.,1.,dist);
+    //lightRad is a uniform controlling the size of the disturbance
+    float mag=1.-smoothstep(0.,lightRad,dist);
 
-    
-    return -mag*n; 
+//refl is a uniform controling the magnitude of the disturbance
+    return -refl*mag*n; 
 }
 
 

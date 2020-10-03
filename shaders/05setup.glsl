@@ -136,8 +136,9 @@ uniform sampler2D tex;
 
 
 uniform float time;
-//uniform float lightRad;
-//uniform float refl;
+
+uniform float lightRad;
+uniform float refl;
 uniform float foggy;
 uniform int planes;
 uniform int resol;

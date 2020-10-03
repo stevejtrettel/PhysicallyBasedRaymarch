@@ -44,7 +44,10 @@ const time0 = new Date().getTime();
  */
 function initGeometry() {
 
-    globals.position = new Position();
+    //globals.position = new Position();
+    //make it so we start looking along y axis
+    globals.position = new Position().rotateFacingBy(new Matrix4().set(1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1));
+
     globals.cellPosition = new Position();
     globals.invCellPosition = new Position();
     globals.gens = createGenerators();
@@ -131,7 +134,7 @@ function setupMaterial(fShader) {
                     ])
             },
 
-            
+
             tex: { //earth texture to global object
                 type: "t",
                 value: texture
@@ -245,7 +248,12 @@ function setupMaterial(fShader) {
  */
 function updateMaterial() {
     //example of how this worked
-    //globals.material.uniforms.currentBoostMat.value = globals.position.boost
+    //globals.material.uniforms.currentBoostMat.value = globals.position.boostu
+
+    globals.material.uniforms.lightRad.value = globals.lightRad;
+    globals.material.uniforms.refl.value = globals.refl;
+    globals.material.uniforms.display.value = globals.display;
+    globals.material.uniforms.foggy.value = globals.foggy;
 }
 
 
