@@ -17,6 +17,10 @@ vec3 checkerboard(vec2 v){
 
 
 
+
+
+
+
 vec2 toSphCoords(vec3 v){
 float theta=atan(v.y,v.x);
 float phi=acos(v.z);
@@ -42,7 +46,8 @@ vec2 angles=toSphCoords(tv.dir);
 float x=(angles.x+3.1415)/(2.*3.1415);
 float y=1.-angles.y/3.1415;
 
-return texture(tex,vec2(x,y)).rgb;
+    //the vec00 are the derivative mappings: get rid of seam!
+return textureGrad(tex,vec2(x,y),vec2(0,0),vec2(0,0)).rgb;
 
 }
 
