@@ -102,7 +102,11 @@ let initGui = function () {
     recordingController.onFinishChange(function (value) {
         if (value == true) {
             capturer = new CCapture({
-                format: 'jpg'
+                frramerate: 50,
+                format: 'png',
+                // timeLimit()
+                //format: 'jpg'
+
             });
             capturer.start();
         } else {
