@@ -56,13 +56,13 @@ vec3 getInternalReflect(Path path){
     //step forward one step along the reflection
     stepForward(path.dat.reflectedRay,path,-1.,reflRes);
     
-    transmitPath=copyForTransmit(path,path.backMat);
+    transmitPath=copyForTransmit(path,path.dat.backMat);
     //decrease remaining intensity by what is left for reflection.
     updateReflectIntensity(path);
 
     stepForward(transmitPath.dat.refractedRay,transmitPath,1.,reflRes);
     //now get the color
-    totalColor+=getSurfaceColor(transmitPath,transmitPath.frontMat,false);
+    totalColor+=getSurfaceColor(transmitPath,transmitPath.dat.frontMat,false);
     
     numRefl+=1;
     keepGoing=(path.dat.reflect>0.)&&(path.intensity>0.01);
@@ -95,11 +95,11 @@ vec3 getRefract(inout Path path){
     Path reflectPath=path;
     
     //get the color of the back surface from Phong?
-    totalColor+=getSurfaceColor(path,path.backMat,false);
+    totalColor+=getSurfaceColor(path,path.dat.backMat,false);
     
     //update the path intensity, taking out the reflective comp
     //path.backmat is the glass we are inside of
-    updateTransmitIntensity(path,path.backMat);
+    updateTransmitIntensity(path,path.dat.backMat);
     
     //update the intensity for what is available for reflection still
     updateReflectIntensity(reflectPath);
@@ -112,34 +112,6 @@ vec3 getRefract(inout Path path){
     
     //the pathData is still at the first exit point from total internal refraction
 }
-
-
-
-
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// Refracting through a Translucent Material
-//----------------------------------------------------------------------------------------------------------------------
-
-
-
-//start at a translucent surface; bounce through to backside, 
-//pic up portion of color that would come from internal reflection (material color)
-//end with the exiting ray, with intensity adjusted for transmission
-vec3 getTranslucentRefract(inout Path path){
-    
-    vec3 totalColor;
-    
-    return totalColor;
-}
-
-
-
-
-
-
-
 
 
 
@@ -170,19 +142,19 @@ vec3 getReflect(inout Path path,Vector initialDir){
     
     //we keep going if the material in front of us is not transparent
     //or if it is the sky, cuz we need to add the sky color
-     bool keepGoing=path.keepGoing&&(path.dat.hitSky||path.frontMat.surf.opacity==1.);
+     bool keepGoing=path.keepGoing&&(path.dat.hitSky||path.dat.frontMat.opacity==1.);
     
      while(keepGoing&&numRefl<MAX_REFL){
         
         //pick up the color
-        totalColor+=getSurfaceColor(path,path.frontMat,true);
+        totalColor+=getSurfaceColor(path,path.dat.frontMat,true);
         updateReflectIntensity(path);
          
          //reflect off the surface
         stepForward(path.dat.reflectedRay,path,1.,reflRes);
         
         //keep going if (1) not sky, and (2)object is opaque and (3)there's sufficient intensity to bother.
-        keepGoing=path.keepGoing&&(!path.dat.hitSky)&&path.frontMat.surf.opacity==1.&&(path.intensity>0.01);
+        keepGoing=path.keepGoing&&(!path.dat.hitSky)&&path.dat.frontMat.opacity==1.&&(path.intensity>0.01);
         
         numRefl+=1;
     }
@@ -203,19 +175,4 @@ vec3 getReflect(inout Path path,Vector initialDir){
 
 
 
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// Rendering a translucent material
-//----------------------------------------------------------------------------------------------------------------------
-
-vec3 getTranslucent(Path path){
-    
-    
-    
-    return vec3(0.);
-    
-    
-    
-}
 

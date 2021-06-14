@@ -137,17 +137,6 @@ vec3 p=abs(pt.coords.xyz-cent.coords.xyz);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 float block(Point p, Point center, float x, float y, float z){
 
 //make the slab
@@ -161,6 +150,3 @@ return distance;
 float cube(Point p, Point center, float s){
     return block(p,center,s,s,s);
 }
-
-
-

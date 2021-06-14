@@ -34,7 +34,7 @@ vec3 pointLight(Light light, Path path, Material mat, bool marchShadow){
     tangDirection(path.dat.pos,light.pos,toLight,distToLight);
     fromLight=toLight;//doesnt matter here cuz isotropic
     
-    ph=phong(toLight,light.color,path,mat.surf.color,mat.surf.phong.shiny);
+    ph=phong(toLight,light.color,path,mat.color,mat.phong.shiny);
     
     if(marchShadow&&hitWhich!=1){//not the light scene
         sh=shadowmarch(toLight,distToLight,50.);
@@ -61,7 +61,7 @@ vec3 dirLight(Light light,Path path, Material mat,bool marchShadow){
     
     //NEED TO DEAL WITH THE SHINYNESS IF WE GO THIS WAY
     //float shiny = max(surface.phong.shine/5.,2.);
-    ph=phong(toSky,light.color,path, mat.surf.color,3.);
+    ph=phong(toSky,light.color,path, mat.color,3.);
     
     if(marchShadow&&hitWhich!=1){//not the light scene
         sh=shadowmarch(toSky,20.,2.);
@@ -76,7 +76,7 @@ vec3 dirLight(Light light,Path path, Material mat,bool marchShadow){
 
 
 vec3 ambientLight(vec4 lightColor,Path path,Material mat){
-    return lightColor.w*lightColor.rgb*mat.surf.color;
+    return lightColor.w*lightColor.rgb*mat.color;
 }
 
 
@@ -142,7 +142,7 @@ vec3 getSurfaceColor(inout Path path,Material mat, bool marchShadow){
         //kill the ray
         path.keepGoing=false;
         //weight by amount of surviving light and get out
-        return (path.lightColor)*(path.accColor)*(path.intensity)*(mat.surf.color);
+        return (path.lightColor)*(path.accColor)*(path.intensity)*(mat.color);
     }
     
     vec3 amb;//ambient lighting
@@ -155,7 +155,7 @@ vec3 getSurfaceColor(inout Path path,Material mat, bool marchShadow){
     totalColor=amb+scn;
     
 
-    float intensityFactor= path.intensity*(1.-path.dat.reflect) *mat.surf.opacity;
+    float intensityFactor= path.intensity*(1.-path.dat.reflect) *mat.opacity;
     
     totalColor*=path.accColor;//correct for absorbtion
     totalColor*=intensityFactor;//correct for intensity

@@ -17,10 +17,6 @@ vec3 checkerboard(vec2 v){
 
 
 
-
-
-
-
 vec2 toSphCoords(vec3 v){
 float theta=atan(v.y,v.x);
 float phi=acos(v.z);
@@ -28,16 +24,6 @@ return vec2(theta,phi);
 }
 
 
-
-
-
-
-//
-vec3 cubeTexture(Vector tv){
-    // vec3 color = vec3(0.5,0.5,0.5);
-    vec3 color = texture(earthCubeTex, tv.dir.yzx).rgb;
-return color;
-}
 
 
 vec3 skyTex(Vector tv){
@@ -58,39 +44,23 @@ return textureGrad(tex,vec2(x,y),vec2(0,0),vec2(0,0)).rgb;
 void setSkyMaterial(inout Material mat, Vector tv){
             mat=air;
             //mat.surf.opacity=0.;
-            mat.surf.color=SRGBToLinear(skyTex(sampletv));
-            mat.vol.absorb=vec3(0.);
+            mat.color=SRGBToLinear(skyTex(sampletv));
+            mat.absorb=vec3(0.);
 }
 
 Material setGlass(){
     Material mat;
     
-            mat.surf.color=vec3(0.05);
-            mat.surf.phong.shiny=15.;
-            mat.surf.reflect=0.08;
-            mat.surf.opacity=0.05;
+            mat.color=vec3(0.05);
+            mat.phong.shiny=15.;
+            mat.reflect=0.08;
+            mat.opacity=0.05;
             
-            mat.vol.refract=1.53;
-            mat.vol.disperse=vec3(1.51,1.52,1.53);
-            mat.vol.translucent=0.;
-            mat.vol.absorb=vec3(0.3,0.05,0.2);
-            mat.vol.emit=vec3(0.);
-    return mat;
-    
-}
-
-Material setDiamond(){
-        Material mat;
-            mat.surf.color=vec3(0.05);
-            mat.surf.phong.shiny=15.;
-            mat.surf.reflect=0.08;
-            mat.surf.opacity=0.05;
-            
-            mat.vol.refract=1.53;
-            mat.vol.disperse=vec3(2.4,2.42,2.46);
-            mat.vol.translucent=0.;
-            mat.vol.absorb=vec3(0.3,0.05,0.2);
-            mat.vol.emit=vec3(0.);
+            mat.refract=1.53;
+            mat.disperse=vec3(1.51,1.52,1.53);
+            mat.translucent=0.;
+            mat.absorb=vec3(0.3,0.05,0.2);
+            mat.emit=vec3(0.);
     return mat;
     
 }
@@ -111,28 +81,15 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
         
              
          case 3://glass
-            mat=setDiamond();
+            mat=setGlass();
             break;
 
-             
-        case 4://mirror
-            mat.surf.color=vec3(0.03,0.05,0.2);
-            mat.surf.reflect=0.95;
-            mat.surf.phong.shiny=15.;
-            mat.surf.opacity=1.;
-             
-            
-            mat.vol.refract=1.25;
-            mat.vol.disperse=vec3(mat.vol.refract);
-            mat.vol.translucent=1.;
-            mat.vol.absorb=vec3(0.);
-            mat.vol.emit=vec3(0.);
+        case 4:
+         mat==setGlass();
+         break;
 
-            break;
-             
-             
         case 5://diamond
-            mat=setDiamond();
+            mat=setGlass();
             break;
 
         
@@ -159,11 +116,11 @@ void updateReflect(inout localData dat, Material back, Material front){
     
     //n1=index of refraction you are currently inside of
     //n2=index of refraction you are entering
-    float n1=back.vol.refract;
-    float n2=front.vol.refract;
+    float n1=back.refract;
+    float n2=front.refract;
     
     //what is the bigger reflectivity between the two surfaces at the interface?
-    float refl=max(back.surf.reflect, front.surf.reflect);
+    float refl=max(back.reflect, front.reflect);
 
         // Schlick aproximation
         float r0 = (n1-n2) / (n1+n2);
@@ -204,7 +161,7 @@ void updateReflectIntensity(inout Path path){
 
 void updateTransmitIntensity(inout Path path,Material mat){
     //need to make sure the reflectivity has been properly updated in path
-    path.intensity*=(1.-path.dat.reflect)*(1.-mat.surf.opacity);
+    path.intensity*=(1.-path.dat.reflect)*(1.-mat.opacity);
 }
 
 
@@ -217,7 +174,7 @@ Path copyForTransmit(Path path, Material mat){
      //make the transmission data
     Path transPath=path;
     //make this true only if the is somewhat transparent
-    transPath.keepGoing=transPath.keepGoing&&(mat.surf.opacity<1.);
+    transPath.keepGoing=transPath.keepGoing&&(mat.opacity<1.);
     //update the intensity of the light which gets transmitted
     updateTransmitIntensity(transPath,mat);
     return transPath;
@@ -234,107 +191,6 @@ Path copyForReflect(Path path, Material mat){
     
     return reflPath;
 }
-
-
-
-void setDispersionPaths(Path path, inout Path red, inout Path green, inout Path blue){
-    
-    //copy the red direction
-    red=copyForTransmit(path,path.frontMat);
-    //update the light color of this path
-    red.lightColor=vec3(1.,0.,0.);
-    //update the refract direction
-red.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,path.backMat.vol.disperse.r,path.frontMat.vol.disperse.r);
-    
-    
-        //copy the red direction
-    green=copyForTransmit(path,path.frontMat);
-    //update the light color of this path
-    green.lightColor=vec3(0.,1.,0.);
-    //update the refract direction
-green.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,path.backMat.vol.disperse.g,path.frontMat.vol.disperse.g);
-    
-    
-        //copy the red direction
-    blue=copyForTransmit(path,path.frontMat);
-    //update the light color of this path
-    blue.lightColor=vec3(0.,0.,1.);
-    //update the refract direction
-blue.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,path.backMat.vol.disperse.b,path.frontMat.vol.disperse.b);
-    
-}
-
-
-//void setDispersionSix(Path path, inout Path red, inout Path yellow, inout Path green, inout Path cyan,inout Path blue, inout Path magenta){
-//    
-//    float frontRef;
-//    float backRef;
-//    
-//    //copy the red direction
-//    red=copyForTransmit(path,path.frontMat);
-//    //update the light color of this path
-//    red.lightColor=vec3(.5,0.,0.);
-//    backRef=path.backMat.vol.disperse.r;
-//    frontRef=path.frontMat.vol.disperse.r;
-//    //update the refract direction
-//red.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef);
-//    
-//    
-//        //copy for the yellow direction
-//    yellow=copyForTransmit(path,path.frontMat);
-//    //update the light color of this path
-//    yellow.lightColor=vec3(.5,0.5,0.);
-//    backRef=(path.backMat.vol.disperse.r+path.backMat.vol.disperse.g)/2.;
-//    frontRef=(path.frontMat.vol.disperse.r+path.frontMat.vol.disperse.g)/2.;
-//    //update the refract direction
-//yellow.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef);
-//    
-//
-//    
-//    //copy the green direction
-//    green=copyForTransmit(path,path.frontMat);
-//    //update the light color of this path
-//    green.lightColor=vec3(.5,0.,0.);
-//    backRef=path.backMat.vol.disperse.g;
-//    frontRef=path.frontMat.vol.disperse.g;
-//    //update the refract direction
-//green.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef); 
-//    
-//    
-//    //copy for the cyan direction
-//    cyan=copyForTransmit(path,path.frontMat);
-//    //update the light color of this path
-//   cyan.lightColor=vec3(0.,0.5,0.5);
-//    backRef=(path.backMat.vol.disperse.g+path.backMat.vol.disperse.b)/2.;
-//    frontRef=(path.frontMat.vol.disperse.g+path.frontMat.vol.disperse.b)/2.;
-//    //update the refract direction
-//cyan.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef);
-//    
-//    
-//      //copy the blue direction
-//    blue=copyForTransmit(path,path.frontMat);
-//    //update the light color of this path
-//    blue.lightColor=vec3(0.,0.,0.5);
-//    backRef=path.backMat.vol.disperse.b;
-//    frontRef=path.frontMat.vol.disperse.b;
-//    //update the refract direction
-//blue.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef); 
-//    
-//    
-//    
-//        //copy for the magenta direction
-//    magenta=copyForTransmit(path,path.frontMat);
-//    //update the light color of this path
-//   magenta.lightColor=vec3(0.5,0.,0.5);
-//    backRef=path.backMat.vol.disperse.b+2.*(path.backMat.vol.disperse.b-path.backMat.vol.disperse.g);
-//    frontRef=path.frontMat.vol.disperse.b+2.*(path.frontMat.vol.disperse.b-path.frontMat.vol.disperse.g);
-//    //update the refract direction
-//magenta.dat.refractedRay=refractThrough(path.dat.incident,path.dat.normal,backRef,frontRef);
-//    
-//    
-//    
-//    
-//}
 
 
 
@@ -361,7 +217,7 @@ void updateLocalData(inout localData dat, Vector tv, Material back,Material fron
     
 
     //set refracted ray using the old and new material;
-    dat.refractedRay=refractThrough(tv,normal,back.vol.refract,front.vol.refract);
+    dat.refractedRay=refractThrough(tv,normal,back.refract,front.refract);
     
     //update the reflectivity float in the local data: this tells us how much needs to be reflected at this given point!
     updateReflect(dat, back, front);
@@ -379,20 +235,20 @@ void updatePath(inout Path path, Vector tv,float dist,bool isSky){
     
     if(isSky){//if we hit the sky; kill the path
         path.dat.hitSky=true;
-        setSkyMaterial(path.frontMat,tv);
-        setSkyMaterial(path.backMat,tv);
+        setSkyMaterial(path.dat.frontMat,tv);
+        setSkyMaterial(path.dat.backMat,tv);
         return;
     }
     
     //otherwise, sample the material in front and behind
-    updateMaterial(path.backMat,tv,-0.01);
-    updateMaterial(path.frontMat,tv,0.01);
+    updateMaterial(path.dat.backMat,tv,-0.01);
+    updateMaterial(path.dat.frontMat,tv,0.01);
     
     //update the direction vectors, and reflectivity
-    updateLocalData(path.dat,tv,path.backMat,path.frontMat);
+    updateLocalData(path.dat,tv,path.dat.backMat,path.dat.frontMat);
     
     //update the accumulation parameters:
     path.dist+=dist;
-    path.accColor *= exp(-path.backMat.vol.absorb*dist);
+    path.accColor *= exp(-path.dat.backMat.absorb*dist);
     
 }

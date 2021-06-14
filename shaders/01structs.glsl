@@ -320,11 +320,26 @@ const Volume transparentVolume=Volume(1.,vec3(1.),0.,vec3(0.),vec3(0.),0.);
 //materials have surface properties,
 //and also volume properties.
 struct Material{
-    Surface surf;
-    Volume vol;
+        vec3 color;
+        Phong phong;
+        float reflect;
+        float opacity;
+        float refract;
+        vec3 disperse;
+        float translucent;
+        vec3 absorb;
+        vec3 emit;
 };
 
-Material air=Material(noSurface,transparentVolume);
+
+//defining the constant material air:
+Material air=Material(vec3(0),noPhong,0.,0.,1.,vec3(1.),1.,vec3(0),vec3(0));
+
+
+
+
+
+
 
 //----------------------------------------------------------------------------------------------------------------------
 // Struct Surface Data
@@ -343,7 +358,8 @@ struct localData{
     float side;//inside or outside an object
     float reflect;//reflectivity of the surface we are currently at.
     bool hitSky;
-    
+    Material frontMat;
+    Material backMat;
 };
 
 
@@ -353,10 +369,6 @@ struct localData{
 //instead of just tracking the tangent vector, we can keep one of these objects in tow;
 struct Path{
     localData dat;
-    
-    //materials at our current location
-    Material backMat;
-    Material frontMat;
     
     float intensity;
     float dist;
@@ -369,9 +381,10 @@ struct Path{
 
 void initializePath(inout Path path){
     path.dat.hitSky=false;
+    path.dat.frontMat=air;
+    path.dat.backMat=air;
+
     //set the initial data
-    path.frontMat=air;
-    path.backMat=air;
     path.intensity=1.;
     path.dist=0.;
     path.accColor=vec3(1.);

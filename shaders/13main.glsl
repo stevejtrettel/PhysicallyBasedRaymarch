@@ -48,18 +48,17 @@ void main(){
     Vector rayDir=setRayDir();
     
     
-//do the first raymarch and get the color
+    //do the first raymarch and get the color
     vec3 pixelColor=getPixelColor(rayDir);
     
     float exposure=1.25;
     pixelColor*=exposure;
-  
-   
+
     pixelColor = ACESFilm(pixelColor);
     
     //do the gamma correction
     //pixelColor= pow( pixelColor, vec3(1.0/2.2) );
-   pixelColor=LinearToSRGB(pixelColor);
+    pixelColor=LinearToSRGB(pixelColor);
     out_FragColor=vec4(pixelColor,1.);
     
 
