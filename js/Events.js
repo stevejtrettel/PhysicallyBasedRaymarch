@@ -17,14 +17,7 @@ let onResize = function () {
 
 window.addEventListener('resize', onResize, false);
 
-//EVENTS**************************************************************
-//--------------------------------------------------------------------
-// Handle keyboard events
-//--------------------------------------------------------------------
-function onkey(event) {
-    //event.preventDefault();
 
-}
 
 //--------------------------------------------------------------------
 // Listen for keys for movement/rotation
@@ -42,29 +35,9 @@ function key(event, sign) {
 }
 
 
-//--------------------------------------------------------------------
-// Phone screen tap for movement
-//--------------------------------------------------------------------
-
-function tap(event, sign) {
-
-}
-
-
-//--------------------------------------------------------------------
-// Listen for mouse clicks
-////--------------------------------------------------------------------
-function click(event) {
-
-}
-
-
-//--------------------------------------------------------------------
-// Get phone's orientation
-//--------------------------------------------------------------------
 
 function initEvents() {
-    window.addEventListener("keydown", onkey, false);
+    // window.addEventListener("keydown", onkey, false);
 
     document.addEventListener('keydown', function (event) {
         key(event, 1);
@@ -72,13 +45,6 @@ function initEvents() {
     document.addEventListener('keyup', function (event) {
         key(event, -1);
     }, false);
-    //    document.addEventListener('touchstart', function (event) {
-    //        tap(event, 1);
-    //    }, false);
-    //    document.addEventListener('touchend', function (event) {
-    //        tap(event, -1);
-    //    }, false);
-    //document.addEventListener('click', click);
 }
 
 
