@@ -83,14 +83,9 @@ return rayDir;
 
 
 void main(){
-
-     
     
     setVariables();
     createLights();
-    
-    //generators(display,gens);
-   // setResolution(resol);
     
     Vector rayDir=setRayDir();
     

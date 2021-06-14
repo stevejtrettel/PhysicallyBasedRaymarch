@@ -1,17 +1,19 @@
 import {
     Scene,
+    PlaneBufferGeometry,
     WebGLRenderer,
     Vector2,
     OrthographicCamera,
     BufferGeometry,
     BufferAttribute,
-    Mesh
+    Mesh, ShaderMaterial,
+    LinearEncoding
 } from './lib/three.module.js';
 
 import {
     initGeometry,
-    setupMaterial,
-    updateMaterial
+    createShaderUniforms,
+    updateShaderUniforms
 } from "./Uniforms.js";
 
 import {
@@ -49,12 +51,166 @@ let mesh;
 let camera;
 let stats;
 let canvas;
+let renderer;
 
-//----------------------------------------------------------------------------------------------------------------------
-// Shader variables
-//----------------------------------------------------------------------------------------------------------------------
 
-let mainFrag;
+
+
+//Creating Basic Components
+//=============================================
+
+
+function createStats(type) {
+
+    var panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;
+    var stats = new Stats();
+
+    stats.showPanel(panelType); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(stats.dom);
+
+    return stats;
+}
+
+
+
+
+
+function createRenderer() {
+    renderer = new WebGLRenderer({
+        canvas,
+        alpha: true,
+        //  premultipliedAlpha: true,
+        //  preserveDrawingBuffer: true,
+        depth: false,
+        stencil: false
+    });
+
+    // set the gamma correction so that output colors look
+    // correct on our screens
+    //renderer.gammaFactor = 1.;
+    renderer.outputEncoding = LinearEncoding;
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+
+function createCamera() {
+
+    //make the one camera we will use for both renders
+    camera = new OrthographicCamera(
+        -1, // left
+        1, // right
+        1, // top
+        -1, // bottom
+        -1, // near,
+        1, // far
+    );
+
+}
+
+
+
+function render() {
+
+    //render the actual scene to the camera using this
+    renderer.render(scene, camera);
+
+}
+
+
+function resizeToDisplay() {
+               canvas = renderer.domElement;
+               const width = canvas.clientWidth;
+               const height = canvas.clientHeight;
+               const needResize = canvas.width !== width || canvas.height !== height;
+               if (needResize) {
+                   // renderer.setPixelRatio(window.devicePixelRatio);
+                   renderer.setSize(window.innerWidth, window.innerHeight);
+               }
+    return needResize;
+}
+
+//
+//
+// function animate() {
+//
+//     requestAnimationFrame(animate);
+//
+//     //stats.begin();
+//
+//     //resizeToDisplay();
+//
+//     updateShaderUniforms();
+//
+//     globals.controls.update();
+//
+//     render();
+//
+//     //stats.end();
+//
+// }
+
+
+
+
+async function main() {
+
+
+    //Setup our THREE scene--------------------------------
+    scene = new Scene();
+    canvas = document.createElement('canvas');
+    let context = canvas.getContext('webgl2');
+    globals.renderer = new WebGLRenderer({
+        canvas: canvas,
+        context: context
+    });
+    document.body.appendChild(globals.renderer.domElement);
+    globals.screenResolution = new Vector2(window.innerWidth, window.innerHeight);
+    globals.effect = new rendererSetup(globals.renderer);
+    camera = new OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1);
+    globals.controls = new Controls();
+    initGeometry();
+
+    createScene();
+
+
+    //loadShaders();
+    initEvents();
+    initGui();
+    stats = new Stats();
+    stats.showPanel(1);
+    stats.showPanel(2);
+    stats.showPanel(0);
+    document.body.appendChild(stats.dom);
+
+    animate();
+
+
+    //
+    // initGeometry();
+    //
+    // globals.controls = new Controls();
+    //
+    // canvas = document.createElement('canvas');
+    // let context = canvas.getContext('webgl2');
+    // globals.renderer = new WebGLRenderer({
+    //     canvas: canvas,
+    //     context: context
+    // });
+    // document.body.appendChild(globals.renderer.domElement);
+    // globals.screenResolution = new Vector2(window.innerWidth, window.innerHeight);
+    //
+    // stats = createStats();
+    //
+    // createRenderer();
+    //
+    // createCamera();
+    //
+    // await createScene();
+
+    //animate();
+
+}
+
 
 
 
@@ -79,7 +235,8 @@ function init() {
     globals.controls = new Controls();
     initGeometry();
 
-    loadShaders();
+    createScene();
+    //loadShaders();
     initEvents();
     initGui();
     stats = new Stats();
@@ -110,9 +267,6 @@ async function buildShader() {
         },
         {
             file: './shaders/02localGeo.glsl'
-        },
-        {
-            file: './shaders/03globalGeo.glsl'
         },
         {
             file: './shaders/04basicSDFs.glsl'
@@ -157,37 +311,61 @@ async function buildShader() {
 }
 
 
+async function createScene() {
 
+    let shaderCode=await buildShader();
 
-async function loadShaders() {
+    //make the actual scene, and the buffer Scene
+    scene = new Scene();
 
-            let shaderCode=await buildShader();
+    //make the plane we draw on
+    const geom = new PlaneBufferGeometry(2, 2);
 
-                                                        mainFrag = shaderCode;
-                                                        setupMaterial(shaderCode);
-                                                        globals.effect.setSize(globals.screenResolution.x, globals.screenResolution.y);
+    const mat = new ShaderMaterial({
+        fragmentShader: shaderCode,
+        //vertexShader: document.getElementById('vertexShader').textContent,
+        uniforms: createShaderUniforms(),
+    });
 
-                                                        //Setup a "quad" to render on-------------------------
-                                                        let geom = new BufferGeometry();
-                                                        let vertices = new Float32Array([
-                                                            -1.0, -1.0, 0.0,
-                                                            1.0, -1.0, 0.0,
-                                                            1.0, 1.0, 0.0,
+    const screen=new Mesh(geom, mat);
 
-                                                            -1.0, -1.0, 0.0,
-                                                            1.0, 1.0, 0.0,
-                                                            -1.0, 1.0, 0.0
-                                                        ]);
-                                                        geom.setAttribute('position', new BufferAttribute(vertices, 3));
-                                                        mesh = new Mesh(geom, globals.material);
-                                                        scene.add(mesh);
-                                                        animate();
+    scene.add(screen);
 }
 
 
 
-
-
+//
+//
+// async function loadShaders() {
+//
+//     let shaderCode=await buildShader();
+//
+//         globals.material = new ShaderMaterial({
+//             uniforms:createShaderUniforms(),
+//             vertexShader: document.getElementById('vertexShader').textContent,
+//             fragmentShader: shaderCode,
+//             transparent: true
+//     });
+//
+//         globals.effect.setSize(globals.screenResolution.x, globals.screenResolution.y);
+//
+//                                                             //Setup a "quad" to render on-------------------------
+//                                                             let geom = new BufferGeometry();
+//                                                             let vertices = new Float32Array([
+//                                                                 -1.0, -1.0, 0.0,
+//                                                                 1.0, -1.0, 0.0,
+//                                                                 1.0, 1.0, 0.0,
+//
+//                                                                 -1.0, -1.0, 0.0,
+//                                                                 1.0, 1.0, 0.0,
+//                                                                 -1.0, 1.0, 0.0
+//                                                             ]);
+//                                                             geom.setAttribute('position', new BufferAttribute(vertices, 3));
+//                                                             mesh = new Mesh(geom, globals.material);
+//                                                             scene.add(mesh);
+//                                                             animate();
+// }
+//
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -197,7 +375,7 @@ async function loadShaders() {
 // Renderer
 //----------------------------------------------------------------------------------------------------------------------
 
-//this controls the effect part of the animate loop
+// //this controls the effect part of the animate loop
 let rendererSetup = function (renderer, done) {
 
     this._renderer = renderer;
@@ -223,7 +401,7 @@ let rendererSetup = function (renderer, done) {
 function animate() {
     stats.begin();
     globals.controls.update();
-    updateMaterial();
+    updateShaderUniforms();
     globals.effect.render(scene, camera, animate);
     stats.end();
 }
@@ -232,11 +410,11 @@ function animate() {
 // Where the magic happens
 //----------------------------------------------------------------------------------------------------------------------
 
-init();
+//init();
+main();
 
 
 export {
-    init,
     globals,
     canvas
 };
