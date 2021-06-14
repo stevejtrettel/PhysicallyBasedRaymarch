@@ -9,7 +9,7 @@ import {
 } from './lib/three.module.js';
 
 import {
-    initGeometry,
+    setOrigin,
     createShaderUniforms,
     updateShaderUniforms
 } from "./Uniforms.js";
@@ -84,7 +84,7 @@ function createCamera() {
 
 function createControls(){
     globals.controls = new Controls();
-    initGeometry();//sets the origin
+    setOrigin();//sets the origin
 }
 
 

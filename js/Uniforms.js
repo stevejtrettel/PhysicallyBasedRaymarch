@@ -23,7 +23,7 @@ const time0 = new Date().getTime();
 /**
  * Initialize the globals variables related to the scene (position, cell position, lattice, etc).
  */
-function initGeometry() {
+function setOrigin() {
     globals.position = new Position();
 }
 
@@ -76,7 +76,7 @@ function updateShaderUniforms() {
 
 
 export {
-    initGeometry,
+    setOrigin,
     createShaderUniforms,
     updateShaderUniforms
 };

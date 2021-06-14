@@ -119,6 +119,33 @@ void tangDirection(Vector u, Vector v, out Vector tv, out float len){
 
 
 
+
+//----------------------------------------------------------------------------------------------------------------------
+// Area Density
+//----------------------------------------------------------------------------------------------------------------------
+
+
+//takes in a tangent vector and a length
+// returns the function A(r,u)
+
+
+
+float areaDensity(float r,Vector u){
+
+    float areaDensity=r*r;
+
+    return areaDensity;
+
+}
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Geodesic Flow
+//----------------------------------------------------------------------------------------------------------------------
+
+
 // flow the given vector during time t
 Vector flow(Vector v, float t) {
 
@@ -138,29 +165,6 @@ void nudge(inout Vector v){
 
 
 
-
-
-
-
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// Area Density
-//----------------------------------------------------------------------------------------------------------------------
-
-
-//takes in a tangent vector and a length
-// returns the function A(r,u)
-
-
-
-float areaDensity(float r,Vector u){
-
-    float areaDensity=r*r;
-
-    return areaDensity;
-
-}
 
 
 
