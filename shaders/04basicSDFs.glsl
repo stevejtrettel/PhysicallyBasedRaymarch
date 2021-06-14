@@ -2,7 +2,7 @@
 // Smooth Mins, Maxes
 //----------------------------------------------------------------------------------------------------------------------
 
-
+//float EPSILON=0.0001;
 
 float smin( float a, float b, float k )
 {
@@ -24,129 +24,130 @@ float smax( float a, float b, float k )
 
 
 
-
 //----------------------------------------------------------------------------------------------------------------------
-// Raymarch Primitives
+// NEW STUFF
 //----------------------------------------------------------------------------------------------------------------------
 
 
-float halfSpaceY(Point p,float h){
-    return p.coords.y+h;
-}
 
-float halfSpaceX(Point p,float h){
-    return p.coords.x+h;
-}
+//if you hit an object which is not part of a compound, one side is the object (material) and the other side is air
+//set your local data appropriately
+void setObjectInAir(inout localData dat, float dist, Vector normal, Material mat){
 
-float halfSpaceZ(Point p,float h){
-   return p.coords.z+h;
-}
+    //set the material
+    dat.hitSky=false;
 
-
-
-float slabY(Point p,float offset, float width){
-    return abs(p.coords.y+offset+width)-width;
-}
-
-float slabX(Point p,float offset, float width){
-    return abs(p.coords.x+offset+width)-width;
-}
-
-float slabZ(Point p,float offset, float width){
-    return abs(p.coords.z+offset+width)-width;
-}
-
-
-float vertCyl(Point p, Point center, float radius){
-    return length(p.coords.xy-center.coords.xy)-radius;
-
-}
-float sphere(Point p, Point center, float radius){
-    return exactDist(p,center)-radius;
-}
-
-
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// from  IQ: 
-//https://iquilezles.org/www/articles/distfunctions/distfunctions.htm
-//----------------------------------------------------------------------------------------------------------------------
-float dot2( in vec2 v ) { return dot(v,v); }
-float dot2( in vec3 v ) { return dot(v,v); }
-float ndot( in vec2 a, in vec2 b ) { return a.x*b.x - a.y*b.y; }
-
-
-float sdBox( Point pt, Point cent,vec3 b )
-    {
-    vec3 p=pt.coords.xyz-cent.coords.xyz;
-    
-    vec3 q = abs(p) - b;
-    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+    //we are inside, approaching air
+    if(dist<0.){
+        //normal is inward pointing;
+        dat.normal=turnAround(normal);
+        dat.backMat=mat;
+        dat.frontMat=air;
     }
 
-
-
-float sdRoundBox( Point pt, Point cent,vec3 b, float r )
-    {
-        vec3 p=pt.coords.xyz-cent.coords.xyz;
-        vec3 q = abs(p) - b;
-        return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - r;
+    else{
+        //normal is outward pointing;
+        dat.normal=normal;
+        dat.backMat=air;
+        dat.frontMat=mat;
     }
 
-
-float sdTorus( Point pt, Point cent, vec2 t )
-{
-    vec3 p=pt.coords.xyz-cent.coords.xyz;
-  vec2 q = vec2(length(p.xz)-t.x,p.y);
-  return length(q)-t.y;
-}
-
-
-float sdRoundedCylinder( Point pt, Point cent,float ra, float rb, float h )
-{vec3 p=pt.coords.xyz-cent.coords.xyz;
-  vec2 d = vec2( length(p.xz)-2.0*ra+rb, abs(p.y) - h );
-  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rb;
-}
-
-
-float sdOctahedron( Point pt, Point cent,float s)
-{ vec3 p=pt.coords.xyz-cent.coords.xyz;
-  p = abs(p);
-  return (p.x+p.y+p.z-s)*0.57735027;
 }
 
 
 
 
-float trueOctahedron( Point pt, Point cent,float s)
-{
-vec3 p=abs(pt.coords.xyz-cent.coords.xyz);
-  float m = p.x+p.y+p.z-s;
-  vec3 q;
-       if( 3.0*p.x < m ) q = p.xyz;
-  else if( 3.0*p.y < m ) q = p.yzx;
-  else if( 3.0*p.z < m ) q = p.zxy;
-  else return m*0.57735027;
-    
-  float k = clamp(0.5*(q.z-q.y+s),0.0,s); 
-  return length(vec3(q.x,q.y-s+k,q.z-k)); 
+//-------------------------------------------------
+//-------------------------------------------------
+//=====distance to a
+//========SPHERE
+//-------------------------------------------------
+//-------------------------------------------------
+
+
+//-------------------------------------------------
+//  Basic Functions
+//-------------------------------------------------
+
+float sphereDist(vec3 pos, float radius){
+
+    return length(pos)-radius;
+}
+
+
+//the directed distance function: this can be improved with a better sphere locator test
+float sphereDist(Vector tv, float radius){
+
+    float d = sphereDist(tv.pos.coords.xyz, radius);
+
+    //if you are looking away from the sphere, stop
+    if(d>0.&&dot(tv.dir,tv.pos.coords.xyz)>0.){return 10000.;}
+
+    //otherwise return the actual distance
+    return d;
+}
+
+
+//----normal vector
+vec3 sphereGrad(vec3 pos,  float radius){
+    return normalize(pos);
+}
+
+//----normal vector
+vec3 sphereGrad(Vector tv,  float radius){
+    return normalize(tv.pos.coords.xyz);
 }
 
 
 
 
 
-float block(Point p, Point center, float x, float y, float z){
 
-//make the slab
-float distance;
-distance=slabX(p,center.coords.x,x);
-distance=smax(distance,slabY(p,center.coords.y,y),0.1);    
-distance=smax(distance,slabZ(p,center.coords.z,z),0.1);      
-return distance;
+//-------------------------------------------------
+//The SPHERE sdf
+//-------------------------------------------------
+
+//the data of a sphere is its center and radius
+struct Sphere{
+    Point center;
+    float radius;
+    Material mat;
+};
+
+//----distance and normal functions
+
+float sphereDistance(Vector tv, Sphere sph){
+
+    tv.pos.coords-=sph.center.coords;
+    tv.pos.coords+=vec4(0,0,0,1);
+
+    return sphereDist(tv,sph.radius);
 }
 
-float cube(Point p, Point center, float s){
-    return block(p,center,s,s,s);
+Vector sphereNormal(Vector tv, Sphere sph){
+    tv.pos.coords-=sph.center.coords;
+    tv.pos.coords+=vec4(0,0,0,1);
+    vec3 dir=sphereGrad(tv,sph.radius);
+    return Vector(tv.pos,dir);
 }
+
+
+//------sdf
+float sphereSDF(Vector tv, Sphere sph,inout localData dat){
+
+    //distance to closest point:
+    float dist = sphereDistance(tv,sph);
+
+    if(abs(dist)<EPSILON){
+
+        //compute the normal
+        Vector normal=sphereNormal(tv,sph);
+
+        //set the material
+        setObjectInAir(dat,dist,normal,sph.mat);
+    }
+
+    return dist;
+}
+
+

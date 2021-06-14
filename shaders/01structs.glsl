@@ -296,27 +296,6 @@ const Phong noPhong=Phong(1.,vec3(1.),vec3(1.));
 //Data type for storing the parameters of a material: its index of refraction, reflectivity, transparency, color, etc.
 
 
-struct Surface{
-    vec3 color;
-    Phong phong;
-    float reflect;
-    float opacity;
-};
-
-const Surface noSurface=Surface(vec3(0.),noPhong,0.,0.);
-
-struct Volume{
-    float refract;
-    vec3 disperse;
-    float translucent;
-    vec3 absorb;
-    vec3 emit;
-    float opacity;
-};
-
-const Volume transparentVolume=Volume(1.,vec3(1.),0.,vec3(0.),vec3(0.),0.);
-
-
 //materials have surface properties,
 //and also volume properties.
 struct Material{
@@ -337,7 +316,22 @@ Material air=Material(vec3(0),noPhong,0.,0.,1.,vec3(1.),1.,vec3(0),vec3(0));
 
 
 
+Material setGlass(){
+    Material mat;
 
+    mat.color=vec3(0.05);
+    mat.phong.shiny=15.;
+    mat.reflect=0.08;
+    mat.opacity=0.05;
+
+    mat.refract=1.53;
+    mat.disperse=vec3(1.51,1.52,1.53);
+    mat.translucent=0.;
+    mat.absorb=vec3(0.3,0.05,0.2);
+    mat.emit=vec3(0.);
+    return mat;
+
+}
 
 
 
@@ -362,7 +356,7 @@ struct localData{
     Material backMat;
 };
 
-
+localData trashDat;
 
 
 //store data as we move along a path in the raymarch:

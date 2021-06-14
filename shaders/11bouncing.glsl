@@ -5,7 +5,7 @@ void stepForward(Vector direction, inout Path path,float side,marchRes res){
     if(path.keepGoing){//if we arent supposed to keep going, do nothing
         
     nudge(direction);//move the ray a little
-    raymarch(direction,side,res);//march to next object
+    raymarch(direction,path.dat,side,res);//march to next object
     //raymarch sets the globals distToViewer and isSky
     
     updatePath(path,sampletv,distToViewer,isSky);//update the local data accordingly

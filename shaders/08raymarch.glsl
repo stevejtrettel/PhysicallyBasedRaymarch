@@ -27,7 +27,7 @@
 //-1=on the inside of an object
 
 
-void raymarch(Vector tv,float side, marchRes res){
+void raymarch(Vector tv,inout localData dat, float side,  marchRes res){
 
     distToViewer=0.;
     float marchStep = 0.;
@@ -35,7 +35,7 @@ void raymarch(Vector tv,float side, marchRes res){
 
         for (int i = 0; i < res.marchSteps; i++){
             
-                float localDist = side*sceneSDF(tv.pos);
+                float localDist = side*sceneSDF(tv,dat);
             //this could be negative; side sets this.
                 if (localDist < res.threshhold){
                     sampletv =tv;
@@ -68,6 +68,8 @@ void raymarch(Vector tv,float side, marchRes res){
 //improving the shadows using some ideas of iq on shadertoy
 float shadowmarch(in Vector toLight, float distToLight,float k)
     {
+
+        localData dat;
     
    // float k =40.; //parameter to determine softness of the shadows.
     
@@ -82,7 +84,7 @@ float shadowmarch(in Vector toLight, float distToLight,float k)
     
     for (int i = 0; i < 40; i++){
         
-            float localDist =sceneObjs(localtv.pos);//exclude lights
+            float localDist =sceneObjs(localtv,dat);//exclude lights
                   marchStep = 0.9*localDist;//make this distance your next march step
             depth += marchStep;//add this to the total distance traced so far
         
@@ -103,58 +105,6 @@ float shadowmarch(in Vector toLight, float distToLight,float k)
     //at the end, return this value for the shadow deepness
     return clamp(shade,0.,1.); 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// Getting Normals, Reflectivities, etc.
-//----------------------------------------------------------------------------------------------------------------------
-
-Vector getSurfaceNormal(Point p){
-    float ep=5.*EPSILON;
-    vec3 bx = vec3(1.,0.,0.);
-    vec3 by = vec3(0.,1.,0.);
-    vec3 bz  = vec3(0.,0.,1.);
-    
-    float dx=sceneSDF(shiftPoint(p,bx,ep))-sceneSDF(shiftPoint(p,bx,-ep));
-    float dy=sceneSDF(shiftPoint(p,by,ep))-sceneSDF(shiftPoint(p,by,-ep));
-    float dz=sceneSDF(shiftPoint(p,bz,ep))-sceneSDF(shiftPoint(p,bz,-ep));
-    
-    vec3 n=dx*bx+dy*by+dz*bz;
-    
-    Vector normal=Vector(p,n);
-
-    return tangNormalize(normal);
-
-    
-}
-
-Vector getSurfaceNormal(Vector tv){
-    Point p=tv.pos;
-    return getSurfaceNormal(p);
-}
-
-
-
 
 
 

@@ -46,7 +46,8 @@ void main(){
     createLights();
     
     Vector rayDir=setRayDir();
-    
+
+    buildScene();
     
     //do the first raymarch and get the color
     vec3 pixelColor=getPixelColor(rayDir);

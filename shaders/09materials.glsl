@@ -25,7 +25,6 @@ return vec2(theta,phi);
 
 
 
-
 vec3 skyTex(Vector tv){
 
 vec2 angles=toSphCoords(tv.dir);
@@ -37,9 +36,6 @@ return textureGrad(tex,vec2(x,y),vec2(0,0),vec2(0,0)).rgb;
 
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-// DECIDING BASE COLOR OF HIT OBJECTS, AND MATERIAL PROPERTIES
-//----------------------------------------------------------------------------------------------------------------------
 
 void setSkyMaterial(inout Material mat, Vector tv){
             mat=air;
@@ -48,54 +44,7 @@ void setSkyMaterial(inout Material mat, Vector tv){
             mat.absorb=vec3(0.);
 }
 
-Material setGlass(){
-    Material mat;
-    
-            mat.color=vec3(0.05);
-            mat.phong.shiny=15.;
-            mat.reflect=0.08;
-            mat.opacity=0.05;
-            
-            mat.refract=1.53;
-            mat.disperse=vec3(1.51,1.52,1.53);
-            mat.translucent=0.;
-            mat.absorb=vec3(0.3,0.05,0.2);
-            mat.emit=vec3(0.);
-    return mat;
-    
-}
 
-
-//====update the material given a position and what you hit.
-void updateMaterial(inout Material mat, Vector sampletv,float ep){
-
-    //set hitWhich using our current location, to be the material directly in front of us in the direction of raymarching.
-    setHitWhich(sampletv,ep);
-    
-    //now, set all of the material properties in terms of this result.
-     switch(hitWhich){
-             
-        case 0://sky
-            setSkyMaterial(mat, sampletv);
-             break;
-        
-             
-         case 3://glass
-            mat=setGlass();
-            break;
-
-        case 4:
-         mat==setGlass();
-         break;
-
-        case 5://diamond
-            mat=setGlass();
-            break;
-
-        
-    }
-    
-}
 
 
 
@@ -106,21 +55,21 @@ void updateMaterial(inout Material mat, Vector sampletv,float ep){
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Update Data
+// Copying and Updating
 //----------------------------------------------------------------------------------------------------------------------
 
 
 
 //calculate the reflectivity of a surface, with fresnel reflection
-void updateReflect(inout localData dat, Material back, Material front){
+void updateReflect(inout localData dat){
     
     //n1=index of refraction you are currently inside of
     //n2=index of refraction you are entering
-    float n1=back.refract;
-    float n2=front.refract;
+    float n1=dat.backMat.refract;
+    float n2=dat.frontMat.refract;
     
     //what is the bigger reflectivity between the two surfaces at the interface?
-    float refl=max(back.reflect, front.reflect);
+    float refl=max(dat.backMat.reflect, dat.frontMat.reflect);
 
         // Schlick aproximation
         float r0 = (n1-n2) / (n1+n2);
@@ -196,34 +145,13 @@ Path copyForReflect(Path path, Material mat){
 
 
 
-void updateLocalData(inout localData dat, Vector tv, Material back,Material front){
-    //update local data depending on the location tv;
-    //update the refraction direction also using material in front and behind
-      
-    dat.incident=tv;
-    dat.toViewer=turnAround(tv);
-    dat.pos=tv.pos;
-    
-    Vector normal=getSurfaceNormal(tv);
-    float side=-sign(tangDot(tv,normal));
-    
-    //make inward pointing normal if we are on the inside
-    if(side==-1.){normal=turnAround(normal);}
-    dat.normal=normal;
-    dat.side=side;
-    
-    //this is enough to set the reflected ray direction
-    dat.reflectedRay=reflectOff(tv,normal);
-    
 
-    //set refracted ray using the old and new material;
-    dat.refractedRay=refractThrough(tv,normal,back.refract,front.refract);
-    
-    //update the reflectivity float in the local data: this tells us how much needs to be reflected at this given point!
-    updateReflect(dat, back, front);
 
-}
 
+
+//----------------------------------------------------------------------------------------------------------------------
+// Update Data
+//----------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -239,14 +167,21 @@ void updatePath(inout Path path, Vector tv,float dist,bool isSky){
         setSkyMaterial(path.dat.backMat,tv);
         return;
     }
-    
-    //otherwise, sample the material in front and behind
-    updateMaterial(path.dat.backMat,tv,-0.01);
-    updateMaterial(path.dat.frontMat,tv,0.01);
-    
-    //update the direction vectors, and reflectivity
-    updateLocalData(path.dat,tv,path.dat.backMat,path.dat.frontMat);
-    
+
+    path.dat.incident=tv;
+    path.dat.toViewer=turnAround(tv);
+    path.dat.pos=tv.pos;
+    //dat.normal was already set by SDF
+
+    //this is enough to set the reflected ray direction
+    path.dat.reflectedRay=reflectOff(tv,path.dat.normal);
+
+    //set refracted ray using the old and new material;
+    path.dat.refractedRay=refractThrough(tv,path.dat.normal,path.dat.backMat.refract,path.dat.frontMat.refract);
+
+    //update the reflectivity float in the local data: this tells us how much needs to be reflected at this given point!
+    updateReflect(path.dat);
+
     //update the accumulation parameters:
     path.dist+=dist;
     path.accColor *= exp(-path.dat.backMat.absorb*dist);
