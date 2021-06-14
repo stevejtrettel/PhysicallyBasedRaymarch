@@ -150,10 +150,10 @@ async function buildShader() {
             file: './shaders/02localGeo.glsl'
         },
         {
-            file: './shaders/05setup.glsl'
+            file: './shaders/04setup.glsl'
         },
         {
-            file: './shaders/04basicSDFs.glsl'
+            file: './shaders/05basicSDFs.glsl'
         },
         {
             file: './shaders/06scene.glsl'
