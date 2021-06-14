@@ -4,6 +4,7 @@ import {
     Matrix4
 } from "./lib/three.module.js";
 import {
+    Position,
     Vector
 } from "./Geometry.js";
 
@@ -85,9 +86,8 @@ let Controls = function () {
         }, // fwd slash
     };
 
-    this.setKeyboard = function (keyboard) {
-                this.manualControls = keyboardUS;
-    };
+
+    this.manualControls = keyboardUS;
 
 
     this.update = function () {
@@ -113,6 +113,7 @@ let Controls = function () {
 
         // do not flow if this is not needed !
         if (deltaPositionNonZero) {
+            console.log('move');
             globals.position.flow(deltaPosition);
         }
 

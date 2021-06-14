@@ -35,6 +35,10 @@ function key(event, sign) {
 }
 
 
+// function onkey(event) {
+//     //event.preventDefault();
+//
+// }
 
 function initEvents() {
     // window.addEventListener("keydown", onkey, false);
@@ -46,8 +50,6 @@ function initEvents() {
         key(event, -1);
     }, false);
 }
-
-
 
 
 

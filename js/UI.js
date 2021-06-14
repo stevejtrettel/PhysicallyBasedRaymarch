@@ -11,7 +11,7 @@ let capturer;
 
 
 //What we need to init our dat GUI
-let initGui = function () {
+let createGui = function () {
     guiInfo = { //Since dat gui can only modify object values we store variables here.
         toggleUI: true,
         keyboard: 'us',
@@ -52,7 +52,7 @@ let initGui = function () {
 };
 
 export {
-    initGui,
+    createGui,
     guiInfo,
     capturer
 }

@@ -106,14 +106,14 @@ uniform mat4 invGenerators[6];//
 uniform mat4 currentBoostMat;
 uniform mat4 facing;
 
-uniform mat4 cellBoostMat;
-uniform mat4 invCellBoostMat;
+//uniform mat4 cellBoostMat;
+//uniform mat4 invCellBoostMat;
 
 Isometry currentBoost;
-Isometry cellBoost;
-Isometry invCellBoost;
-
-
+//Isometry cellBoost;
+//Isometry invCellBoost;
+//
+//
 
 
 
@@ -174,8 +174,8 @@ Light pointLight1, pointLight2, dirLight1;
 void setVariables(){
     
     currentBoost = Isometry(currentBoostMat);
-    cellBoost = Isometry(cellBoostMat);
-    invCellBoost = Isometry(invCellBoostMat);
+//    cellBoost = Isometry(cellBoostMat);
+//    invCellBoost = Isometry(invCellBoostMat);
     
     //nice to have a default phong value to set
     defaultPhong=Phong(10.,vec3(1.),vec3(1.));

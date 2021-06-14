@@ -69,7 +69,8 @@ function createShaderUniforms(){
  */
 function updateShaderUniforms() {
     //example of how this worked
-    //globals.material.uniforms.currentBoostMat.value = globals.position.boost
+    // globals.material.uniforms.currentBoostMat.value = globals.position.boost;
+    // globals.material.uniforms.facing.value = globals.position.facing;
 }
 
 

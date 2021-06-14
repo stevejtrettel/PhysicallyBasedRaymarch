@@ -1,13 +1,11 @@
 import {
     Scene,
-    PlaneBufferGeometry,
     WebGLRenderer,
     Vector2,
     OrthographicCamera,
-    BufferGeometry,
-    BufferAttribute,
-    Mesh, ShaderMaterial,
-    LinearEncoding
+    Mesh,
+    PlaneBufferGeometry,
+    ShaderMaterial
 } from './lib/three.module.js';
 
 import {
@@ -17,7 +15,7 @@ import {
 } from "./Uniforms.js";
 
 import {
-    initGui,
+    createGui,
     guiInfo,
     capturer
 } from "./UI.js";
@@ -54,43 +52,20 @@ let canvas;
 let renderer;
 
 
-
-
-//Creating Basic Components
-//=============================================
-
+//----------------------------------------------------------------------------------------------------------------------
+// Basic Components
+//----------------------------------------------------------------------------------------------------------------------
 
 function createStats(type) {
 
     var panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;
-    var stats = new Stats();
+    stats = new Stats();
 
     stats.showPanel(panelType); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(stats.dom);
-
-    return stats;
 }
 
 
-
-
-
-function createRenderer() {
-    renderer = new WebGLRenderer({
-        canvas,
-        alpha: true,
-        //  premultipliedAlpha: true,
-        //  preserveDrawingBuffer: true,
-        depth: false,
-        stencil: false
-    });
-
-    // set the gamma correction so that output colors look
-    // correct on our screens
-    //renderer.gammaFactor = 1.;
-    renderer.outputEncoding = LinearEncoding;
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
 
 
 function createCamera() {
@@ -109,142 +84,53 @@ function createCamera() {
 
 
 
-function render() {
-
-    //render the actual scene to the camera using this
-    renderer.render(scene, camera);
-
+function createControls(){
+    globals.controls = new Controls();
+    initGeometry();//sets the origin
 }
 
 
-function resizeToDisplay() {
-               canvas = renderer.domElement;
-               const width = canvas.clientWidth;
-               const height = canvas.clientHeight;
-               const needResize = canvas.width !== width || canvas.height !== height;
-               if (needResize) {
-                   // renderer.setPixelRatio(window.devicePixelRatio);
-                   renderer.setSize(window.innerWidth, window.innerHeight);
-               }
-    return needResize;
-}
 
-//
-//
-// function animate() {
-//
-//     requestAnimationFrame(animate);
-//
-//     //stats.begin();
-//
-//     //resizeToDisplay();
-//
-//     updateShaderUniforms();
-//
-//     globals.controls.update();
-//
-//     render();
-//
-//     //stats.end();
-//
-// }
-
-
-
-
-async function main() {
-
-
-    //Setup our THREE scene--------------------------------
-    scene = new Scene();
+function setup(){
     canvas = document.createElement('canvas');
     let context = canvas.getContext('webgl2');
+
     globals.renderer = new WebGLRenderer({
         canvas: canvas,
         context: context
     });
     document.body.appendChild(globals.renderer.domElement);
+
     globals.screenResolution = new Vector2(window.innerWidth, window.innerHeight);
-    globals.effect = new rendererSetup(globals.renderer);
-    camera = new OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1);
-    globals.controls = new Controls();
-    initGeometry();
-
-    createScene();
-
-
-    //loadShaders();
-    initEvents();
-    initGui();
-    stats = new Stats();
-    stats.showPanel(1);
-    stats.showPanel(2);
-    stats.showPanel(0);
-    document.body.appendChild(stats.dom);
-
-    animate();
-
-
-    //
-    // initGeometry();
-    //
-    // globals.controls = new Controls();
-    //
-    // canvas = document.createElement('canvas');
-    // let context = canvas.getContext('webgl2');
-    // globals.renderer = new WebGLRenderer({
-    //     canvas: canvas,
-    //     context: context
-    // });
-    // document.body.appendChild(globals.renderer.domElement);
-    // globals.screenResolution = new Vector2(window.innerWidth, window.innerHeight);
-    //
-    // stats = createStats();
-    //
-    // createRenderer();
-    //
-    // createCamera();
-    //
-    // await createScene();
-
-    //animate();
+    globals.effect = new renderEffect(globals.renderer);
 
 }
 
 
-
-
-
 //----------------------------------------------------------------------------------------------------------------------
-// Sets up the scene
+//EFFECT
 //----------------------------------------------------------------------------------------------------------------------
 
-function init() {
-    //Setup our THREE scene--------------------------------
-    scene = new Scene();
-    canvas = document.createElement('canvas');
-    let context = canvas.getContext('webgl2');
-    globals.renderer = new WebGLRenderer({
-        canvas: canvas,
-        context: context
-    });
-    document.body.appendChild(globals.renderer.domElement);
-    globals.screenResolution = new Vector2(window.innerWidth, window.innerHeight);
-    globals.effect = new rendererSetup(globals.renderer);
-    camera = new OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1);
-    globals.controls = new Controls();
-    initGeometry();
+//this controls the effect part of the animate loop
+let renderEffect = function (renderer, done) {
 
-    createScene();
-    //loadShaders();
-    initEvents();
-    initGui();
-    stats = new Stats();
-    stats.showPanel(1);
-    stats.showPanel(2);
-    stats.showPanel(0);
-    document.body.appendChild(stats.dom);
-}
+    this._renderer = renderer;
+
+    this.render = function (scene, camera, animate) {
+        let renderer = this._renderer;
+
+        requestAnimationFrame(animate);
+
+        renderer.render.apply(this._renderer, [scene, camera]);
+        if (guiInfo.recording === true) {
+            capturer.capture(canvas);
+        }
+    };
+    this.setSize = function (width, height) {
+        renderer.setSize(width, height);
+    };
+};
+
 
 
 
@@ -254,12 +140,9 @@ function init() {
 //----------------------------------------------------------------------------------------------------------------------
 
 
-
-
 async function buildShader() {
 
     let newShader = '';
-
 
     const shaders = [] = [
         {
@@ -323,9 +206,11 @@ async function createScene() {
 
     const mat = new ShaderMaterial({
         fragmentShader: shaderCode,
-        //vertexShader: document.getElementById('vertexShader').textContent,
+        vertexShader: document.getElementById('vertexShader').textContent,
         uniforms: createShaderUniforms(),
     });
+
+    globals.effect.setSize(globals.screenResolution.x, globals.screenResolution.y);
 
     const screen=new Mesh(geom, mat);
 
@@ -334,67 +219,29 @@ async function createScene() {
 
 
 
-//
-//
-// async function loadShaders() {
-//
-//     let shaderCode=await buildShader();
-//
-//         globals.material = new ShaderMaterial({
-//             uniforms:createShaderUniforms(),
-//             vertexShader: document.getElementById('vertexShader').textContent,
-//             fragmentShader: shaderCode,
-//             transparent: true
-//     });
-//
-//         globals.effect.setSize(globals.screenResolution.x, globals.screenResolution.y);
-//
-//                                                             //Setup a "quad" to render on-------------------------
-//                                                             let geom = new BufferGeometry();
-//                                                             let vertices = new Float32Array([
-//                                                                 -1.0, -1.0, 0.0,
-//                                                                 1.0, -1.0, 0.0,
-//                                                                 1.0, 1.0, 0.0,
-//
-//                                                                 -1.0, -1.0, 0.0,
-//                                                                 1.0, 1.0, 0.0,
-//                                                                 -1.0, 1.0, 0.0
-//                                                             ]);
-//                                                             geom.setAttribute('position', new BufferAttribute(vertices, 3));
-//                                                             mesh = new Mesh(geom, globals.material);
-//                                                             scene.add(mesh);
-//                                                             animate();
-// }
-//
+
+
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Where our scene actually renders out to screen
-//----------------------------------------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------------------------
-// Renderer
+// Main Functions
 //----------------------------------------------------------------------------------------------------------------------
 
-// //this controls the effect part of the animate loop
-let rendererSetup = function (renderer, done) {
+function main() {
 
-    this._renderer = renderer;
+    setup();
 
-    this.render = function (scene, camera, animate) {
-        let renderer = this._renderer;
+    createCamera();
+    createControls();
+    createGui();
+    createStats();
+    createScene();
 
-        requestAnimationFrame(animate);
+    initEvents();
 
-        renderer.render.apply(this._renderer, [scene, camera]);
-        if (guiInfo.recording === true) {
-            capturer.capture(canvas);
-        }
-    };
-    this.setSize = function (width, height) {
-        renderer.setSize(width, height);
-    };
-};
-
+    animate();
+}
 
 
 
@@ -410,11 +257,9 @@ function animate() {
 // Where the magic happens
 //----------------------------------------------------------------------------------------------------------------------
 
-//init();
 main();
 
 
 export {
-    globals,
-    canvas
+    globals
 };
