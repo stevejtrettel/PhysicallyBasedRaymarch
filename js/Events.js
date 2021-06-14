@@ -1,5 +1,3 @@
-// This file should be geometry independent
-
 import {
     globals
 } from "./Main.js";
@@ -35,13 +33,8 @@ function key(event, sign) {
 }
 
 
-// function onkey(event) {
-//     //event.preventDefault();
-//
-// }
 
 function initEvents() {
-    // window.addEventListener("keydown", onkey, false);
 
     document.addEventListener('keydown', function (event) {
         key(event, 1);

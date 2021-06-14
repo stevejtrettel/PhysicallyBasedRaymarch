@@ -4,7 +4,6 @@ import {
     Matrix4
 } from "./lib/three.module.js";
 import {
-    Position,
     Vector
 } from "./Geometry.js";
 
