@@ -152,19 +152,19 @@ async function buildShader() {
             file: './shaders/geometry/euc.glsl'
         },
         {
-            file: './shaders/render/physBased/material.glsl'
+            file: './shaders/render/physBased/Light.glsl'
         },
         {
-            file: './shaders/render/physBased/path.glsl'
+            file: './shaders/render/physBased/Material.glsl'
         },
         {
-            file: './shaders/render/physBased/light.glsl'
+            file: './shaders/render/physBased/Path.glsl'
         },
         {
             file: './shaders/trace/raymarch/objects.glsl'
         },
         {
-            file: './shaders/trace/raymarch/scene.glsl'
+            file: './shaders/trace/raymarch/sceneSDF.glsl'
         },
         {
             file: './shaders/trace/raymarch/stepForward.glsl'
@@ -173,7 +173,7 @@ async function buildShader() {
             file: './shaders/render/physBased/getSurfaceColor.glsl'
         },
         {
-            file: './shaders/render/physBased/getColor.glsl'
+            file: './shaders/render/physBased/getPixelColor.glsl'
         },
         {
             file: './shaders/main.glsl'

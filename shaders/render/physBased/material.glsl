@@ -3,17 +3,6 @@
 // Struct Material Properties
 //----------------------------------------------------------------------------------------------------------------------
 
-
-struct Phong{
-    float shiny;
-    vec3 diffuse;
-    vec3 specular;
-};
-
-//some default values
-const Phong noPhong=Phong(1.,vec3(1.),vec3(1.));
-const Phong defaultPhong=Phong(10.,vec3(1.),vec3(1.));
-
 //Data type for storing the parameters of a material: its index of refraction, reflectivity, transparency, color, etc.
 
 //materials have surface properties,

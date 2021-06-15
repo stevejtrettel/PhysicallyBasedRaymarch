@@ -34,7 +34,7 @@ float sceneObjs(Vector tv, inout localData dat){
 
     dist=min(dist,sphereSDF(tv,ball1,dat));
     dist=min(dist,sphereSDF(tv,ball2,dat));
-    dist=min(dist,boxSDF(tv,box1,dat));
+    //dist=min(dist,boxSDF(tv,box1,dat));
     return dist;
 
 }
