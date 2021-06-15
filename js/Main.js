@@ -137,44 +137,46 @@ let renderEffect = function (renderer, done) {
 // Building the Shader out of the GLSL files
 //----------------------------------------------------------------------------------------------------------------------
 
-
 async function buildShader() {
 
     let newShader = '';
 
     const shaders = [] = [
         {
-            file: './shaders/01structs.glsl'
+            file: './shaders/setup/uniforms.glsl'
         },
         {
-            file: './shaders/02localGeo.glsl'
+            file: './shaders/setup/process.glsl'
         },
         {
-            file: './shaders/04setup.glsl'
+            file: './shaders/geometry/euc.glsl'
         },
         {
-            file: './shaders/05basicSDFs.glsl'
+            file: './shaders/render/physBased/material.glsl'
         },
         {
-            file: './shaders/06scene.glsl'
+            file: './shaders/render/physBased/path.glsl'
         },
         {
-            file: './shaders/08raymarch.glsl'
+            file: './shaders/render/physBased/light.glsl'
         },
         {
-            file: './shaders/09materials.glsl'
+            file: './shaders/trace/raymarch/objects.glsl'
         },
         {
-            file: './shaders/10lighting.glsl'
+            file: './shaders/trace/raymarch/scene.glsl'
         },
         {
-            file: './shaders/11bouncing.glsl'
+            file: './shaders/trace/raymarch/stepForward.glsl'
         },
         {
-            file: './shaders/12shader.glsl'
+            file: './shaders/render/physBased/getSurfaceColor.glsl'
         },
         {
-            file: './shaders/13main.glsl'
+            file: './shaders/render/physBased/getColor.glsl'
+        },
+        {
+            file: './shaders/main.glsl'
         },
     ];
 
@@ -190,6 +192,10 @@ async function buildShader() {
     return newShader;
 
 }
+
+
+
+
 
 
 async function createScene() {

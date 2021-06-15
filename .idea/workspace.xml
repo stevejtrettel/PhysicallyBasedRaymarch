@@ -2,10 +2,27 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="376f0173-8698-4cc2-8349-5efa68c5c9b4" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/shaders/geometry/euc.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/shaders/trace/raymarch/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/shaders/trace/raymarch/scene.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/shaders/trace/raymarch/stepForward.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js/Main.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/Main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/04basicSDFs.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/05setup.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/01structs.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/02localGeo.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/04setup.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/05basicSDFs.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/06scene.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/08raymarch.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/09materials.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/10lighting.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/11bouncing.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/12shader.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/13main.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/aux/constants.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/aux/process.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/aux/random.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/aux/uniforms.glsl" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +74,9 @@
       <workItem from="1623695591203" duration="492000" />
       <workItem from="1623696084774" duration="1577000" />
       <workItem from="1623697671191" duration="15455000" />
-      <workItem from="1623714242625" duration="15000" />
+      <workItem from="1623714242625" duration="3995000" />
+      <workItem from="1623733416884" duration="465000" />
+      <workItem from="1623733888708" duration="4096000" />
     </task>
     <servers />
   </component>
@@ -81,7 +100,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/js/Main.js</url>
-          <line>250</line>
+          <line>256</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

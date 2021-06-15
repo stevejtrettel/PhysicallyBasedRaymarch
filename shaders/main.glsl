@@ -3,6 +3,11 @@
 // Setup
 //----------------------------------------------------------------------------------------------------------------------
 
+
+
+
+
+
 Vector getRayPoint(vec2 resolution, vec2 fragCoord){ //creates a tangent vector for our ray
 
     vec2 xy = 0.2 * ((fragCoord - 0.5*resolution)/resolution.x);
@@ -15,18 +20,19 @@ Vector getRayPoint(vec2 resolution, vec2 fragCoord){ //creates a tangent vector 
 }
 
 
+
+
 Vector setRayDir(){
 
-
+    Isometry currentBoost=Isometry(currentBoostMat);
     Vector rayDir = getRayPoint(screenResolution, gl_FragCoord.xy);
 
         rayDir = rotateByFacing(facing, rayDir);
         rayDir = translate(currentBoost, rayDir);
 
-
 return rayDir;
-}
 
+}
 
 
 
@@ -42,25 +48,15 @@ return rayDir;
 
 void main(){
     
-    setVariables();
-    createLights();
-    
     Vector rayDir=setRayDir();
 
+    createLights();
     buildScene();
     
     //do the first raymarch and get the color
     vec3 pixelColor=getPixelColor(rayDir);
-    
-    float exposure=1.25;
-    pixelColor*=exposure;
+    pixelColor=postProcess(pixelColor,1.25);
 
-    pixelColor = ACESFilm(pixelColor);
-    
-    //do the gamma correction
-    //pixelColor= pow( pixelColor, vec3(1.0/2.2) );
-    pixelColor=LinearToSRGB(pixelColor);
     out_FragColor=vec4(pixelColor,1.);
-    
 
 }
