@@ -149,7 +149,7 @@ async function buildShader() {
             file: './shaders/setup/process.glsl'
         },
         {
-            file: './shaders/geometry/euc.glsl'
+            file: './shaders/trace/geometry.glsl'
         },
         {
             file: './shaders/render/physBased/Light.glsl'

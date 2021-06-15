@@ -4,12 +4,6 @@
     <list default="true" id="376f0173-8698-4cc2-8349-5efa68c5c9b4" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/js/Main.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/Main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/geometry/euc.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/geometry/euc.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/main.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/main.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/render/physBased/getColor.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/setup/uniforms.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/trace/raymarch/scene.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/trace/raymarch/stepForward.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/trace/raymarch/stepForward.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +57,7 @@
       <workItem from="1623697671191" duration="15455000" />
       <workItem from="1623714242625" duration="3995000" />
       <workItem from="1623733416884" duration="465000" />
-      <workItem from="1623733888708" duration="5051000" />
+      <workItem from="1623733888708" duration="5634000" />
     </task>
     <servers />
   </component>
