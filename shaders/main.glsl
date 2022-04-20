@@ -23,16 +23,16 @@ return rayDir;
 
 
 void main(){
-    
+
     Vector rayDir=setRayDir();
 
+    createSolids();
     createLights();
-    buildScene();
-    
+    createVolumetrics();
+
     //do the first raymarch and get the color
     vec3 pixelColor=getPixelColor(rayDir);
     pixelColor=postProcess(pixelColor,1.25);
 
     out_FragColor=vec4(pixelColor,1.);
-
 }

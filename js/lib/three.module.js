@@ -25021,7 +25021,7 @@ function WebGLRenderer( parameters ) {
 
 		materialProperties.fog = fog;
 
-		// store the light setup it was created for
+		// store the light 0-setup it was created for
 
 		materialProperties.needsLights = materialNeedsLights( material );
 		materialProperties.lightsStateVersion = lightsStateVersion;
@@ -48538,7 +48538,7 @@ Object.defineProperty( Curve.prototype, '__arcLengthDivisions', {
 PerspectiveCamera.prototype.setLens = function ( focalLength, filmGauge ) {
 
 	console.warn( "THREE.PerspectiveCamera.setLens is deprecated. " +
-			"Use .setFocalLength and .filmGauge for a photographic setup." );
+			"Use .setFocalLength and .filmGauge for a photographic 0-setup." );
 
 	if ( filmGauge !== undefined ) this.filmGauge = filmGauge;
 	this.setFocalLength( focalLength );

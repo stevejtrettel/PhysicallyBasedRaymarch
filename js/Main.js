@@ -143,37 +143,41 @@ async function buildShader() {
 
     const shaders = [] = [
         {
-            file: './shaders/setup/uniforms.glsl'
+            file: './shaders/0-setup/uniforms.glsl'
         },
         {
-            file: './shaders/setup/process.glsl'
+            file: './shaders/0-setup/process.glsl'
         },
         {
-            file: './shaders/trace/geometry.glsl'
+            file: './shaders/0-setup/geometry.glsl'
         },
         {
-            file: './shaders/render/physBased/Light.glsl'
+            file: './shaders/components/materials.glsl'
         },
         {
-            file: './shaders/render/physBased/Material.glsl'
+            file: './shaders/components/path.glsl'
         },
         {
-            file: './shaders/render/physBased/Path.glsl'
+            file: './shaders/objects/solids.glsl'
         },
         {
-            file: './shaders/trace/raymarch/objects.glsl'
+            file: './shaders/objects/volumetrics.glsl'
+        },
+
+        {
+            file: './shaders/render/getSolidColor.glsl'
         },
         {
-            file: './shaders/trace/raymarch/sceneSDF.glsl'
+            file: './shaders/render/getVolumetricColor.glsl'
         },
         {
-            file: './shaders/trace/raymarch/stepForward.glsl'
+            file: './shaders/trace/scene.glsl'
         },
         {
-            file: './shaders/render/physBased/getSurfaceColor.glsl'
+            file: './shaders/trace/stepForward.glsl'
         },
         {
-            file: './shaders/render/physBased/getPixelColor.glsl'
+            file: './shaders/trace/getPixelColor.glsl'
         },
         {
             file: './shaders/main.glsl'

@@ -1,49 +1,5 @@
 
 //----------------------------------------------------------------------------------------------------------------------
-// STRUCT Point
-//----------------------------------------------------------------------------------------------------------------------
-
-/*
-
-    Data type for points in the space X
-    A point x in X is represented by a pair (proj,fiber) where
-    - proj is the projection of x to SL(2,R) seen as a vec4 (in the basis E)
-    - fiber is the fiber coordinates (!)
-
-    The goal of this choice is to perform as many computations in SL(2,R) rather than in X.
-    Hopefully this will reduce numerical errors (no need to go back and forth between SL2 and X).
-
-*/
-
-struct Point {
-    vec4 coords;// the point in R4
-};
-
-// origin of the space
-const Point ORIGIN = Point(vec4(0, 0, 0, 1));
-
-
-// unserialize the data received from the shader to create a point
-Point unserializePoint(vec4 data) {
-    return Point(data);
-}
-
-Point createPoint(float x, float y, float z){
-    return Point(vec4(x,y,z,1.));
-}
-
-vec3 projModel(Point p){
-    return p.coords.xyz;
-}
-
-
-Point shiftPoint(Point p, vec3 v, float ep){
-    vec3 s=p.coords.xyz+ep*v;
-    return createPoint(s.x,s.y,s.z);
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
 // STRUCT Vector
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -54,22 +10,16 @@ Point shiftPoint(Point p, vec3 v, float ep){
   - pos : a point in the space
   - dir: a tangent vector at pos
 
-  Local direction are vec3 written in the orthonormal basis (e_x, e_y, e_phi) where
-  . e_x is the direction of the x coordinate of H^2
-  . e_y is the direction of the y coordinate in H^2
-  . e_phi is the direction of the fiber
-
-  Implement various basic methods to manipulate them
-
 */
 
+vec3 ORIGIN = vec3(0,0,0);
 
 struct Vector {
-    Point pos;// position on the manifold
+    vec3 pos;// position on the manifold
     vec3 dir;// pull back of the tangent vector at the origin written in the appropriate basis
 };
 
-Vector createVector(Point p, vec3 dp) {
+Vector createVector(vec3 p, vec3 dp) {
     return Vector(p, dp);
 }
 
@@ -94,12 +44,6 @@ struct Isometry {
 
 Isometry identity=Isometry(mat4(1.));
 
-// Method to unserialized isometries passed to the shader
-Isometry unserializeIsom(vec4 data) {
-    //THIS NEEDS TO BE UPDATED ON THE JS SIDE
-    return identity;
-}
-
 // Product of two isometries (more precisely isom1 * isom2)
 Isometry composeIsometry(Isometry isom1, Isometry isom2) {
 
@@ -113,8 +57,7 @@ Isometry getInverse(Isometry isom) {
 }
 
 
-Isometry makeLeftTranslation(Point pt) {
-    vec4 p=pt.coords;
+Isometry makeLeftTranslation(vec3 p) {
     mat4 matrix =  mat4(
     1, 0., 0., 0.,
     0., 1, 0., 0.,
@@ -124,8 +67,7 @@ Isometry makeLeftTranslation(Point pt) {
     return Isometry(matrix);
 }
 
-Isometry makeInvLeftTranslation(Point pt) {
-    vec4 p=pt.coords;
+Isometry makeInvLeftTranslation(vec3 p) {
     mat4 matrix =  mat4(
     1, 0., 0., 0.,
     0., 1, 0., 0.,
@@ -157,8 +99,9 @@ Isometry translateByVector(Vector v) {
 
 
 
-Point translate(Isometry A, Point pt) {
-    return Point(A.mat * pt.coords);
+vec3 translate(Isometry A, vec3 p ) {
+        vec4 q = A.mat*vec4(p,1.);
+        return q.xyz;
 }
 
 
@@ -182,10 +125,12 @@ Isometry makeInvLeftTranslation(Vector v) {
 // overload to translate a direction
 //SHOULD THIS CHANGE THE DIRECTION?
 Vector translate(Isometry isom, Vector v) {
-    return Vector(
-    translate(isom, v.pos),
-    v.dir
-    );
+
+    vec3 newPos=translate(isom,v.pos);
+    vec4 u = isom.mat*vec4(v.dir,0.);
+    vec3 newDir = u.xyz;
+
+    return Vector( newPos, newDir);
 }
 
 
@@ -298,8 +243,8 @@ Vector refractThrough(Vector v, Vector n, float n1, float n2){
 
 
 // distance between two points
-float exactDist(Point p1, Point p2){
-    vec3 difference=p1.coords.xyz-p2.coords.xyz;
+float exactDist(vec3 p1, vec3 p2){
+    vec3 difference=p1-p2;
     return length(difference);
 }
 
@@ -309,8 +254,8 @@ float exactDist(Vector v1, Vector v2){
 }
 
 //returns unit tangent vector t
-void tangDirection(Point p, Point q, out Vector tv, out float len){
-    vec4 difference=q.coords-p.coords;
+void tangDirection(vec3 p, vec3 q, out Vector tv, out float len){
+    vec3 difference=q-p;
     len=length(difference);
 
     vec3 dir=normalize(difference.xyz);
@@ -357,9 +302,7 @@ float areaDensity(float r,Vector u){
 // flow the given vector during time t
 Vector flow(Vector v, float t) {
 
-    vec4 diff=t*vec4(v.dir,0.);
-
-    Point newPos=Point(v.pos.coords+diff);
+    vec3 newPos=v.pos+t*v.dir;
 
     return Vector(newPos,v.dir);
 }
