@@ -32,7 +32,7 @@ vec3 getSolidColor(Path path){
     vec3 color;
 
     //inputs to phong model:
-    vec3 lightDir=vec3(1.,1.,1.);
+    vec3 lightDir=vec3(1.,-1.,1.);
     Vector toLight = Vector(path.dat.incident.pos, normalize(lightDir));
 
     color+=phong(path.dat, toLight,1.);

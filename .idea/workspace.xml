@@ -5,30 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="376f0173-8698-4cc2-8349-5efa68c5c9b4" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/shaders/components/materials.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/shaders/components/path.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/shaders/objects/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/shaders/objects/solids.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/shaders/objects/volumetrics.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/shaders/render/getLightColor.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/shaders/render/getSolidColor.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/shaders/render/getVolumetricColor.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/shaders/trace/getPixelColor.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/Main.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/Main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/lib/three.module.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/lib/three.module.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/main.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/main.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/render/physBased/getPixelColor.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/render/physBased/getSurfaceColor.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/render/physBased/light.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/render/physBased/material.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/render/physBased/path.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/setup/process.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/0-setup/process.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/0-setup/uniforms.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/trace/geometry.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/0-setup/geometry.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/trace/raymarch/objects.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/trace/raymarch/sceneSDF.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/trace/scene.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shaders/trace/raymarch/stepForward.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/trace/stepForward.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/Geometry.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/Geometry.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/0-setup/geometry.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/0-setup/geometry.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/objects/solids.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/objects/solids.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/render/getSolidColor.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/render/getSolidColor.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shaders/trace/scene.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/shaders/trace/scene.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,7 +77,7 @@
       <workItem from="1636044628265" duration="320000" />
       <workItem from="1650329604578" duration="3543000" />
       <workItem from="1650379897543" duration="3444000" />
-      <workItem from="1650422583303" duration="7668000" />
+      <workItem from="1650422583303" duration="11814000" />
     </task>
     <servers />
   </component>

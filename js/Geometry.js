@@ -201,7 +201,10 @@ class Position {
         /** @property {Isometry} boost - the isometry part of the position */
         this.boost = new Isometry();
         /** @property {Matrix4} facing - the facing part of the position */
-        this.facing = new Matrix4();
+        this.facing = new Matrix4().set(1,0,0,0,
+                                        0,0,-1,0,
+                                        0,1,0,0,
+                                        0,0,0,1);
     }
 
     /**

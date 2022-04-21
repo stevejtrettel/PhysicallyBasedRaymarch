@@ -238,7 +238,7 @@ bool at( Vector tv, Plane plane){
 float sdf( Vector tv, Plane plane ){
 
     //if aimed away from plane:
-    if(dot(tv.dir,plane.orientation.dir)>0.){return maxDist;}
+   // if(dot(tv.dir,plane.orientation.dir)>0.){return maxDist;}
 
     //otherwise give distance
     return distR3(tv.pos, plane);
@@ -249,17 +249,6 @@ Vector normalVec( Vector tv,Plane plane ){
     //the normal is just the plane's normal vector
     return Vector(tv.pos, plane.orientation.dir);
 }
-
-//overload of trace
-float trace( Vector tv, Plane plane ){
-
-    float denom=dot(tv.dir,plane.orientation.dir);
-    if(denom>0.){return maxDist;}
-
-    //otherwise, aimed at plane
-    return - distR3( tv.pos, plane) / denom;
-}
-
 
 //overload of setData for a sphere
 void setData( inout Path path, Plane plane ){
